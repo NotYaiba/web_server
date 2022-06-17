@@ -9,14 +9,24 @@
     {
 
     }
-    void Server::setServerName(std::string const &servername) 
+    void Server::addServerName(std::string const &servername) 
     {
-        serverName = servername;
+        serverNames.push_back(servername);
     }
     std::string const & Server::getServerName() const
     {
-        return (serverName);
+        return (serverNames);
     }
+
+    void Server::setPort(std::string const &rot) 
+    {
+        port = rot;
+    }
+    std::string const & Server::getPort()const 
+    {
+        return port;
+    }
+
     void Server::setHost(std::string const &hostt)
     {
         host = hostt;
@@ -34,6 +44,15 @@
     {
         return body_size_limit;
     }
+    void Server::setErrorpage(std::string const &error)
+    {
+        error_page = error;
+
+    }
+    std::string const & Server::getErrorpage() const
+    {
+        return error_page;
+    }
 
     void Server::locationADD(Location   loc)
     {
@@ -43,4 +62,13 @@
     std::vector<Location> const &  Server::getLocations()const 
     {
         return locations;
+    }
+    void Server::addtoCgiMap(std::string key, std::string val)
+    {
+        cgimap.insert(std::make_pair(key, val));
+    }
+
+    std::map<std::string, std::string> const &  Server::getCgiMap() const 
+    {
+        return cgimap;
     }

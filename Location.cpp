@@ -24,7 +24,7 @@
     }
     std::string const & Location::getMethod()const 
     {
-        return method
+        return method;
     }
 
     void Location::setAutoindex(std::string const &rot)
@@ -54,7 +54,7 @@
     }
     std::string const & Location::getUpload()const 
     {
-        return upload
+        return upload;
     }
     void Location::setRoot(std::string const &rot)
     {

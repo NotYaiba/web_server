@@ -22,7 +22,7 @@ public:
     ~Parser();
     void setLine_noSpace(std::string line) ;
     int stateOfLine();
-    std::vector< std::string > split(std::string line);
+    std::vector< std::string > split(std::string line, std::string del);
 
 };
 std::string removeSpaces(std::string str);
