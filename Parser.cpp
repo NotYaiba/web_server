@@ -10,23 +10,12 @@
             checkFile(path[1]);
         else
             throw "ERROR : IN ARGUMENTS!";
-        // for (int i = servers.size() -1 ; i >= 0; i--)
-        // {
-        //     std::vector<Location> serverLocations = servers[i].getLocations();
-        //     for (int i = serverLocations.size()  -1 ; i >= 0; i--)
-        //     {
-        //         std::cout << serverLocations[i].getLocation() << std::endl;
-        //     }
-            
-        // }
-        
 
     }
+    
     Parser::~Parser()
     {
     }
-
-
     void Parser::checkFile(char *path)
     {
         std::ifstream fs(path);
@@ -49,16 +38,10 @@
             {
             case STARTSERV :
                 std::cout <<  "server found" << std::endl;
-                
-                /* code */
                 break;
             case ENDSERV :
-
-
                 servers.push_back(server);
-                
                 break;
-            
             default:
                 vtmp = split(line_noSpace, "=");
                 if (vtmp.size() != 0)

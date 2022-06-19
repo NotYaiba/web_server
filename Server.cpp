@@ -13,7 +13,7 @@
     {
         serverNames.push_back(servername);
     }
-    std::string const & Server::getServerName() const
+     std::vector< std::string> const &Server::getServerName() const
     {
         return (serverNames);
     }
