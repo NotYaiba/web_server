@@ -20,6 +20,8 @@ class Parser
 public: 
     Parser(int ac, char *path[]);
     ~Parser();
+
+    std::vector < Server > const & getServers()const ;
     void setLine_noSpace(std::string line) ;
     int stateOfLine();
     std::vector< std::string > split(std::string line, std::string del);

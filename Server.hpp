@@ -7,12 +7,12 @@
 #include <vector>
 #include <map>
 #include "Location.hpp"
-
+#include <iomanip>
 class Location;
 class Server 
 {    
     std::vector< std::string> serverNames;
-    std::string port;
+    int port;
     std::string host;
     std::string body_size_limit;
     std::string error_page;
@@ -26,7 +26,7 @@ public:
      std::vector< std::string> const & getServerName() const;
 
     void setPort(std::string const &portt);
-    std::string const & getPort() const;
+    int const & getPort() const;
 
     void setHost(std::string const &hostt);
     std::string const & getHost() const;
@@ -40,6 +40,8 @@ public:
     std::vector<Location> const &  getLocations() const ;
     void addtoCgiMap(std::string key, std::string val);
     std::map<std::string, std::string> const &  getCgiMap() const ;
+    void   debug();
+
 };
 
 #endif

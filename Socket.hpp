@@ -18,10 +18,16 @@ class Socket
 {    
     Server server;
     struct sockaddr_in hint;
+    int  fd;
 public: 
     Socket(Server serv);
     ~Socket();
 
+    int CreateServerSocket(); //create  a server socket 
+    int BindAccectSock(int socket); //bind and accept socket 
+
+    void SetSockAddress();
+    int getFd()const ;
 
 };
 

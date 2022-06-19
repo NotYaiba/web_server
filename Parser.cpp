@@ -34,10 +34,11 @@
             vtmp.clear();
             setLine_noSpace(line);
 
+
+
             switch (stateOfLine())
             {
             case STARTSERV :
-                std::cout <<  "server found" << std::endl;
                 break;
             case ENDSERV :
                 servers.push_back(server);
@@ -68,6 +69,8 @@
                         location.setDefaultt(vtmp[1]);
                     else if (vtmp[0] == "upload")
                         location.setUpload(vtmp[1]);
+                    else if (vtmp[0] == "error_page")
+                        server.setErrorpage(vtmp[1]);
                     else if (vtmp[0] == "cgi")
                     {
                          std::vector< std::string > tmp = split(line, "=");
@@ -149,3 +152,7 @@ std::vector< std::string > Parser:: split(std::string line, std::string del)
         return (v);
 }
 
+    std::vector < Server > const & Parser::getServers() const 
+    {
+        return servers;
+    }

@@ -2,6 +2,7 @@ SRCS =  main.cpp \
 		Parser.cpp \
 		Server.cpp \
 		Location.cpp \
+		Socket.cpp \
 
 NAME = webserv
 

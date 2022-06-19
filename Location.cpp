@@ -65,3 +65,13 @@
         return root;
     }
 
+
+void    Location::debug()
+{
+    std::cout << std::setw(5) << red << "location :" << reset  << location << std::endl; 
+    std::cout << std::setw(5) << red << "method :" << reset  << method << std::endl; 
+    std::cout << std::setw(5) << red << "root :" << reset  << root<< std::endl; 
+    std::cout << std::setw(5) << red << "autoindex :" << reset  << autoindex << std::endl; 
+    std::cout << std::setw(5) << red << "defaultt :" << reset  << defaultt << std::endl; 
+    std::cout << std::setw(5) << red << "upload :" << reset  << upload << std::endl; 
+}

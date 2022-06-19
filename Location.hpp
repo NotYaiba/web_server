@@ -5,6 +5,8 @@
 #include <string.h>
 #include <fstream>
 #include <vector>
+#include "./utils/Tools.hpp"
+#include <iomanip>
 
 
 class Location 
@@ -35,7 +37,7 @@ public:
 
     void setUpload(std::string const &rot);
     std::string const & getUpload()const ;
-
+    void debug ();
 
 
 };
