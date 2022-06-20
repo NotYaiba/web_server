@@ -1,5 +1,5 @@
 #include "Socket.hpp"
-
+#include <fcntl.h>
 Socket::Socket(Server serv)
 {
     server = serv;
@@ -36,9 +36,8 @@ int Socket::BindAccectSock(int socket)
     std::cout << "bind accept  .." << std::endl;
 
     int new_socket=0;
-    sockaddr_in client;
-    socklen_t clientSize = sizeof(client);
 
+        fcntl(socket, F_SETFL,  O_NONBLOCK);
     if (bind(socket,(struct sockaddr *)&hint,sizeof(hint)) < 0) 
     { 
         perror("“bind failed”"); 
@@ -50,14 +49,10 @@ int Socket::BindAccectSock(int socket)
         perror("“In listen”"); 
         exit(0);
     }
-    std::cout << "salam";
-    if ((new_socket = accept(socket, (struct sockaddr *)&client, (socklen_t*)&clientSize))<0)
-    {
-        perror("In accept");            
-        exit(0);        
-    }
-    close (socket);
-    return (new_socket);
+
+    // close (socket);
+
+    return (socket);
 }
 
     int Socket::getFd()const 

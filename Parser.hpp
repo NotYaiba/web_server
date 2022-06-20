@@ -6,6 +6,7 @@
 #include <fstream>
 #include <vector>
 #include "Server.hpp"
+#include <fcntl.h>
 
 #define  STARTSERV -1
 #define  ENDSERV   1
