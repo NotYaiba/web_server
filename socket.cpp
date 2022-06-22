@@ -1,12 +1,11 @@
 #include "Socket.hpp"
 #include <fcntl.h>
-Socket::Socket(Server serv)
+Socket::Socket(Server const &serv)
 {
     server = serv;
     SetSockAddress();
     fd = CreateServerSocket();
-
-    fd = BindAccectSock(fd);
+    fd = BindSock(fd);
 }
 Socket::~Socket( )
 {
@@ -31,9 +30,9 @@ void Socket::SetSockAddress()
     inet_pton(AF_INET, "0.0.0.0", &hint.sin_addr);
 }
 
-int Socket::BindAccectSock(int socket)
+int Socket::BindSock(int const &socket)
 {
-    std::cout << "bind accept  .." << std::endl;
+    std::cout << "bind sock  .." << std::endl;
 
     int new_socket=0;
 
@@ -41,21 +40,34 @@ int Socket::BindAccectSock(int socket)
     if (bind(socket,(struct sockaddr *)&hint,sizeof(hint)) < 0) 
     { 
         perror("“bind failed”"); 
-        return 0; 
+        exit (0); 
     }
 
-    if (listen(socket, 10) < 0) 
+    if (listen(socket, SOMAXCONN) < 0) 
     { 
         perror("“In listen”"); 
         exit(0);
     }
-
-    // close (socket);
-
     return (socket);
 }
 
-    int Socket::getFd()const 
+int Socket::AccectSock(int const &socket)
+{
+    std::cout << "Accect sock  .." << std::endl;
+    sockaddr_in client;
+    socklen_t clientSize = sizeof(client);
+
+    int new_socket = accept(socket, (struct sockaddr *)&client, &clientSize);
+    if (new_socket == -1)
+    {
+        std::cerr << std::strerror( errno)  << std::endl;
+        std::cerr << "Problem with client connecting!";
+        return -4;
+    }
+    return (new_socket);
+}
+
+    int const &Socket::getFd()const 
     {
         return fd;
     }

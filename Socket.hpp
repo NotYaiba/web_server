@@ -20,14 +20,16 @@ class Socket
     struct sockaddr_in hint;
     int  fd;
 public: 
-    Socket(Server serv);
+    Socket(Server const &serv);
     ~Socket();
 
     int CreateServerSocket(); //create  a server socket 
-    int BindAccectSock(int socket); //bind and accept socket 
+    int BindSock(int const &socket); //bind   socket 
+    int AccectSock(int const &socket); //  accept socket 
 
     void SetSockAddress();
-    int getFd()const ;
+    int const &getFd()const ;
+
 
 };
 
