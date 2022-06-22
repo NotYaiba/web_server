@@ -7,6 +7,7 @@
 
 #include <sys/select.h>
 #include <cerrno>
+# define BUFFER_SIZE 4096
 int main(int ac , char *av[])
 {
     (void)ac;
@@ -61,6 +62,7 @@ int main(int ac , char *av[])
                             int rb = read(fd,buf,BUFFER_SIZE );
                             if (rb > 0)
                             {
+                                std::cout << buf << std::endl;
                                 // parse request 
                                 // - first read -> construc5t object
                                 // - mid reads -> fill body in file
