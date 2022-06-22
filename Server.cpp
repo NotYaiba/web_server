@@ -1,7 +1,7 @@
 #include "Server.hpp"
+#include "./utils/Tools.hpp"
 
-
-    Server::Server()
+    Server::Server() : port(0), host("") , body_size_limit(0) , error_page("")
     {
 
     }
@@ -20,7 +20,10 @@
 
     void Server::setPort(std::string const &rot) 
     {
-        port = stoi(rot);
+        if (port == 0)
+            port = stoi(rot);
+        else
+            throw "Duplicated parameter port";
     }
     int const & Server::getPort()const 
     {
@@ -29,7 +32,13 @@
 
     void Server::setHost(std::string const &hostt)
     {
-        host = hostt;
+            std::cout << lineS.getLine() << std::endl;
+        if (host == "")
+            host = hostt;
+        else
+        {
+            throw "Duplicated parameter host";
+        }
     }
     std::string const & Server::getHost() const
     {
@@ -38,9 +47,12 @@
     void Server::setBody_size_limit(std::string const &body_size_limitt)
 
     {
-        body_size_limit = body_size_limitt;
+        if (body_size_limit == 0)
+            body_size_limit = stoi(body_size_limitt);
+        else
+            throw "Duplicated parameter body_size_limitt";
     }
-    std::string const & Server::getBody_size_limit() const
+    int const & Server::getBody_size_limit() const
     {
         return body_size_limit;
     }
@@ -56,7 +68,10 @@
 
     void Server::locationADD(Location   loc)
     {
+
         locations.push_back(loc);
+        
+        
     }
 
     std::vector<Location> const &  Server::getLocations()const 

@@ -16,11 +16,11 @@
 
 class Socket 
 {    
-    Server server;
+    int _port;
     struct sockaddr_in hint;
     int  fd;
 public: 
-    Socket(Server const &serv);
+    Socket(int const &port);
     ~Socket();
 
     int CreateServerSocket(); //create  a server socket 
@@ -29,7 +29,6 @@ public:
 
     void SetSockAddress();
     int const &getFd()const ;
-
 
 };
 

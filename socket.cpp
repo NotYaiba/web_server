@@ -1,8 +1,8 @@
 #include "Socket.hpp"
 #include <fcntl.h>
-Socket::Socket(Server const &serv)
+Socket::Socket(int const &port)
 {
-    server = serv;
+    _port = port;
     SetSockAddress();
     fd = CreateServerSocket();
     fd = BindSock(fd);
@@ -26,7 +26,7 @@ void Socket::SetSockAddress()
 {
     std::cout << "SetSockAddress .." << std::endl;
     hint.sin_family = AF_INET;
-    hint.sin_port = htons(server.getPort());
+    hint.sin_port = htons(_port);
     inet_pton(AF_INET, "0.0.0.0", &hint.sin_addr);
 }
 
@@ -67,7 +67,7 @@ int Socket::AccectSock(int const &socket)
     return (new_socket);
 }
 
-    int const &Socket::getFd()const 
-    {
-        return fd;
-    }
+int const &Socket::getFd()const 
+{
+    return fd;
+}

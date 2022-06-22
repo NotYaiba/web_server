@@ -14,9 +14,10 @@ class Location
     std::string location;
     std::string method;
     std::string root;
-    std::string autoindex;
+    bool autoindex;
     std::string defaultt;
     std::string upload;
+    std::string redirect;
 public: 
     Location() ;
     ~Location();
@@ -30,13 +31,24 @@ public:
     std::string const & getRoot()const ;
 
     void setAutoindex(std::string const &rot);
-    std::string const & getAutoindex()const ;
+    bool  getAutoindex()const ;
 
     void setDefaultt(std::string const &rot);
     std::string const & getDefaultt()const ;
 
     void setUpload(std::string const &rot);
     std::string const & getUpload()const ;
+    void setRedirect(std::string const &rot);
+    std::string const & getRedirect()const ;
+    void clear()
+    {
+        location = "" ;
+        method = "";
+        root = "" ;
+        defaultt = "";
+        upload = "";
+        redirect = "";
+    }
     void debug ();
 
 
