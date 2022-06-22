@@ -31,14 +31,18 @@ void Parser::checkFile(char *path)
 }
 void Parser::readFile(char *path)
 {
+    bool isServ = false;
+    bool isLoc = false;
     std::ifstream MyReadFile(path);
     std::vector< std::string > vtmp;
     Server server;
     Location location;
+    int lineNb = 0;
     while (std::getline (MyReadFile, line)) 
     {
-        lineS++;
-        std::cout << "_line ; "<< lineS.getLine() << std::endl;
+        lineNb++;
+        server.setLine(lineNb);
+        location.setLine(lineNb);
         vtmp.clear();
         setLine_noSpace(line);
 
@@ -47,11 +51,16 @@ void Parser::readFile(char *path)
         switch (stateOfLine())
         {
         case STARTSERV :
+            if (isServ == true)
+                throwError(SYN, "" , lineNb);
             server.clear();
+            isServ = true;
             break;
         case ENDSERV :
+            if (isServ == false)
+                throwError(SYN, "" , lineNb);
             servers.push_back(server);
-            break;
+            isServ = false;
         default:
             vtmp = split(line_noSpace, "=");
             if (vtmp.size() != 0)
@@ -61,9 +70,17 @@ void Parser::readFile(char *path)
                 else if (vtmp[0] == "server_name")
                     server.addServerName(vtmp[1]);
                 else if (vtmp[0] == "location")
+                {
+                    if (isLoc == true)
+                        throwError(SYN, "" , lineNb);
+                    isLoc = true;
                     location.setLocation(vtmp[1]);
+                }
                 else if (vtmp[0] == "]")
                 {
+                    if (isLoc == false)
+                        throwError(SYN, "" , lineNb);
+                    isLoc = false;
                     server.locationADD(location);
                     location.clear();
                 }
@@ -95,10 +112,8 @@ void Parser::readFile(char *path)
                         server.addtoCgiMap(removeSpaces(tmp2[0]),removeSpaces(tmp2[1]) );
                 }
                 else
-                {
-                    std::cout << "test :" << line_noSpace << std::endl;
-                    throw "error in line !";
-                }
+                   throwError(SYN, "" , lineNb);
+                
                 
             }
             
@@ -117,9 +132,9 @@ void Parser::setLine_noSpace(std::string line)
 int Parser::stateOfLine()
 {
     if (line_noSpace == "server{")
-        return (-1);
+        return (STARTSERV);
     else if (line_noSpace == "}")
-        return (1);
+        return (ENDSERV);
     else 
         return (0);
 } 
@@ -218,7 +233,26 @@ void Parser::debug()
         }
 }
 
-void Parser::checkError()
+void Parser::throwError(int type, std::string para , int lineNB)
 {
-    // if ()
+    std::string nb = std::to_string(lineNB);
+    nb = "Line : " + nb; 
+    std::stringstream errr(nb);
+    switch (type)
+    {
+        case DUP :
+            errr << red <<nb <<  reset <<  "  ERROR Duplicated Parameter " << para   ;
+            break;
+        case EMPTY :
+            errr << red <<nb <<  reset <<  "  ERROR Empty Parameter " << para   ;
+        case IVA :
+            errr << red <<nb <<  reset <<  "  ERROR Invalid Parameter " << para   ;
+            break;
+        case SYN :
+            errr << red <<nb <<  reset <<  "  ERROR Invalid  Syntax " << para   ;
+            break;
+        
+    }
+        throw errr.str();
+
 }

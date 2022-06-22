@@ -7,6 +7,7 @@
 #include <vector>
 #include "./utils/Tools.hpp"
 #include <iomanip>
+#include <sstream>
 
 
 class Location 
@@ -18,7 +19,12 @@ class Location
     std::string defaultt;
     std::string upload;
     std::string redirect;
-public: 
+    int line;
+    public: 
+    void setLine(int const & linne)
+    {
+        line = linne;
+    }
     Location() ;
     ~Location();
     void setLocation(std::string const &rot);
@@ -50,6 +56,7 @@ public:
         redirect = "";
     }
     void debug ();
+    void throwError(int type, std::string para);
 
 
 };

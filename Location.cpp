@@ -12,10 +12,12 @@
     
     void Location::setLocation(std::string const &rot)
     {
+         if (rot == "")
+            throwError(EMPTY, "location");
         if (location == "")
             location = rot;
         else
-            throw "multiple parameter location!";
+           throwError(DUP , "location");
     }
     std::string const & Location::getLocation()const 
     {
@@ -23,10 +25,13 @@
     }
     void Location::setMethod(std::string const &rot)
     {
+        if (rot == "")
+            throwError(EMPTY, "method");
         if (method == "")
             method = rot;
         else
-            throw "multiple parameter method!";
+            throwError(DUP , "method");
+
     }
     std::string const & Location::getMethod()const 
     {
@@ -35,12 +40,14 @@
 
     void Location::setAutoindex(std::string const &rot)
     {
+        if (rot == "")
+            throwError(EMPTY, "autoindex");
         if (rot == "on")    
             autoindex = true;
         else if (rot == "off")    
             autoindex = false;
         else
-            throw "Invalid Auto Index !";
+           throwError(IVA, "autoindex");
 
     }
     bool Location::getAutoindex()const 
@@ -50,11 +57,12 @@
 
     void Location::setDefaultt(std::string const &rot)
     {
+        if (rot == "")
+            throwError(EMPTY, "default");
         if (defaultt == "")
             defaultt = rot;
         else
-            throw "multiple parameter defaultt!";
- 
+            throwError(DUP , "default"); 
     }
     std::string const & Location::getDefaultt()const 
     {
@@ -63,8 +71,12 @@
 
     void Location::setUpload(std::string const &rot)
     {
-        upload = rot;
- 
+         if (rot == "")
+            throwError(EMPTY, "upload");
+        if (upload == "")
+            upload = rot;
+        else
+            throwError(DUP , "upload");  
     }
     std::string const & Location::getUpload()const 
     {
@@ -73,22 +85,21 @@
     void Location::setRoot(std::string const &rot)
     {
 
+
+        if (rot == "")
+            throwError(EMPTY, "root");
         if (root == "")
             root = rot;
         else
-        {
-            throw "multiple parameter root  !";
-        }
+            throwError(DUP, "root");
+        
     }
     void Location::setRedirect(std::string const &rot)
     {
-
         if (redirect == "")
             redirect = rot;
         else
-        {
-            throw "multiple parameter redirect  !";
-        }
+            throwError(DUP, "redirect");
     }
     std::string const & Location::getRedirect()const 
     {
@@ -110,4 +121,25 @@ void    Location::debug()
     std::cout << std::setw(5) << red << "defaultt :" << reset  << defaultt << std::endl; 
     std::cout << std::setw(5) << red << "upload :" << reset  << upload << std::endl; 
     std::cout <<"--------------------------------------------------------" << std::endl; 
+}
+
+void Location::throwError(int type, std::string para)
+{
+    std::string nb = std::to_string(line);
+    nb = "Line : " + nb; 
+    std::stringstream errr(nb);
+    switch (type)
+    {
+        case DUP :
+            errr << red <<nb <<  reset <<  "  ERROR Duplicated Parameter " << para   ;
+            break;
+        case EMPTY :
+            errr << red <<nb <<  reset <<  "  ERROR Empty Parameter " << para   ;
+        case IVA :
+            errr << red <<nb <<  reset <<  "  ERROR Invalid Parameter " << para   ;
+            break;
+        
+    }
+        throw errr.str();
+
 }

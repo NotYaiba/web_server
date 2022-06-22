@@ -5,6 +5,11 @@
 #include <string.h>
 #include <fstream>
 #include <vector>
+# define DUP 0
+# define EMPTY 1
+# define IVA 2
+# define SYN 3
+
 
 
 
@@ -37,45 +42,8 @@
    static  Color::Modifier blue(Color::FG_BLUE);
    static  Color::Modifier reset(Color::FG_DEFAULT);
 class Line;
+bool isDigit(std::string str);
 
-
-class Line 
-{
-    int  _line;
-    public:
-    int const & getLine() const
-    {
-        return _line;
-    }
-    Line()
-    {
-        _line = 0;
-    }
-    Line(Line const &lin)
-    {
-        _line = lin.getLine();
-    }
-    ~Line()
-    {
-        
-    }
-         Line& operator++()       { ++_line; return (*this); }
-        Line& operator--()       { --_line; return (*this); }
-        
-        Line operator++(int)
-        {
-            Line res(*this);
-            ++(*this);
-            return (res);
-        }
-        Line operator--(int)
-        {
-            Line res(*this);
-            --(*this);
-            return (res);
-        }
-};
-    static Line lineS;
 
 // class c 
 // {

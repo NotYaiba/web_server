@@ -3,17 +3,21 @@
 #include "Parser.hpp"
 
 #include <iostream>
+#include <sstream>
 #include <string.h>
 #include <fstream>
 #include <vector>
 #include <map>
 #include "Location.hpp"
+#include "./utils/Tools.hpp"
 #include <iomanip>
+
 class Location;
 class Server 
 {    
     std::vector< std::string> serverNames;
     int port;
+    int line;
     std::string host;
     int body_size_limit;
     std::string error_page;
@@ -38,6 +42,10 @@ public:
     std::string const & getErrorpage() const;
     
     void locationADD(Location  loc);
+    void setLine(int const & linne)
+    {
+        line = linne;
+    }
     std::vector<Location> const &  getLocations() const ;
     void addtoCgiMap(std::string key, std::string val);
     std::map<std::string, std::string> const &  getCgiMap() const ;
@@ -49,9 +57,10 @@ public:
         cgimap.clear();
         port = 0;
         host = "";
-        body_size_limit = 0;
+        body_size_limit = 10;
         error_page = "";
     }
+    void throwError(int type, std::string para);
 
 };
 

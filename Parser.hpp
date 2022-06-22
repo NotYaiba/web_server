@@ -11,6 +11,8 @@
 
 #define  STARTSERV -1
 #define  ENDSERV   1
+#define  STARTLOC -2
+#define  ENDLOC   2
 class Server;
 
 class Parser 
@@ -33,7 +35,8 @@ public:
     std::vector< std::string > split(std::string line, std::string del);
     void makeMap();
     void debug();
-
+    void throwError(int type, std::string para , int lineNB);
+    
 };
 std::string removeSpaces(std::string str);
    

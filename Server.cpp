@@ -1,7 +1,7 @@
 #include "Server.hpp"
 #include "./utils/Tools.hpp"
 
-    Server::Server() : port(0), host("") , body_size_limit(0) , error_page("")
+    Server::Server() : port(0), host("") , body_size_limit(10) , error_page("")
     {
 
     }
@@ -11,6 +11,13 @@
     }
     void Server::addServerName(std::string const &servername) 
     {
+        if (servername == "")
+            throwError(EMPTY, "servername");
+        for (size_t i = 0 ; i <  serverNames.size() ; i++)
+        {
+            if (servername == serverNames[i])
+                throwError(DUP, "servername");
+        }
         serverNames.push_back(servername);
     }
      std::vector< std::string> const &Server::getServerName() const
@@ -20,10 +27,14 @@
 
     void Server::setPort(std::string const &rot) 
     {
+        if (rot == "")
+            throwError(EMPTY, "port");
+        else if (!isDigit(rot))
+            throwError(IVA, "port");
         if (port == 0)
             port = stoi(rot);
         else
-            throw "Duplicated parameter port";
+            throwError(DUP , "port");
     }
     int const & Server::getPort()const 
     {
@@ -32,13 +43,12 @@
 
     void Server::setHost(std::string const &hostt)
     {
-            std::cout << lineS.getLine() << std::endl;
+        if (hostt == "")
+            throwError(EMPTY, "host");
         if (host == "")
             host = hostt;
         else
-        {
-            throw "Duplicated parameter host";
-        }
+            throwError(DUP , "host");
     }
     std::string const & Server::getHost() const
     {
@@ -47,10 +57,15 @@
     void Server::setBody_size_limit(std::string const &body_size_limitt)
 
     {
-        if (body_size_limit == 0)
+
+        if (!isDigit(body_size_limitt))
+            throwError(IVA, "body_size_limit");
+        // std::cout << body_size_limit;
+        if (body_size_limit == 10)
             body_size_limit = stoi(body_size_limitt);
         else
-            throw "Duplicated parameter body_size_limitt";
+            throwError(DUP , "body_size_limit");
+
     }
     int const & Server::getBody_size_limit() const
     {
@@ -96,4 +111,25 @@ void    Server::debug()
     // std::cou<<t << blue << "cgimap :" << reset << setw(50) << defaultt <<  std::endl; 
     for (size_t i = 0 ; i < locations.size() ; i++)
         locations[i].debug();
+}
+
+void Server::throwError(int type, std::string para)
+{
+    std::string nb = std::to_string(line);
+    nb = "Line : " + nb; 
+    std::stringstream errr(nb);
+    switch (type)
+    {
+        case DUP :
+            errr << red <<nb <<  reset <<  "  ERROR Duplicated Parameter " << para   ;
+            break;
+        case EMPTY :
+            errr << red <<nb <<  reset <<  "  ERROR Empty Parameter " << para   ;
+        case IVA :
+            errr << red <<nb <<  reset <<  "  ERROR Invalid Parameter " << para   ;
+            break;
+        
+    }
+        throw errr.str();
+
 }

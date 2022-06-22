@@ -20,7 +20,7 @@ int main(int ac , char *av[])
         pars.debug();
         // for (size_t i  = 0 ; i < servers.size(); i++)
         //     servers[i].debug();
-        // Socket soc(servers[0].getPort());
+        Socket soc(servers[0].getPort());
         
         // char buf[BUFFER_SIZE];
         // int socket = soc.getFd();
@@ -92,7 +92,7 @@ int main(int ac , char *av[])
         //     }
         // } 
     }
-    catch(const char  *er)
+    catch(std::string  er)
     {
         std::cout << er << std::endl;
     }
