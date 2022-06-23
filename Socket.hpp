@@ -25,7 +25,7 @@ public:
 
     int CreateServerSocket(); //create  a server socket 
     int BindSock(int const &socket); //bind   socket 
-    int AccectSock(int const &socket); //  accept socket 
+    static int AccectSock(int const &socket); //  accept socket 
 
     void SetSockAddress();
     int const &getFd()const ;

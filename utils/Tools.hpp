@@ -43,13 +43,9 @@
    static  Color::Modifier reset(Color::FG_DEFAULT);
 class Line;
 bool isDigit(std::string str);
+std::string &trim(std::string &s);
+std::string removeSpaces(std::string str);
 
+std::vector< std::string > split(std::string line, std::string del);
 
-// class c 
-// {
-//     public:
-
-// };
-
-// c test;
 #endif

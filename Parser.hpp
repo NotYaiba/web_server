@@ -2,17 +2,20 @@
 #define  PARSER_HPP
 
 #include <iostream>
-#include <string.h>
 #include <fstream>
 #include <vector>
 #include <map>
 #include "Server.hpp"
 #include <fcntl.h>
-
+#include <string>
+#include <algorithm> 
+#include <functional> 
+#include <cctype>
+#include <locale>
+#include "./utils/Tools.hpp"
 #define  STARTSERV -1
 #define  ENDSERV   1
-#define  STARTLOC -2
-#define  ENDLOC   2
+
 class Server;
 
 class Parser 
@@ -27,18 +30,16 @@ class Parser
 public: 
     Parser(int ac, char *path[]);
     ~Parser();
-
     std::vector < Server > const & getServers()const ;
+    std::map < int ,  std::vector < Server > >const & getMapServers()const ;
     void setLine_noSpace(std::string line) ;
     void checkError() ;
     int stateOfLine();
-    std::vector< std::string > split(std::string line, std::string del);
     void makeMap();
     void debug();
     void throwError(int type, std::string para , int lineNB);
     
 };
-std::string removeSpaces(std::string str);
    
 
 #endif

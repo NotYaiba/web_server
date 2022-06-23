@@ -24,7 +24,6 @@ int Socket::CreateServerSocket()
 }
 void Socket::SetSockAddress()
 {
-    std::cout << "SetSockAddress .." << std::endl;
     hint.sin_family = AF_INET;
     hint.sin_port = htons(_port);
     inet_pton(AF_INET, "0.0.0.0", &hint.sin_addr);
@@ -32,7 +31,6 @@ void Socket::SetSockAddress()
 
 int Socket::BindSock(int const &socket)
 {
-    std::cout << "bind sock  .." << std::endl;
 
     int new_socket=0;
 
@@ -53,10 +51,8 @@ int Socket::BindSock(int const &socket)
 
 int Socket::AccectSock(int const &socket)
 {
-    std::cout << "Accect sock  .." << std::endl;
     sockaddr_in client;
     socklen_t clientSize = sizeof(client);
-
     int new_socket = accept(socket, (struct sockaddr *)&client, &clientSize);
     if (new_socket == -1)
     {

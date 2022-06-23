@@ -69,6 +69,7 @@
         "cerrno": "cpp",
         "__tree": "cpp",
         "map": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "__functional_base_03": "cpp"
     }
 }

@@ -1,9 +1,5 @@
 #include "Parser.hpp"
-#include <string>
-#include <algorithm> 
-#include <functional> 
-#include <cctype>
-#include <locale>
+
 Parser::Parser(int ac, char *path[])
 {
     if (ac == 2)
@@ -11,12 +7,6 @@ Parser::Parser(int ac, char *path[])
     else
         throw "ERROR : IN ARGUMENTS!";
     makeMap();
-    // debug();
-    // for (std::map<int ,  std::vector < Server > >::iterator i = mapServers.begin(); i != mapServers.end(); i++)
-    // {
-    //     std::cout << i->first << std::endl;
-    // }
-    
 }
 
 Parser::~Parser()
@@ -45,10 +35,8 @@ void Parser::readFile(char *path)
         location.setLine(lineNb);
         vtmp.clear();
         setLine_noSpace(line);
-
-
-
-        switch (stateOfLine())
+        int n = stateOfLine();
+        switch (n)
         {
         case STARTSERV :
             if (isServ == true)
@@ -61,6 +49,8 @@ void Parser::readFile(char *path)
                 throwError(SYN, "" , lineNb);
             servers.push_back(server);
             isServ = false;
+            break;
+
         default:
             vtmp = split(line_noSpace, "=");
             if (vtmp.size() != 0)
@@ -112,7 +102,9 @@ void Parser::readFile(char *path)
                         server.addtoCgiMap(removeSpaces(tmp2[0]),removeSpaces(tmp2[1]) );
                 }
                 else
+                {
                    throwError(SYN, "" , lineNb);
+                }
                 
                 
             }
@@ -131,67 +123,15 @@ void Parser::setLine_noSpace(std::string line)
 }
 int Parser::stateOfLine()
 {
+
     if (line_noSpace == "server{")
-        return (STARTSERV);
+        return (-1);
     else if (line_noSpace == "}")
-        return (ENDSERV);
+        return (1);
     else 
         return (0);
 } 
 
-
-
-std::string removeSpaces(std::string str)
-{
-str.erase(remove(str.begin(), str.end(), ' '), str.end());
-return str;
-}
-
-
-// trim from start
-static inline std::string &ltrim(std::string &s) {
-        s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-        std::not1(std::ptr_fun<int, int>(std::isspace))));
-return s;
-}
-
-// trim from end
-static inline std::string &rtrim(std::string &s) {
-        s.erase(std::find_if(s.rbegin(), s.rend(),
-        std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
-return s;
-}
-
-// trim from both ends
-static inline std::string &trim(std::string &s) {
-    return ltrim(rtrim(s));
-}
-
-std::vector< std::string > Parser:: split(std::string line, std::string del)
-{
-    std::string ret = "";
-    std::vector< std::string > v;
-    std::size_t found;
-    int start = 0;
-    found = line.find(del, 0);
-
-    while (found != std::string::npos)
-    {
-        ret = line.substr(start,  found  - start);
-        line.erase(start, found +  1);
-        ret =trim(ret);
-        if (ret != "")
-            v.push_back(ret);
-        found = line.find(del , found + 1);
-    }
-    v.push_back(line);
-    return (v);
-}
-
-std::vector < Server > const & Parser::getServers() const 
-{
-    return servers;
-}
 
 void Parser::makeMap()
 {
@@ -255,4 +195,14 @@ void Parser::throwError(int type, std::string para , int lineNB)
     }
         throw errr.str();
 
+}
+
+std::vector < Server > const & Parser::getServers() const 
+{
+    return servers;
+}
+
+std::map < int ,  std::vector < Server > >const & Parser::getMapServers()const 
+{
+    return (mapServers);
 }

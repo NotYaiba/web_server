@@ -3,6 +3,7 @@ SRCS =  main.cpp \
 		Server.cpp \
 		Location.cpp \
 		Socket.cpp \
+		Connection.cpp \
 		./utils/Tools.cpp \
 
 NAME = webserv
