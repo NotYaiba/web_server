@@ -5,6 +5,7 @@ SRCS =  main.cpp \
 		Socket.cpp \
 		Connection.cpp \
 		WebServer.cpp \
+		Request.cpp\
 		./utils/Tools.cpp \
 
 NAME = webserv
@@ -27,3 +28,4 @@ fclean : clean
 
 re : fclean
 		make all
+		rm  testingbody

@@ -1,4 +1,5 @@
 #include "WebServer.hpp"
+#include "Request.hpp"
 
 Webserver::Webserver(Connection const &connection)
 {
@@ -77,11 +78,14 @@ void Webserver::HandleRequest(int fd)
     if (rb == -1)
     {
         std::cout << std::strerror( errno)  << std::endl;
-        throw "muchkila\n";
+        throw "mochkila\n";
     }
     else if (rb > 0)
     {
-        std::cout << buf << std::endl;
+        Request req;
+        // std::cout << buf << std::endl;
+        req.fillRequest(buf, rb);
+        // getline(cin, rb);
         // parse request 
         // - first read -> construc5t object
         // - mid reads -> fill body in file
