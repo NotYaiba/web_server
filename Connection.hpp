@@ -19,6 +19,9 @@ class Connection
 
     public:
     Connection( std::map < int ,  std::vector < Server > > msP);
+    Connection( Connection const & ref);
+    Connection();
+    Connection const & operator=(Connection const & ref);
     ~Connection();
     void debug ();
     void createConnnections ();

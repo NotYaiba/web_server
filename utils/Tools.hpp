@@ -10,6 +10,7 @@
 # define IVA 2
 # define SYN 3
 
+# define BUFFER_SIZE 4096
 
 
 
