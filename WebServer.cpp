@@ -1,5 +1,4 @@
 #include "WebServer.hpp"
-#include "Request.hpp"
 
 Webserver::Webserver(Connection const &connection)
 {
@@ -74,6 +73,8 @@ void Webserver::NewConnectionRead(int fd)
 void Webserver::HandleRequest(int fd)
 {
     char buf[BUFFER_SIZE];
+    int allread  = 0;
+
     int rb = read(fd,buf,BUFFER_SIZE );
     if (rb == -1)
     {
@@ -82,16 +83,18 @@ void Webserver::HandleRequest(int fd)
     }
     else if (rb > 0)
     {
-        Request req;
-        // std::cout << buf << std::endl;
         req.fillRequest(buf, rb);
+        if (req.isslastRead == true)
+        {
+            FD_SET(fd, &writecopy);
+            FD_CLR(fd, &readcopy);
+        }
         // getline(cin, rb);
         // parse request 
         // - first read -> construc5t object
         // - mid reads -> fill body in file
         // - last read -> request is complete clear from read set in write lines below
-        FD_SET(fd, &writecopy);
-        FD_CLR(fd, &readcopy);
+
     }
     else if (rb == 0)
     {

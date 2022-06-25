@@ -6,13 +6,11 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # PARTICULAR PURPOSE.
 
 # This program built for i386-apple-darwin11.3.0
- 
 
-# Make data base, printed on Fri Jun 24 15:26:28 2022
+# Make data base, printed on Sat Jun 25 11:22:20 2022
 
 # Variables
 
- 
 # automatic
 <D = $(patsubst %/,%,$(dir $<))
 # automatic
@@ -38,11 +36,11 @@ MAKEFILE_LIST :=  Makefile
 # environment
 VSCODE_VERBOSE_LOGGING = true
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/zz/zyxvpxvq6csfxvn_n00006k40001mj/T/vscode-ipc-b8f08772-0b32-4aa6-b8da-f6bc055d866b.sock
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/zz/zyxvpxvq6csfxvn_n00006k40001mj/T/vscode-ipc-872c376f-aeec-452a-9b33-e687067a80bd.sock
 # environment
 VSCODE_CWD = /
 # environment
-Apple_PubSub_Socket_Render = /private/tmp/com.apple.launchd.UOalgpHCHM/Render
+Apple_PubSub_Socket_Render = /private/tmp/com.apple.launchd.qi4ddnTxZo/Render
 # environment
 PATH = /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/munki
 # environment
@@ -54,7 +52,7 @@ ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.uWpaOYmrYz/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.lQ1R30WT1o/Listeners
 # automatic
 %F = $(notdir $%)
 # environment
@@ -148,9 +146,9 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 3398
+VSCODE_PID = 3809
 # variable set hash-table stats:
-# Load=68/1024=7%, Rehash=0, Collisions=1/101=1%
+# Load=68/1024=7%, Rehash=0, Collisions=1/96=1%
 
 # Pattern-specific Variable Values
 
@@ -158,9 +156,9 @@ VSCODE_PID = 3398
 
 # Directories
 
-# . (device 16777227, inode 744506): 26 files, no impossibilities.
+# . (device 16777227, inode 744506): 28 files, no impossibilities.
 
-# 26 files, no impossibilities in 1 directories.
+# 28 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -182,34 +180,17 @@ all: webserv
 #  Implicit rule search has been done.
 #  File does not exist.
 #  File has been updated.
-#  Needs to be updated (-q is set).
+#  Successfully updated.
 # variable set hash-table stats:
-# Load=0/32=0%, Rehash=0, Collisions=0/5=0%
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
 webserv: main.cpp Parser.cpp Server.cpp Location.cpp Socket.cpp Connection.cpp WebServer.cpp Request.cpp utils/Tools.cpp
 #  Implicit rule search has not been done.
-#  Implicit/static pattern stem: `'
-#  File does not exist.
+#  Last modified 2022-06-24 23:48:36
 #  File has been updated.
-#  Needs to be updated (-q is set).
-# automatic
-# @ := webserv
-# automatic
-# % := 
-# automatic
-# * := 
-# automatic
-# + := main.cpp Parser.cpp Server.cpp Location.cpp Socket.cpp Connection.cpp WebServer.cpp Request.cpp utils/Tools.cpp
-# automatic
-# | := 
-# automatic
-# < := main.cpp
-# automatic
-# ^ := main.cpp Parser.cpp Server.cpp Location.cpp Socket.cpp Connection.cpp WebServer.cpp Request.cpp utils/Tools.cpp
-# automatic
-# ? := main.cpp Parser.cpp Server.cpp Location.cpp Socket.cpp Connection.cpp WebServer.cpp Request.cpp utils/Tools.cpp
+#  Successfully updated.
 # variable set hash-table stats:
-# Load=8/32=25%, Rehash=0, Collisions=1/13=8%
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 #  commands to execute (from `Makefile', line 18):
 	@clang++ ${FLAGS} ${SRCS}   -o $(NAME)
 	
@@ -217,7 +198,7 @@ webserv: main.cpp Parser.cpp Server.cpp Location.cpp Socket.cpp Connection.cpp W
 # Not a target:
 Request.cpp:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-24 15:25:37
+#  Last modified 2022-06-24 23:48:19
 #  File has been updated.
 #  Successfully updated.
 # variable set hash-table stats:
@@ -241,7 +222,7 @@ Location.cpp:
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-24 15:26:15
+#  Last modified 2022-06-24 17:30:35
 #  File has been updated.
 #  Successfully updated.
 # variable set hash-table stats:
@@ -302,6 +283,7 @@ re: fclean
 #  File has not been updated.
 #  commands to execute (from `Makefile', line 30):
 	make all
+	rm  testingbody
 	
 
 clean:
@@ -315,7 +297,7 @@ clean:
 # Not a target:
 WebServer.cpp:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-24 15:22:21
+#  Last modified 2022-06-24 23:33:09
 #  File has been updated.
 #  Successfully updated.
 # variable set hash-table stats:
@@ -328,7 +310,6 @@ Server.cpp:
 #  File has been updated.
 #  Successfully updated.
 # variable set hash-table stats:
- 
 # Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
 # Not a target:
@@ -337,11 +318,12 @@ utils/Tools.cpp:
 #  Last modified 2022-06-24 13:35:36
 #  File has been updated.
 #  Successfully updated.
+ 
 # variable set hash-table stats:
 # Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
 # files hash-table stats:
-# Load=18/1024=2%, Rehash=0, Collisions=1/53=2%
+# Load=18/1024=2%, Rehash=0, Collisions=1/52=2%
 # VPATH Search Paths
 
 # No `vpath' search paths.
@@ -353,6 +335,6 @@ utils/Tools.cpp:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Fri Jun 24 15:26:28 2022
+# Finished Make data base on Sat Jun 25 11:22:20 2022
 
  

@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <string>
+#include "Request.hpp"
 
 // class Connextion;
 class Webserver 
@@ -24,6 +25,8 @@ class Webserver
     fd_set writecopy;
     int maxfd;
     std::map < int, int > fd_map;
+    Request req;
+    
 public: 
     Webserver(Connection const &connection);
     ~Webserver();

@@ -1,10 +1,12 @@
 #include "Request.hpp"
+#include <sstream>
 #include "utils/Tools.hpp"
 
 Request::Request()
 {
 
     this->isFrstRead = true;
+    this->isslastRead =  false;
 }
 
 Request::~Request()
@@ -19,19 +21,25 @@ void    Request::fillRequest(char *buff, int read)
     std::vector<std::string> vect2;
     std::vector<std::string> vect3;
     std::string str = buff;
-     std::ofstream _body("testingbody");
+    _bodyfd = open("body", O_RDWR | O_CREAT | O_APPEND, 0666);
+    
     if (isFrstRead)
     {
         vect = split(str, "\r\n\r\n");
-        fillHeaders(vect);
-        _body << vect[1];
+        // std::cout << vect[0];
+        fillHeaders(vect[0]);
+        write (_bodyfd, vect[1].c_str(), vect[1].size() );
     }
     else
-    {
-        // _bode << buff;
+    {   
+        // std::cout << "salam\n";
+        write (_bodyfd, str.c_str(), str.size() );
+
+        size_t found = str.find("0\r\n");
+        if (found != std::string::npos)
+            isslastRead = true;
     }
-    debug();
-    _body.close();
+    // debug();
     isFrstRead = false;
 }
 
@@ -46,22 +54,30 @@ void    Request::debug()
     }
 }
 
-void Request::fillHeaders(std::vector<std::string> vect)
+void Request::fillHeaders(std::string header)
 {
-    std::vector<std::string> vect2;
     std::vector<std::string> vect3;
-     for (int i = 0; i < vect.size(); i++)
+    std::string line;
+    std::stringstream headerStream(header);
+    std::string value;
+    int i = 0;
+    while (std::getline (headerStream, line))
     {
-        vect2 = split(vect[0], "\r\n");
-        for (int i = 0; i < vect2.size(); i++)
+    
+        if (i == 0)
+            Muv  = line;
+        else
         {
-            if (i == 0)
-                Muv  = vect2[i];
-            else
+            vect3 = split(line, ":");
+            value = vect3[1];
+            if (vect3.size() > 2)
             {
-                vect3 = split(vect2[i], ":");
-                headers.insert(std::make_pair(vect3[0], vect3[1]));
-            }
+                int k  = 2;
+                while (k < vect3.size())
+                    value +=  + ":" + vect3[k++];
+            }   
+            headers.insert(std::make_pair(vect3[0], value));
         }
+        i++;
     }
 }
