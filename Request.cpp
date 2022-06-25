@@ -26,23 +26,30 @@ void    Request::fillRequest(char *buff, int read)
     if (isFrstRead)
     {
         vect = split(str, "\r\n\r\n");
-        // std::cout << vect[0];
         fillHeaders(vect[0]);
         write (_bodyfd, vect[1].c_str(), vect[1].size() );
+        isFrstRead = false;
     }
     else
-    {   
-        // std::cout << "salam\n";
-        write (_bodyfd, str.c_str(), str.size() );
+    {
+        write (_bodyfd,  buff, read );  
 
         size_t found = str.find("0\r\n");
-        if (found != std::string::npos)
-            isslastRead = true;
+        int i = 0;
+        while (i < read)
+        {
+            if (buff[i] == '0' && buff[i + 1] == '\r'  && buff[i + 2] == '\n'  )
+            {
+                 std::cout << "ENDD OF REQUEST\n";
+                isslastRead = true;
+                isFrstRead = true;
+            }
+            i++;
+        }
     }
     // debug();
-    isFrstRead = false;
+ 
 }
-
 void    Request::debug()
 {
     std::cout  <<blue << "Muv :" <<  reset << Muv << std::endl; 

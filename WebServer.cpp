@@ -50,7 +50,11 @@ void Webserver::RunWebServer()
                         HandleRequest(fd);
                 }
                 else if (FD_ISSET(fd, &writeset))
+                {
+            std::cout << "send response\n";
+
                     HandleResponse(fd);
+                }
             }
         }
     } 
@@ -107,7 +111,9 @@ void Webserver::HandleRequest(int fd)
 void Webserver::HandleResponse(int fd)
 {
     char *tello = (char *)("HTTP/1.1 200 OK\nContent-length: 17\n\r\nTello from server");
-    write(fd, tello, strlen(tello));
+    int returnWrite = write(fd, tello, strlen(tello));
+    std::cout << "reurn : " << returnWrite << std::endl;
+    std::cout <<  std::strerror( errno) << std::endl;
     FD_CLR(fd, &writecopy);
     close(fd);
 }
