@@ -28,4 +28,4 @@ fclean : clean
 
 re : fclean
 		make all
-		rm  testingbody
+		rm  body

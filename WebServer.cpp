@@ -60,9 +60,6 @@ void Webserver::RunWebServer()
     } 
 }
 
-
-
-
 void Webserver::NewConnectionRead(int fd)
 {
    int new_fd = Socket::AccectSock(fd);

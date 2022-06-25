@@ -6,8 +6,9 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # PARTICULAR PURPOSE.
 
 # This program built for i386-apple-darwin11.3.0
+ 
 
-# Make data base, printed on Sat Jun 25 11:22:20 2022
+# Make data base, printed on Sat Jun 25 21:46:14 2022
 
 # Variables
 
@@ -30,17 +31,18 @@ SHELL = /bin/sh
 # environment
 VSCODE_NLS_CONFIG = {"locale":"en-us","availableLanguages":{},"_languagePackSupport":true}
 # environment
+ 
 _ = /usr/bin/make
 # makefile (from `Makefile', line 1)
 MAKEFILE_LIST :=  Makefile
 # environment
 VSCODE_VERBOSE_LOGGING = true
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/zz/zyxvpxvq6csfxvn_n00006k40001mj/T/vscode-ipc-872c376f-aeec-452a-9b33-e687067a80bd.sock
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/zz/zyxvpxvq6csfxvn_n00006k40001mj/T/vscode-ipc-6a6060d6-7215-434e-8ba5-8a32686443cd.sock
 # environment
 VSCODE_CWD = /
 # environment
-Apple_PubSub_Socket_Render = /private/tmp/com.apple.launchd.qi4ddnTxZo/Render
+Apple_PubSub_Socket_Render = /private/tmp/com.apple.launchd.TwDPnm1AJQ/Render
 # environment
 PATH = /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/munki
 # environment
@@ -52,7 +54,7 @@ ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.lQ1R30WT1o/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.FYWx0stuh9/Listeners
 # automatic
 %F = $(notdir $%)
 # environment
@@ -118,7 +120,7 @@ MFLAGS = -Rrqp
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
-XPC_SERVICE_NAME = com.microsoft.VSCode.1224
+XPC_SERVICE_NAME = com.microsoft.VSCode.1208
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
 # automatic
@@ -146,7 +148,7 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 3809
+VSCODE_PID = 11657
 # variable set hash-table stats:
 # Load=68/1024=7%, Rehash=0, Collisions=1/96=1%
 
@@ -156,9 +158,9 @@ VSCODE_PID = 3809
 
 # Directories
 
-# . (device 16777227, inode 744506): 28 files, no impossibilities.
+# . (device 16777227, inode 744506): 30 files, no impossibilities.
 
-# 28 files, no impossibilities in 1 directories.
+# 30 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -186,7 +188,7 @@ all: webserv
 
 webserv: main.cpp Parser.cpp Server.cpp Location.cpp Socket.cpp Connection.cpp WebServer.cpp Request.cpp utils/Tools.cpp
 #  Implicit rule search has not been done.
-#  Last modified 2022-06-24 23:48:36
+#  Last modified 2022-06-25 18:37:59
 #  File has been updated.
 #  Successfully updated.
 # variable set hash-table stats:
@@ -198,7 +200,7 @@ webserv: main.cpp Parser.cpp Server.cpp Location.cpp Socket.cpp Connection.cpp W
 # Not a target:
 Request.cpp:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-24 23:48:19
+#  Last modified 2022-06-25 18:37:36
 #  File has been updated.
 #  Successfully updated.
 # variable set hash-table stats:
@@ -222,7 +224,7 @@ Location.cpp:
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-24 17:30:35
+#  Last modified 2022-06-25 16:24:49
 #  File has been updated.
 #  Successfully updated.
 # variable set hash-table stats:
@@ -283,7 +285,7 @@ re: fclean
 #  File has not been updated.
 #  commands to execute (from `Makefile', line 30):
 	make all
-	rm  testingbody
+	rm  body
 	
 
 clean:
@@ -297,7 +299,7 @@ clean:
 # Not a target:
 WebServer.cpp:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-24 23:33:09
+#  Last modified 2022-06-25 17:48:05
 #  File has been updated.
 #  Successfully updated.
 # variable set hash-table stats:
@@ -318,7 +320,6 @@ utils/Tools.cpp:
 #  Last modified 2022-06-24 13:35:36
 #  File has been updated.
 #  Successfully updated.
- 
 # variable set hash-table stats:
 # Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
@@ -335,6 +336,6 @@ utils/Tools.cpp:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Sat Jun 25 11:22:20 2022
+# Finished Make data base on Sat Jun 25 21:46:14 2022
 
  
