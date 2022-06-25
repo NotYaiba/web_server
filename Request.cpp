@@ -8,6 +8,7 @@ Request::Request()
     this->isFrstRead = true;
     this->isslastRead =  false;
     this->ischuncked = -1;
+    body = "";
 }
 
 Request::~Request()
@@ -29,7 +30,8 @@ void    Request::fillRequest(char *buff, int read)
         {
             ischuncked = (it ->second == "chunked") ? 1  : 0; 
         }
-        write (_bodyfd, vect[1].c_str(), strlen(vect[1].c_str()) );
+        fillBody( vect[1].c_str() , strlen(vect[1].c_str()), _bodyfd);
+        // write (_bodyfd, vect[1].c_str(), strlen(vect[1].c_str()) );
         isFrstRead = false;
     }
     else
@@ -47,6 +49,46 @@ void    Request::debug()
     }
 }
 
+void Request::fillBody( char const *buff, int read, int _bodyfd)
+{
+    body +=  buff;
+     write (_bodyfd,  buff, read );  
+
+    // if (ischuncked)
+    // {
+    //     size_t found = body.find("\r\n");
+    //     // std::cout << "kayn " <<found << std::endl;
+    //     int i = 2;
+    //     // std::cout << "kayn |" << body[found + 2]<< "|" << std::endl;
+
+    //     if (found != std::string::npos)
+    //     {
+    //         while (isxdigit(body[found + i]))
+    //         {
+    //             // std::cout << "kayn=> " << body[found + i] << std::endl;
+    //             i++;
+    //         }
+    //         body.erase(found, found + i + 2);
+    //         write (_bodyfd,  body.c_str(), strlen(body.c_str()) );  
+    //         body = "";
+    //     }
+    // }
+    // else
+    // {   
+    //     write (_bodyfd,  buff, read );  
+    //     int i = 0;
+    //     while (i < read)
+    //     {
+    //         if (buff[i] == '0' && buff[i + 1] == '\r'  && buff[i + 2] == '\n'  )
+    //         {
+    //             std::cout << "ENDD OF REQUEST\n";
+    //             isslastRead = true;
+    //             isFrstRead = true;
+    //         }
+    //         i++;
+    //     } 
+    // }
+}
 void Request::fillHeaders(std::string header)
 {
     std::cout << header << std::endl;
@@ -76,24 +118,3 @@ void Request::fillHeaders(std::string header)
     }
 }
 
-void Request::fillBody( char *buff, int read, int _bodyfd)
-{
-    if (ischuncked)
-    {
-    }
-    else
-    {   
-        write (_bodyfd,  buff, read );  
-        int i = 0;
-        while (i < read)
-        {
-            if (buff[i] == '0' && buff[i + 1] == '\r'  && buff[i + 2] == '\n'  )
-            {
-                std::cout << "ENDD OF REQUEST\n";
-                isslastRead = true;
-                isFrstRead = true;
-            }
-            i++;
-        } 
-    }
-}
