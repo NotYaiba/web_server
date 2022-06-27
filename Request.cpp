@@ -51,47 +51,64 @@ void    Request::debug()
 
 void Request::fillBody( char const *buff, int read, int _bodyfd)
 {
-    body +=  buff;
-     write (_bodyfd,  buff, read );  
+    checkEndRequest(buff , read);
 
-    // if (ischuncked)
-    // {
-    //     size_t found = body.find("\r\n");
-    //     // std::cout << "kayn " <<found << std::endl;
-    //     int i = 2;
-    //     // std::cout << "kayn |" << body[found + 2]<< "|" << std::endl;
+    std::string tmp(buff, read);
+    int debug_fd = open("body_debug", O_RDWR | O_CREAT | O_APPEND, 0666);
 
-    //     if (found != std::string::npos)
-    //     {
-    //         while (isxdigit(body[found + i]))
-    //         {
-    //             // std::cout << "kayn=> " << body[found + i] << std::endl;
-    //             i++;
-    //         }
-    //         body.erase(found, found + i + 2);
-    //         write (_bodyfd,  body.c_str(), strlen(body.c_str()) );  
-    //         body = "";
-    //     }
-    // }
-    // else
-    // {   
-    //     write (_bodyfd,  buff, read );  
-    //     int i = 0;
-    //     while (i < read)
-    //     {
-    //         if (buff[i] == '0' && buff[i + 1] == '\r'  && buff[i + 2] == '\n'  )
-    //         {
-    //             std::cout << "ENDD OF REQUEST\n";
-    //             isslastRead = true;
-    //             isFrstRead = true;
-    //         }
-    //         i++;
-    //     } 
-    // }
+    body  = body +  tmp ;
+    if (ischuncked)
+    {
+        size_t begin = body.find("\r\n");
+        size_t end = body.find("\r\n" , begin + 2);
+        if (begin == std::string::npos && end == std::string::npos){
+            write(_bodyfd , body.c_str() , strlen(body.c_str()) );
+            body = "";
+            return ;
+        }
+        else if (begin != std::string::npos && end == std::string::npos){
+            std::cout << "salaaaaaaaam\n";
+            write(_bodyfd , body.c_str() , begin );
+            body.erase(0, begin);
+            return ;
+        }
+        else if (begin == std::string::npos && end != std::string::npos){
+            std::cout << "allllllaahuuu\n";
+            write(_bodyfd , body.c_str() , begin );
+            body.erase(0, begin);
+            return ;
+        }
+        while (begin != std::string::npos && end != std::string::npos )
+        {
+            if ( isChunksize(begin + 2 , end  , body ))
+            {
+                int i = begin;
+                while (i < end)
+                {
+                    std::cout << body[i];
+                    i++;
+                } 
+                body.erase(begin , end + 2);
+                write(_bodyfd , body.c_str() , strlen(body.c_str()) );
+                body = "";
+                begin = body.find("\r\n");
+                end = body.find("\r\n" , begin + 2);
+            }
+            else
+            {
+
+                begin = body.find("\r\n", end);
+                end = body.find("\r\n" , begin + 2);
+            }
+        }
+        // exit(0);
+    }   
+    else
+        write (_bodyfd,  buff, read );  
+    write (debug_fd,  buff, read );  
 }
 void Request::fillHeaders(std::string header)
 {
-    std::cout << header << std::endl;
     std::vector<std::string> vect3;
     std::string line;
     std::stringstream headerStream(header);
@@ -118,3 +135,36 @@ void Request::fillHeaders(std::string header)
     }
 }
 
+
+bool Request::checkEndRequest( char const *buff, int read)
+{
+     int i = 0;
+    while (i < read)
+    {
+        if   (i < read && buff[i] == '\r' && buff[i + 1] == '\n'  &&  buff[i + 2] == '0' && buff[i + 3] == '\r'  && buff[i + 4] == '\n'  )
+        {
+            std::cout << "ENDD OF REQUEST\n";
+            isslastRead = true;
+            isFrstRead = true;
+                return true;
+
+        }
+        i++;
+    } 
+        return false;
+
+}
+
+bool Request::isChunksize(size_t begin , size_t end, std::string str)
+{
+    int i = 1;
+    int expetedSize = end - begin;
+    
+    while (isxdigit(str[begin + i]) )
+        i++;
+    std::cout<<  "i :"<< i << std::endl;
+    std::cout<<  "expected :"<< expetedSize << std::endl;
+    if (i == expetedSize)
+        return true;
+    return false;
+}

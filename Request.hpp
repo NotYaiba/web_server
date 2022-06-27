@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <cstring>
 class Request
 {
     private:
@@ -25,6 +26,8 @@ class Request
         void    fillRequest(char *buff,  int read);
         void fillHeaders(std::string header);
         void fillBody( char const  *buff, int read, int _bodyfd);
+        bool checkEndRequest( char const *buff, int read);
+        bool isChunksize(size_t begin , size_t end, std::string str);
 
         // Request(Request  const & src);
         // Request opertor=(Request  const & src);
