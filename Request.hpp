@@ -18,6 +18,7 @@ class Request
         int  _bodyfd;
         int ischuncked;
         std::string body;
+         int i;
     public:
         bool isFrstRead;
         bool isslastRead;
@@ -25,7 +26,7 @@ class Request
         ~Request();
         void    fillRequest(char *buff,  int read);
         void fillHeaders(std::string header);
-        void fillBody( char const  *buff, int read, int _bodyfd);
+        void fillBody( char   *buff, int read, int _bodyfd);
         bool checkEndRequest( char const *buff, int read);
         bool isChunksize(size_t begin , size_t end, std::string str);
 

@@ -4,7 +4,7 @@
 
 Request::Request()
 {
-
+i = 0;
     this->isFrstRead = true;
     this->isslastRead =  false;
     this->ischuncked = -1;
@@ -29,9 +29,11 @@ void    Request::fillRequest(char *buff, int read)
         if (it != headers.end())
         {
             ischuncked = (it ->second == "chunked") ? 1  : 0; 
-        }
-        fillBody( vect[1].c_str() , strlen(vect[1].c_str()), _bodyfd);
-        // write (_bodyfd, vect[1].c_str(), strlen(vect[1].c_str()) );
+        }  
+        else
+            ischuncked = 0; 
+        int testoffset = vect[0].size();
+        fillBody( buff + testoffset , read - testoffset, _bodyfd);
         isFrstRead = false;
     }
     else
@@ -49,35 +51,18 @@ void    Request::debug()
     }
 }
 
-void Request::fillBody( char const *buff, int read, int _bodyfd)
+void Request::fillBody( char  *buff, int read, int _bodyfd)
 {
-    checkEndRequest(buff , read);
-
-    std::string tmp(buff, read);
     int debug_fd = open("body_debug", O_RDWR | O_CREAT | O_APPEND, 0666);
-
+    std::string tmp(buff, read);
     body  = body +  tmp ;
+    checkEndRequest(buff , read);
+    write (debug_fd,  buff, read );
     if (ischuncked)
     {
         size_t begin = body.find("\r\n");
         size_t end = body.find("\r\n" , begin + 2);
-        if (begin == std::string::npos && end == std::string::npos){
-            write(_bodyfd , body.c_str() , strlen(body.c_str()) );
-            body = "";
-            return ;
-        }
-        else if (begin != std::string::npos && end == std::string::npos){
-            std::cout << "salaaaaaaaam\n";
-            write(_bodyfd , body.c_str() , begin );
-            body.erase(0, begin);
-            return ;
-        }
-        else if (begin == std::string::npos && end != std::string::npos){
-            std::cout << "allllllaahuuu\n";
-            write(_bodyfd , body.c_str() , begin );
-            body.erase(0, begin);
-            return ;
-        }
+
         while (begin != std::string::npos && end != std::string::npos )
         {
             if ( isChunksize(begin + 2 , end  , body ))
@@ -96,16 +81,26 @@ void Request::fillBody( char const *buff, int read, int _bodyfd)
             }
             else
             {
-
-                begin = body.find("\r\n", end);
+                body.erase(0, end + 2);
+                begin = body.find("\r\n");
                 end = body.find("\r\n" , begin + 2);
             }
         }
-        // exit(0);
+        if (begin == std::string::npos && end == std::string::npos){
+            write(_bodyfd , body.c_str() , strlen(body.c_str()) );
+            body = "";
+            return ;
+        }
+        else if (begin != std::string::npos && end == std::string::npos){
+            std::cout << "salaaaaaaaam\n";
+            write(_bodyfd , body.c_str() , begin );
+            body.erase(0, begin);
+            return ;
+        }
     }   
     else
         write (_bodyfd,  buff, read );  
-    write (debug_fd,  buff, read );  
+   
 }
 void Request::fillHeaders(std::string header)
 {
@@ -138,20 +133,25 @@ void Request::fillHeaders(std::string header)
 
 bool Request::checkEndRequest( char const *buff, int read)
 {
-     int i = 0;
-    while (i < read)
+    if (ischuncked )
     {
-        if   (i < read && buff[i] == '\r' && buff[i + 1] == '\n'  &&  buff[i + 2] == '0' && buff[i + 3] == '\r'  && buff[i + 4] == '\n'  )
+         int i = 0;
+        while (i < read)
         {
-            std::cout << "ENDD OF REQUEST\n";
-            isslastRead = true;
-            isFrstRead = true;
-                return true;
+            if   (i < read && buff[i] == '\r' && buff[i + 1] == '\n'  &&  buff[i + 2] == '0' && buff[i + 3] == '\r'  && buff[i + 4] == '\n'  )
+            {
+                std::cout << "ENDD OF REQUEST\n";
+                isslastRead = true;
+                isFrstRead = true;
+                    return true;
 
-        }
-        i++;
-    } 
+            }
+            i++;
+        } 
         return false;
+    }
+        return false;
+  
 
 }
 
