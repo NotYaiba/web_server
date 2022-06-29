@@ -9,6 +9,8 @@ i = 0;
     this->isslastRead =  false;
     this->ischuncked = -1;
     body = "";
+    god_vect.push_back('\r');
+    god_vect.push_back('\n');
 }
 
 Request::~Request()
@@ -53,53 +55,25 @@ void    Request::debug()
 
 void Request::fillBody( char  *buff, int read, int _bodyfd)
 {
-    int debug_fd = open("body_debug", O_RDWR | O_CREAT | O_APPEND, 0666);
-    std::string tmp(buff, read);
-    body  = body +  tmp ;
+  
+
+
+
     checkEndRequest(buff , read);
-    write (debug_fd,  buff, read );
+    fill_vect(buff, read);
     if (ischuncked)
     {
-        size_t begin = body.find("\r\n");
-        size_t end = body.find("\r\n" , begin + 2);
-
-        while (begin != std::string::npos && end != std::string::npos )
+        if (findchunkSize())
         {
-            if ( isChunksize(begin + 2 , end  , body ))
-            {
-                int i = begin;
-                while (i < end)
-                {
-                    std::cout << body[i];
-                    i++;
-                } 
-                body.erase(begin , end + 2);
-                write(_bodyfd , body.c_str() , strlen(body.c_str()) );
-                body = "";
-                begin = body.find("\r\n");
-                end = body.find("\r\n" , begin + 2);
-            }
-            else
-            {
-                body.erase(0, end + 2);
-                begin = body.find("\r\n");
-                end = body.find("\r\n" , begin + 2);
-            }
-        }
-        if (begin == std::string::npos && end == std::string::npos){
-            write(_bodyfd , body.c_str() , strlen(body.c_str()) );
-            body = "";
-            return ;
-        }
-        else if (begin != std::string::npos && end == std::string::npos){
-            std::cout << "salaaaaaaaam\n";
-            write(_bodyfd , body.c_str() , begin );
-            body.erase(0, begin);
-            return ;
+            writeVect(_bodyfd);
         }
     }   
     else
         write (_bodyfd,  buff, read );  
+
+
+    int debug_fd = open("body_debug", O_RDWR | O_CREAT | O_APPEND, 0666);
+    write (debug_fd,  buff, read );
    
 }
 void Request::fillHeaders(std::string header)
@@ -155,16 +129,67 @@ bool Request::checkEndRequest( char const *buff, int read)
 
 }
 
-bool Request::isChunksize(size_t begin , size_t end, std::string str)
+bool Request::isChunksize(size_t begin , size_t end, char * str)
 {
     int i = 1;
     int expetedSize = end - begin;
     
     while (isxdigit(str[begin + i]) )
+    {
+        std::cout << str[begin + i];
         i++;
+    }
     std::cout<<  "i :"<< i << std::endl;
     std::cout<<  "expected :"<< expetedSize << std::endl;
     if (i == expetedSize)
+        return true;
+    return false;
+}
+
+
+void Request::fill_vect(char *buff , size_t read)
+{
+    for (size_t i = 0 ; i < read; i++)
+    {
+        god_vect.push_back(buff[i]);
+    }
+}
+void Request::writeVect(int fd)
+{
+    for (size_t i = 0 ; i < god_vect.size(); i++)
+    {
+        write(fd, &god_vect[i], 1);
+    }
+    god_vect.clear();
+}
+bool Request::findchunkSize()
+{
+    int dd = 0;
+    for (size_t i = 0 ; i < god_vect.size(); i++)
+    {
+        if (god_vect[i] == '\r')
+        {
+
+            if (i + 1 <  god_vect.size() && god_vect[i + 1] == '\n')
+            {
+                int n = i  + 2;
+                while  (n  <  god_vect.size()  &&  isxdigit(god_vect[n]) )
+                {
+                    n++;
+                }
+
+                if (n + 1 < god_vect.size() &&   god_vect[n] == '\r' && god_vect[n + 1] == '\n')
+                {
+                    dd = 1;
+                    std::cout << "mseeh l9lawi/n";
+                    size_t tmp  = i;
+                    god_vect.erase(god_vect.begin() + i, god_vect.begin() + n + 1);
+                }
+            }
+        }
+           
+    }
+    if (dd == 1)
         return true;
     return false;
 }

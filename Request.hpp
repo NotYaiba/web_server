@@ -4,6 +4,7 @@
 #include <map>
 #include <fcntl.h>
 #include <fstream>
+#include <vector>
 #include <cstring>
 #include <string>
 #include <unistd.h>
@@ -19,6 +20,7 @@ class Request
         int ischuncked;
         std::string body;
          int i;
+        std::vector<char> god_vect;
     public:
         bool isFrstRead;
         bool isslastRead;
@@ -28,7 +30,10 @@ class Request
         void fillHeaders(std::string header);
         void fillBody( char   *buff, int read, int _bodyfd);
         bool checkEndRequest( char const *buff, int read);
-        bool isChunksize(size_t begin , size_t end, std::string str);
+        bool isChunksize(size_t begin , size_t end, char * str);
+        void fill_vect(char *buff , size_t read);
+        void writeVect(int fd);
+        bool findchunkSize();
 
         // Request(Request  const & src);
         // Request opertor=(Request  const & src);
