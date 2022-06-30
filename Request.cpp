@@ -34,7 +34,7 @@ void    Request::fillRequest(char *buff, int read)
         }  
         else
             ischuncked = 0; 
-        int testoffset = vect[0].size();
+        int testoffset = vect[0].size() + 4;
         fillBody( buff + testoffset , read - testoffset, _bodyfd);
         isFrstRead = false;
     }
@@ -181,9 +181,14 @@ bool Request::findchunkSize()
                 if (n + 1 < god_vect.size() &&   god_vect[n] == '\r' && god_vect[n + 1] == '\n')
                 {
                     dd = 1;
-                    std::cout << "mseeh l9lawi/n";
+                    std::cout << "mseeh l9lawi\n";
                     size_t tmp  = i;
-                    god_vect.erase(god_vect.begin() + i, god_vect.begin() + n + 1);
+                    for (size_t i = tmp; i < n+2; i++)
+                    {
+                       std::cout << god_vect[i];
+                    }
+                    std::cout << n + 1 - i<< std::endl;
+                    god_vect.erase(god_vect.begin() + i, god_vect.begin() + n + 2);
                 }
             }
         }
