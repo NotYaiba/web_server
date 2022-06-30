@@ -169,6 +169,8 @@ void Request::fillHeaders(std::string header)
             it = headers.find("Content-Length");
             if (it != headers.end())
                 content_length = atoi(((*it).second).c_str());
+            // std::cout << content_length << std::endl;
+            // std::cout << "---------\n";
         }
         i++;
     }
@@ -194,7 +196,23 @@ bool Request::checkEndRequest( char const *buff, int read)
         } 
         return false;
     }
-        return false;
+    else
+    {
+        std::ifstream testFile("./body", std::ios::binary);
+        testFile.lseek(0, std::ios::end);
+        int file_size = testFile.tellg();
+        std::cout<< file_size<< " file_size\n";
+        std::cout<< content_length<< " content lenghnt\n";
+    
+        if (content_length <= file_size)
+        {
+                std::cout << "heey\n";
+                isslastRead = true;
+                isFrstRead = true;
+                return true;
+        }
+    }  
+     return false;
   
 
 }
