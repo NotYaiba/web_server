@@ -4,13 +4,20 @@
 
 Request::Request()
 {
-i = 0;
+    i = 0;
     this->isFrstRead = true;
     this->isslastRead =  false;
     this->ischuncked = -1;
+    this->invalidMethod = 0;
+    this->Uri = "";
+    this->Muv = "";
     body = "";
     god_vect.push_back('\r');
     god_vect.push_back('\n');
+    method_vect.push_back("POST");
+    method_vect.push_back("DELETE");
+    method_vect.push_back("GET");
+    j = 0;
 }
 
 Request::~Request()
@@ -29,9 +36,7 @@ void    Request::fillRequest(char *buff, int read)
         fillHeaders( vect[0]);
         std::map<std::string, std::string>::iterator it =  headers.find("Transfer-Encoding");
         if (it != headers.end())
-        {
             ischuncked = (it ->second == "chunked") ? 1  : 0; 
-        }  
         else
             ischuncked = 0; 
         int testoffset = vect[0].size() + 4;
@@ -55,10 +60,6 @@ void    Request::debug()
 
 void Request::fillBody( char  *buff, int read, int _bodyfd)
 {
-  
-
-
-
     checkEndRequest(buff , read);
     fill_vect(buff, read);
     if (ischuncked)
@@ -76,6 +77,70 @@ void Request::fillBody( char  *buff, int read, int _bodyfd)
     write (debug_fd,  buff, read );
    
 }
+
+// std::vector<char> fillv()
+// {
+//     std::vector<char> v;
+//     char c = 'A';
+//     for (; c <= 'Z'; c++)
+//         v.push_back(c);
+//     c = 'a';
+//     for (; c <= 'z'; c++)
+//         v.push_back(c);
+//     c = '1';
+//     for (; c <= '9'; c++)
+//         v.push_back(c);
+//     c = '#';
+//     for (; c <= '/'; c++)
+//         v.push_back(c);
+//     v.push_back('!');
+//     v.push_back(':');
+//     v.push_back(';');
+//     v.push_back('=');
+//     v.push_back('?');
+//     v.push_back('@');
+//     v.push_back('[');
+//     v.push_back(']');
+//     v.push_back('~');
+//     return (v);
+// }
+
+// void validUri(std::string s, int invalidUri)
+// {
+
+//     std::vector<char> v = fillv();
+//     for (int i = 0; i < s.size(); i++)
+//     {
+//         for (int k = 0; k < v.size(); k++)
+//         {
+//             if (s[i] == v[k])
+//             {
+//                 invalidUri = 1;
+//                 break;
+//             }
+//             continue;
+//         }
+//     }
+//     std::cout << invalidUri << std::endl;
+
+// }
+
+void Request::fillMethod()
+{
+    std::vector<std::string> s  = split(Muv, "/");
+    for (int i = 0; i < method_vect.size(); i++)
+    {                
+        if (s[0] == method_vect[i])
+            j = 1;
+        continue;
+    }
+    if (j != 1)
+        invalidMethod = -1;
+    s = split(s[1], "/");
+    Uri = s[0];
+    std::cout << Uri << std::endl;
+}
+
 void Request::fillHeaders(std::string header)
 {
     std::vector<std::string> vect3;
@@ -85,9 +150,11 @@ void Request::fillHeaders(std::string header)
     int i = 0;
     while (std::getline (headerStream, line))
     {
-    
         if (i == 0)
+        {
             Muv  = line;
+            fillMethod();
+        }
         else
         {
             vect3 = split(line, ":");
@@ -139,8 +206,8 @@ bool Request::isChunksize(size_t begin , size_t end, char * str)
         std::cout << str[begin + i];
         i++;
     }
-    std::cout<<  "i :"<< i << std::endl;
-    std::cout<<  "expected :"<< expetedSize << std::endl;
+    // std::cout<<  "i :"<< i << std::endl;
+    // std::cout<<  "expected :"<< expetedSize << std::endl;
     if (i == expetedSize)
         return true;
     return false;
@@ -181,13 +248,13 @@ bool Request::findchunkSize()
                 if (n + 1 < god_vect.size() &&   god_vect[n] == '\r' && god_vect[n + 1] == '\n')
                 {
                     dd = 1;
-                    std::cout << "mseeh l9lawi\n";
+                    // std::cout << "mseeh l9lawi\n";
                     size_t tmp  = i;
                     for (size_t i = tmp; i < n+2; i++)
                     {
-                       std::cout << god_vect[i];
+                    //    std::cout << god_vect[i];
                     }
-                    std::cout << n + 1 - i<< std::endl;
+                    // std::cout << n + 1 - i<< std::endl;
                     god_vect.erase(god_vect.begin() + i, god_vect.begin() + n + 2);
                 }
             }

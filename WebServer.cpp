@@ -76,7 +76,7 @@ void Webserver::HandleRequest(int fd)
     int allread  = 0;
 
     int rb = read(fd,buf,BUFFER_SIZE );
-    write(2, buf, rb);
+
     if (rb == -1)
     {
         std::cout << std::strerror( errno)  << std::endl;

@@ -18,9 +18,13 @@ class Request
         std::string Muv;
         int  _bodyfd;
         int ischuncked;
+        int invalidMethod;
+        std::string Uri;
         std::string body;
-         int i;
+        int i;
         std::vector<char> god_vect;
+        std::vector<std::string> method_vect;
+        int j;
     public:
         bool isFrstRead;
         bool isslastRead;
@@ -34,6 +38,8 @@ class Request
         void fill_vect(char *buff , size_t read);
         void writeVect(int fd);
         bool findchunkSize();
+        void fillMethod();
+        // void validUri(std::string s);
 
         // Request(Request  const & src);
         // Request opertor=(Request  const & src);
