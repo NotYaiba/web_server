@@ -11,6 +11,7 @@ Request::Request()
     this->invalidMethod = 0;
     this->Uri = "";
     this->Muv = "";
+    this->content_length = 0;
     body = "";
     god_vect.push_back('\r');
     god_vect.push_back('\n');
@@ -71,8 +72,6 @@ void Request::fillBody( char  *buff, int read, int _bodyfd)
     }   
     else
         write (_bodyfd,  buff, read );  
-
-
     int debug_fd = open("body_debug", O_RDWR | O_CREAT | O_APPEND, 0666);
     write (debug_fd,  buff, read );
    
@@ -138,7 +137,7 @@ void Request::fillMethod()
         invalidMethod = -1;
     s = split(s[1], "/");
     Uri = s[0];
-    std::cout << Uri << std::endl;
+    // std::cout << Uri << std::endl;
 }
 
 void Request::fillHeaders(std::string header)
@@ -166,6 +165,10 @@ void Request::fillHeaders(std::string header)
                     value +=  + ":" + vect3[k++];
             }   
             headers.insert(std::make_pair(vect3[0], trim(value)));
+            std::map<std::string, std::string>::iterator it;
+            it = headers.find("Content-Length");
+            if (it != headers.end())
+                content_length = atoi(((*it).second).c_str());
         }
         i++;
     }

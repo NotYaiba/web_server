@@ -1,4 +1,6 @@
 #include "WebServer.hpp"
+#include <fstream>
+#include <iostream>
 
 Webserver::Webserver(Connection const &connection)
 {
@@ -85,6 +87,7 @@ void Webserver::HandleRequest(int fd)
     else if (rb > 0)
     {
         req.fillRequest(buf, rb);
+       (req._bodyfd).seekg(0, ios::end);
         if (req.isslastRead == true)
         {
             FD_SET(fd, &writecopy);

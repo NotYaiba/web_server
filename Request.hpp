@@ -10,23 +10,25 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <cstdlib>
 #include <cstring>
 class Request
 {
     private:
         std::map<std::string, std::string> headers;
         std::string Muv;
-        int  _bodyfd;
         int ischuncked;
         int invalidMethod;
         std::string Uri;
         std::string body;
         int i;
+        int content_length;
         std::vector<char> god_vect;
         std::vector<std::string> method_vect;
         int j;
     public:
         bool isFrstRead;
+        int  _bodyfd;
         bool isslastRead;
         Request();
         ~Request();
