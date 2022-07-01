@@ -25,6 +25,7 @@ class Webserver
     fd_set writecopy;
     int maxfd;
     std::map < int, int > fd_map;
+    std::map<int , Request> req_map;
     Request req;
     
 public: 

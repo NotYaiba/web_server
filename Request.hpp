@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <cstdlib>
 #include <cstring>
+# include <sys/types.h>
 class Request
 {
     private:
@@ -22,7 +23,8 @@ class Request
         std::string Uri;
         std::string body;
         int i;
-        int content_length;
+        size_t content_length;
+        std::string content_type;
         std::vector<char> god_vect;
         std::vector<std::string> method_vect;
         int j;
@@ -41,6 +43,10 @@ class Request
         void writeVect(int fd);
         bool findchunkSize();
         void fillMethod();
+        void  createFile();
+        void  InitData();
+
+
         // void validUri(std::string s);
 
         // Request(Request  const & src);

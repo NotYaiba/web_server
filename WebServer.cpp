@@ -24,6 +24,8 @@ void  Webserver::InitData(Connection const &connection)
     for (std::map < int, int >::iterator it = fd_map.begin(); it != fd_map.end(); it++)
     {
             FD_SET(it->first, &readset);
+            Request req;
+            req_map.insert(std::make_pair(it->first,req));
 
     }
     maxfd = (--fd_map.end())->first ;
@@ -68,6 +70,8 @@ void Webserver::NewConnectionRead(int fd)
     fcntl(new_fd, F_SETFL,  O_NONBLOCK);
     FD_SET(new_fd, &readcopy);
     fd_map.insert(std::make_pair(new_fd, 1));
+    Request req;
+    req_map.insert(std::make_pair(new_fd ,req));
     fd_map[new_fd] = 1;
     if (new_fd > maxfd)
         maxfd = new_fd;
@@ -87,19 +91,16 @@ void Webserver::HandleRequest(int fd)
     }
     else if (rb > 0)
     {
-        req.fillRequest(buf, rb);
-
-        if (req.isslastRead == true)
+        Request req;
+        std::map<int , Request>::iterator it = req_map.find(fd);
+        
+        it->second.fillRequest(buf, rb);
+        if ( it->second.isslastRead == true)
         {
+            it->second.InitData();
             FD_SET(fd, &writecopy);
             FD_CLR(fd, &readcopy);
         }
-        // getline(cin, rb);
-        // parse request 
-        // - first read -> construc5t object
-        // - mid reads -> fill body in file
-        // - last read -> request is complete clear from read set in write lines below
-
     }
     else if (rb == 0)
     {

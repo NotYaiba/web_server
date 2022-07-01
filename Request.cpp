@@ -13,6 +13,7 @@ Request::Request()
     this->Muv = "";
     this->content_length = 0;
     body = "";
+    content_type = "";
     god_vect.push_back('\r');
     god_vect.push_back('\n');
     method_vect.push_back("POST");
@@ -30,11 +31,13 @@ void    Request::fillRequest(char *buff, int read)
 {
     std::vector<std::string> vect;
     std::string str(buff, read);
-    _bodyfd = open("body", O_RDWR | O_CREAT | O_APPEND, 0666);
     if (isFrstRead)
     {
+        std::cout << "salamu alaikum \n";
         vect = split(str, "\r\n\r\n");
         fillHeaders( vect[0]);
+        createFile();
+
         std::map<std::string, std::string>::iterator it =  headers.find("Transfer-Encoding");
         if (it != headers.end())
             ischuncked = (it ->second == "chunked") ? 1  : 0; 
@@ -61,7 +64,6 @@ void    Request::debug()
 
 void Request::fillBody( char  *buff, int read, int _bodyfd)
 {
-    checkEndRequest(buff , read);
     fill_vect(buff, read);
     if (ischuncked)
     {
@@ -74,7 +76,7 @@ void Request::fillBody( char  *buff, int read, int _bodyfd)
         write (_bodyfd,  buff, read );  
     int debug_fd = open("body_debug", O_RDWR | O_CREAT | O_APPEND, 0666);
     write (debug_fd,  buff, read );
-   
+    checkEndRequest(buff , read);
 }
 
 // std::vector<char> fillv()
@@ -184,12 +186,12 @@ bool Request::checkEndRequest( char const *buff, int read)
          int i = 0;
         while (i < read)
         {
-            if   (i < read && buff[i] == '\r' && buff[i + 1] == '\n'  &&  buff[i + 2] == '0' && buff[i + 3] == '\r'  && buff[i + 4] == '\n'  )
+            if   (i  +  4< read && buff[i] == '\r' && buff[i + 1] == '\n'  &&  buff[i + 2] == '0' && buff[i + 3] == '\r'  && buff[i + 4] == '\n'  )
             {
                 std::cout << "ENDD OF REQUEST\n";
                 isslastRead = true;
                 isFrstRead = true;
-                    return true;
+                return true;
 
             }
             i++;
@@ -198,15 +200,19 @@ bool Request::checkEndRequest( char const *buff, int read)
     }
     else
     {
-        std::ifstream testFile("./body", std::ios::binary);
-        testFile.lseek(0, std::ios::end);
-        int file_size = testFile.tellg();
-        std::cout<< file_size<< " file_size\n";
+        FILE *p_file = NULL;
+        p_file = fopen(body.c_str(),"rb");
+        fseek(p_file,0,SEEK_END);
+        int size = ftell(p_file);
+        fclose(p_file);
+        // std::ifstream testFile("./body", std::ios::binary);
+        // // testFile.lseek(0, std::ios::end);
+        // size_t file_size =(size_t)fsize("body");
+        std::cout<< size<< " file_size\n";
         std::cout<< content_length<< " content lenghnt\n";
     
-        if (content_length <= file_size)
+        if (content_length <= size)
         {
-                std::cout << "heey\n";
                 isslastRead = true;
                 isFrstRead = true;
                 return true;
@@ -217,22 +223,6 @@ bool Request::checkEndRequest( char const *buff, int read)
 
 }
 
-bool Request::isChunksize(size_t begin , size_t end, char * str)
-{
-    int i = 1;
-    int expetedSize = end - begin;
-    
-    while (isxdigit(str[begin + i]) )
-    {
-        std::cout << str[begin + i];
-        i++;
-    }
-    // std::cout<<  "i :"<< i << std::endl;
-    // std::cout<<  "expected :"<< expetedSize << std::endl;
-    if (i == expetedSize)
-        return true;
-    return false;
-}
 
 
 void Request::fill_vect(char *buff , size_t read)
@@ -285,4 +275,30 @@ bool Request::findchunkSize()
     if (dd == 1)
         return true;
     return false;
+}
+void  Request::createFile()
+{
+
+    std::map<std::string, std::string>::iterator it =  headers.find("Content-Type");
+    if (it != headers.end())
+        content_type = it->second;
+    body +=   "./tmp/"  +  random_string() + get_file_ext(content_type);
+    _bodyfd = open(body.c_str(), O_RDWR | O_CREAT | O_APPEND, 0666);
+}
+
+void  Request::InitData()
+{
+    this->isFrstRead = true;
+    this->isslastRead =  false;
+    this->ischuncked = -1;
+    this->invalidMethod = 0;
+    this->Uri = "";
+    this->Muv = "";
+    this->content_length = 0;
+    body = "";
+    content_type = "";
+    headers.clear();
+    god_vect.clear();
+    god_vect.push_back('\r');
+    god_vect.push_back('\n');
 }

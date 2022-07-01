@@ -28,5 +28,5 @@ fclean : clean
 
 re : fclean
 		make all
-		rm  -f body 
+		rm  -f tmp/* 
 		rm -f body_debug 
