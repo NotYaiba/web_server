@@ -26,6 +26,7 @@ class Webserver
     int maxfd;
     std::map < int, int > fd_map;
     std::map<int , Request> req_map;
+    std::map<int , std::vector<Server> > servers;
     Request req;
     
 public: 

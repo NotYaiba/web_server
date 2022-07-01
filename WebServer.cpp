@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <filesystem>
-
+#include "Response.hpp"
 Webserver::Webserver(Connection const &connection)
 {
     InitData(connection);
@@ -15,6 +15,8 @@ Webserver::~Webserver()
 
 void  Webserver::InitData(Connection const &connection)
 {
+    servers = connection.getMapServersF();
+
     _cnx = connection;
     fd_map = _cnx.getFd_map();
     FD_ZERO(&readset); 
@@ -51,12 +53,14 @@ void Webserver::RunWebServer()
                 {
                     if (fd_map[fd] == 0)
                         NewConnectionRead(fd);
-                    else 
+                    else
+                    {
+                        //todo set fd to be wrotable
                         HandleRequest(fd);
+                    }
                 }
                 else if (FD_ISSET(fd, &writeset))
                 {
-
                     HandleResponse(fd);
                 }
             }
@@ -70,6 +74,7 @@ void Webserver::NewConnectionRead(int fd)
     fcntl(new_fd, F_SETFL,  O_NONBLOCK);
     FD_SET(new_fd, &readcopy);
     fd_map.insert(std::make_pair(new_fd, 1));
+    servers.insert(std::make_pair(new_fd, servers[fd]));
     Request req;
     req_map.insert(std::make_pair(new_fd ,req));
     fd_map[new_fd] = 1;
@@ -95,9 +100,10 @@ void Webserver::HandleRequest(int fd)
         std::map<int , Request>::iterator it = req_map.find(fd);
         
         it->second.fillRequest(buf, rb);
+
         if ( it->second.isslastRead == true)
         {
-            it->second.InitData();
+           
             FD_SET(fd, &writecopy);
             FD_CLR(fd, &readcopy);
         }
@@ -113,8 +119,12 @@ void Webserver::HandleRequest(int fd)
 
 void Webserver::HandleResponse(int fd)
 {
+    // std::vector <Server> serv =  servers[fd];
+    Response res(servers[fd][0], req_map[fd]);
+    req_map[fd].InitData();
     char *tello = (char *)("HTTP/1.1 200 OK\nContent-length: 17\n\r\nTello from server");
     int returnWrite = write(fd, tello, strlen(tello));
     FD_CLR(fd, &writecopy);
     close(fd);
 }
+

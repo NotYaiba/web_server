@@ -143,3 +143,15 @@ void Location::throwError(int type, std::string para)
         throw errr.str();
 
 }
+
+Location &Location::operator=(Location  const & src)
+{
+    location = src.getLocation();
+    method = src.getMethod();
+    root = src.getRoot();
+    autoindex  =src.getAutoindex();
+    defaultt = src.getDefaultt();
+    upload = src.getUpload();
+    redirect = src.getRedirect();
+    return (*this);
+}

@@ -57,8 +57,8 @@ class Location
     }
     void debug ();
     void throwError(int type, std::string para);
-
-
+    Location &operator=(Location  const & src);
 };
+
 
 #endif

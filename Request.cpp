@@ -11,7 +11,7 @@ Request::Request()
     this->invalidMethod = 0;
     this->Uri = "";
     this->Muv = "";
-    this->content_length = 0;
+    this->content_length = -1;
     body = "";
     content_type = "";
     god_vect.push_back('\r');
@@ -33,16 +33,10 @@ void    Request::fillRequest(char *buff, int read)
     std::string str(buff, read);
     if (isFrstRead)
     {
-        std::cout << "salamu alaikum \n";
         vect = split(str, "\r\n\r\n");
         fillHeaders( vect[0]);
+        checkHeaders();
         createFile();
-
-        std::map<std::string, std::string>::iterator it =  headers.find("Transfer-Encoding");
-        if (it != headers.end())
-            ischuncked = (it ->second == "chunked") ? 1  : 0; 
-        else
-            ischuncked = 0; 
         int testoffset = vect[0].size() + 4;
         fillBody( buff + testoffset , read - testoffset, _bodyfd);
         isFrstRead = false;
@@ -65,66 +59,23 @@ void    Request::debug()
 void Request::fillBody( char  *buff, int read, int _bodyfd)
 {
     fill_vect(buff, read);
-    if (ischuncked)
+
+    if (ischuncked == 1)
     {
         if (findchunkSize())
         {
             writeVect(_bodyfd);
         }
     }   
-    else
+    else 
+    {
         write (_bodyfd,  buff, read );  
+    }
     int debug_fd = open("body_debug", O_RDWR | O_CREAT | O_APPEND, 0666);
     write (debug_fd,  buff, read );
     checkEndRequest(buff , read);
 }
 
-// std::vector<char> fillv()
-// {
-//     std::vector<char> v;
-//     char c = 'A';
-//     for (; c <= 'Z'; c++)
-//         v.push_back(c);
-//     c = 'a';
-//     for (; c <= 'z'; c++)
-//         v.push_back(c);
-//     c = '1';
-//     for (; c <= '9'; c++)
-//         v.push_back(c);
-//     c = '#';
-//     for (; c <= '/'; c++)
-//         v.push_back(c);
-//     v.push_back('!');
-//     v.push_back(':');
-//     v.push_back(';');
-//     v.push_back('=');
-//     v.push_back('?');
-//     v.push_back('@');
-//     v.push_back('[');
-//     v.push_back(']');
-//     v.push_back('~');
-//     return (v);
-// }
-
-// void validUri(std::string s, int invalidUri)
-// {
-
-//     std::vector<char> v = fillv();
-//     for (int i = 0; i < s.size(); i++)
-//     {
-//         for (int k = 0; k < v.size(); k++)
-//         {
-//             if (s[i] == v[k])
-//             {
-//                 invalidUri = 1;
-//                 break;
-//             }
-//             continue;
-//         }
-//     }
-//     std::cout << invalidUri << std::endl;
-
-// }
 
 void Request::fillMethod()
 {
@@ -132,14 +83,17 @@ void Request::fillMethod()
     for (int i = 0; i < method_vect.size(); i++)
     {                
         if (s[0] == method_vect[i])
+        {
+            method = s[0];
             j = 1;
+        }
         continue;
     }
     if (j != 1)
         invalidMethod = -1;
-    s = split(s[1], "/");
+    s = split(s[1], " ");
     Uri = s[0];
-    // std::cout << Uri << std::endl;
+    std::cout << Uri << std::endl;
 }
 
 void Request::fillHeaders(std::string header)
@@ -154,7 +108,6 @@ void Request::fillHeaders(std::string header)
         if (i == 0)
         {
             Muv  = line;
-            fillMethod();
         }
         else
         {
@@ -167,12 +120,6 @@ void Request::fillHeaders(std::string header)
                     value +=  + ":" + vect3[k++];
             }   
             headers.insert(std::make_pair(vect3[0], trim(value)));
-            std::map<std::string, std::string>::iterator it;
-            it = headers.find("Content-Length");
-            if (it != headers.end())
-                content_length = atoi(((*it).second).c_str());
-            // std::cout << content_length << std::endl;
-            // std::cout << "---------\n";
         }
         i++;
     }
@@ -181,7 +128,7 @@ void Request::fillHeaders(std::string header)
 
 bool Request::checkEndRequest( char const *buff, int read)
 {
-    if (ischuncked )
+    if (ischuncked == 1 )
     {
          int i = 0;
         while (i < read)
@@ -200,17 +147,14 @@ bool Request::checkEndRequest( char const *buff, int read)
     }
     else
     {
+        
         FILE *p_file = NULL;
         p_file = fopen(body.c_str(),"rb");
         fseek(p_file,0,SEEK_END);
         int size = ftell(p_file);
         fclose(p_file);
-        // std::ifstream testFile("./body", std::ios::binary);
-        // // testFile.lseek(0, std::ios::end);
-        // size_t file_size =(size_t)fsize("body");
-        std::cout<< size<< " file_size\n";
-        std::cout<< content_length<< " content lenghnt\n";
-    
+
+
         if (content_length <= size)
         {
                 isslastRead = true;
@@ -242,35 +186,23 @@ void Request::writeVect(int fd)
 }
 bool Request::findchunkSize()
 {
-    int dd = 0;
+    int dd = 0;                                                                                                                                                                                                                                                                                                                                                                             
     for (size_t i = 0 ; i < god_vect.size(); i++)
     {
         if (god_vect[i] == '\r')
         {
-
             if (i + 1 <  god_vect.size() && god_vect[i + 1] == '\n')
             {
                 int n = i  + 2;
                 while  (n  <  god_vect.size()  &&  isxdigit(god_vect[n]) )
-                {
                     n++;
-                }
-
                 if (n + 1 < god_vect.size() &&   god_vect[n] == '\r' && god_vect[n + 1] == '\n')
                 {
                     dd = 1;
-                    // std::cout << "mseeh l9lawi\n";
-                    size_t tmp  = i;
-                    for (size_t i = tmp; i < n+2; i++)
-                    {
-                    //    std::cout << god_vect[i];
-                    }
-                    // std::cout << n + 1 - i<< std::endl;
                     god_vect.erase(god_vect.begin() + i, god_vect.begin() + n + 2);
                 }
             }
-        }
-           
+        }    
     }
     if (dd == 1)
         return true;
@@ -285,6 +217,26 @@ void  Request::createFile()
     body +=   "./tmp/"  +  random_string() + get_file_ext(content_type);
     _bodyfd = open(body.c_str(), O_RDWR | O_CREAT | O_APPEND, 0666);
 }
+void   Request::checkHeaders()
+{
+    fillMethod();
+    std::map<std::string, std::string>::iterator it;
+    it = headers.find("Content-Length");
+    if (it != headers.end())
+        content_length = stoi(it->second);
+        it =  headers.find("Transfer-Encoding");
+    if (it != headers.end())
+        ischuncked = (it ->second == "chunked") ? 1  : 0;
+    else if (ischuncked == 0)
+        status_code = 501;
+    else if (ischuncked == -1 && content_length == -1)
+        status_code = 400;
+    else if (Uri.size() > 2048)
+        status_code = 404;
+    else if (invalidMethod == -1)
+        status_code = 405;
+    
+}
 
 void  Request::InitData()
 {
@@ -294,11 +246,18 @@ void  Request::InitData()
     this->invalidMethod = 0;
     this->Uri = "";
     this->Muv = "";
-    this->content_length = 0;
+    this->method = "";
+    this->content_length = -1;
     body = "";
     content_type = "";
     headers.clear();
     god_vect.clear();
     god_vect.push_back('\r');
     god_vect.push_back('\n');
+}
+Request &Request::operator=(Request  const & src)
+{
+    status_code = src.getStatusCode();
+    Uri = src.getUri();
+    return *this;
 }

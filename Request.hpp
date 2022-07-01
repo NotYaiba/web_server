@@ -22,11 +22,13 @@ class Request
         int invalidMethod;
         std::string Uri;
         std::string body;
+        std::string method;
         int i;
         size_t content_length;
         std::string content_type;
         std::vector<char> god_vect;
         std::vector<std::string> method_vect;
+        int status_code;
         int j;
     public:
         bool isFrstRead;
@@ -45,11 +47,21 @@ class Request
         void fillMethod();
         void  createFile();
         void  InitData();
-
+        void checkHeaders();
+        int const & getStatusCode() const{
+            return status_code;
+        }
+        std::string const & getUri() const{
+            return Uri;
+        }
+        std::string const & getMethod() const{
+            return method;
+        }
 
         // void validUri(std::string s);
 
         // Request(Request  const & src);
-        // Request opertor=(Request  const & src);
+        Request &operator=(Request  const & src);
+
         void    debug();
 };

@@ -25,6 +25,7 @@ void Parser::readFile(char *path)
     bool isLoc = false;
     std::ifstream MyReadFile(path);
     std::vector< std::string > vtmp;
+    std::vector< std::string > vtmpSpace;
     Server server;
     Location location;
     int lineNb = 0;
@@ -53,6 +54,7 @@ void Parser::readFile(char *path)
 
         default:
             vtmp = split(line_noSpace, "=");
+            vtmpSpace = split(line, "=");
             if (vtmp.size() != 0)
             {
                 if (vtmp[0][0] == '#' || line_noSpace == "")
@@ -83,7 +85,7 @@ void Parser::readFile(char *path)
                 else if (vtmp[0] == "body_size_limit")
                     server.setBody_size_limit(vtmp[1]);
                 else if (vtmp[0] == "method")
-                    location.setMethod(vtmp[1]);
+                    location.setMethod(vtmpSpace[1]);
                 else if (vtmp[0] == "autoindex")
                     location.setAutoindex(vtmp[1]);
                 else if (vtmp[0] == "default")
