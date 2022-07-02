@@ -1,20 +1,31 @@
 #include "Response.hpp"
 
+
+
 Response::Response(Server  serv , Request req)
 {
     _server = serv;
     _req  = req;
     statusCode =  req.getStatusCode();
-    if (statusCode != 200 ||statusCode != 201)
-    {
-             // todo send response with status code; 
-    }
+    // if (statusCode != 200 || statusCode != 201)
+    // {
+    //          // todo send response with status code; 
+    // }
+    // check 400 413 uri errors
+
+    // if get method | 404 403 405 | 200 | 301 redirect
+
+    // if delete Method | 405 404 403 | 200
+
+    // if post method | 405 | 201
+
+
+    // addistional info in CGI case 500 is returnrd when CGI fails
+    // else 500
     validMethod = 0;
     findMatchingLocation();
 
 }
-
-
 
 void   Response::findMatchingLocation()
 {
@@ -31,7 +42,6 @@ void Response::getMethod()
             validMethod = 1;
     }
     std::cout <<validMethod << std::endl;
-
 }
 
 void Response::getLocation()
@@ -41,6 +51,7 @@ void Response::getLocation()
        locations.push_back(v[i]);
     for (int i = 0; i < locations.size(); i++)
     {
+        
         if (_loc.getLocation().size() < locations[i].getLocation().size())
            _loc = locations[i];
     }

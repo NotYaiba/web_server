@@ -33,5 +33,4 @@ class Response
     void findMatchingLocation();
     void getLocation();
     void getMethod();
-
 };
