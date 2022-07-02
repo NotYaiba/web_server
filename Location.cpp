@@ -12,10 +12,16 @@
     
     void Location::setLocation(std::string const &rot)
     {
-         if (rot == "")
+
+        std::string tmp =  rot;
+        if (tmp == "")
             throwError(EMPTY, "location");
+        if(tmp[tmp.size() - 1] == '[')
+            tmp.erase(tmp.size() - 1);
+        else
+            throwError(SYN, "location");
         if (location == "")
-            location = rot;
+            location = fixIt(tmp);
         else
            throwError(DUP , "location");
     }
@@ -60,7 +66,7 @@
         if (rot == "")
             throwError(EMPTY, "default");
         if (defaultt == "")
-            defaultt = rot;
+            defaultt = fixIt(rot);
         else
             throwError(DUP , "default"); 
     }

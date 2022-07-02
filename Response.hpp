@@ -22,10 +22,11 @@ class Response
     private:
     Server _server;
     Request _req;
+    std::string  _path;
     Location _loc;
     int validMethod;
     int statusCode;
-    std::string  matching_location;
+    Location  matching_location;
     public:
     Response(Server  serv , Request req);
     std::vector<Location> locations;

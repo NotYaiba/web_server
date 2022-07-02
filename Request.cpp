@@ -79,21 +79,14 @@ void Request::fillBody( char  *buff, int read, int _bodyfd)
 
 void Request::fillMethod()
 {
-    std::vector<std::string> s  = split(Muv, "/");
-    for (int i = 0; i < method_vect.size(); i++)
-    {                
-        if (s[0] == method_vect[i])
-        {
-            method = s[0];
-            j = 1;
-        }
-        continue;
-    }
-    if (j != 1)
+    std::cout << Muv << std::endl;
+    std::vector<std::string> s  = split(Muv, " ");
+    std::cout << "size " << s.size() << std::endl;
+    method = s[0];
+    Uri = fixIt(s[1]);
+    if (Uri != "POST" || Uri != "GET" || Uri != "DELETE")
         invalidMethod = -1;
-    s = split(s[1], " ");
-    Uri = s[0];
-    std::cout << Uri << std::endl;
+ 
 }
 
 void Request::fillHeaders(std::string header)
@@ -106,9 +99,7 @@ void Request::fillHeaders(std::string header)
     while (std::getline (headerStream, line))
     {
         if (i == 0)
-        {
             Muv  = line;
-        }
         else
         {
             vect3 = split(line, ":");

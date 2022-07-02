@@ -50,5 +50,7 @@ std::string removeSpaces(std::string str);
 std::vector< std::string > split(std::string line, std::string del);
 std::string random_string();
 std::string  get_file_ext(std::string res);
+std::string fixIt(std::string str);
+std::string removeRepeated(std::string str , char s);
 
 #endif

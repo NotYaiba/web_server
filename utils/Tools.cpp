@@ -43,16 +43,18 @@ std::vector< std::string > split(std::string line, std::string del)
     std::size_t found;
     int start = 0;
     found = line.find(del, 0);
-
     while (found != std::string::npos)
     {
         ret = line.substr(start,  found  - start);
-        line.erase(start, found +  1);
+        line.erase(start, found + 1) ;
         ret =trim(ret);
         if (ret != "")
             v.push_back(ret);
-        found = line.find(del , found + 1);
+
+        found = line.find(del ,0);
+
     }
+
     v.push_back(line);
     return (v);
 }
@@ -123,4 +125,41 @@ std::string random_string()
      std::shuffle(str.begin(), str.end(), generator);
 
      return str.substr(0, 32);    // assumes 32 < number of characters in str         
+}
+std::string fixIt(std::string str)
+{
+    str += "/";
+    std::cout <<str <<std::endl;
+    return (removeRepeated(str, '/'));
+    
+}
+std::string removeRepeated(std::string str , char s)
+{
+    std::vector <char> v;
+    int d = 0;
+    for (int i = 0 ; i < str.size(); i++)
+    {
+        
+        if (s == str[i] )
+        {
+            if (d == 0)
+            {
+                v.push_back(str[i]);
+                d = 1;
+
+            }
+           continue ;
+        }
+        else
+            d = 0;
+        v.push_back(str[i]);
+    }
+    int size  = v.size();
+    char ss[1000];
+    
+    int k = 0;
+    for (k= 0 ; k < size; k++)
+        ss[k] = v[k];
+    ss[k] = '\0';
+    return ss;
 }
