@@ -55,4 +55,5 @@ std::string fixIt(std::string str);
 std::string removeRepeated(std::string str , char s);
 std::string tuUpper(std::string str);
 bool file_exists(std::string filename);
+std::string	formatted_time();
 #endif

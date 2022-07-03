@@ -135,7 +135,11 @@ void Response::Delete()
             statusCode.first = 200;
     }
     else
+    {
        statusCode.first  = 404;
+       statusCode.second  = " Not Found";
+
+    }
 }
 void Response::Get()
 {
@@ -147,13 +151,32 @@ void Response::Post()
 }
 
 void Response::generateHeader()
-{
-
+{   
+    int len;
+    if (statusCode.first== 404)
+    {
+            std::cout << "salam\n";
+            body = generateBody();
+    }
+    else
+        body = "";
+    len = body.size();
     header += "HTTP/1.1 " + std::to_string(statusCode.first) + statusCode.second + "\r\n" ;
-    header += "Content-length: 17\n\r\nTello from 666666\r\n";
+    header += "Content-type: text/html\r\n";
+    header += "Content-length: " + std::to_string(len) + "\r\n";
+	header += "Server: mywebserver\r\n";
+    header += "Date: " + formatted_time() + "\r\n";
+    header += "\r\n"+ body;
 }
 
 std::string Response::gethadak()
 {
     return header;
+}
+std::string Response::generateBody()
+{
+   std::string msg = std::to_string(statusCode.first) +  statusCode.second;
+   std::string tmp;
+   tmp = "<html>\n<head><title>" + msg + "</title></head>\n<body bgcolor='white'>\n<center><h1>"  +msg + "</h1></center>\n</body>\n</html>";
+   return tmp;
 }

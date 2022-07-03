@@ -186,3 +186,17 @@ bool file_exists(std::string filename)
 	close(fd);
 	return (true);
 }
+
+std::string	formatted_time()
+{
+	time_t	current;
+	struct tm * timeinfo;
+	char	buffer[80];
+
+	time(&current);
+	timeinfo = localtime (&current);
+
+	strftime(buffer, 80, "%a,%e %b %Y %X %Z", timeinfo);
+
+	return std::string(buffer);
+}

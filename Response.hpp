@@ -44,4 +44,6 @@ class Response
     void Post();
     void generateHeader();
     std::string gethadak();
+    std::string generateBody();
+    
 };
