@@ -14,7 +14,13 @@ int main(int ac , char *av[])
 {
     (void)ac;
     (void)av;
-
+    std::vector<std::string> v = split("GET POST\r\n\r\nDELETE", "\r\n\r\n");
+    for (size_t i = 0; i < v.size(); i++)
+    {
+        /* code */
+        std::cout << v[i] << std::endl;
+    }
+    
     try{
         Parser pars(ac, av);
         std::vector < Server > servers = pars.getServers();

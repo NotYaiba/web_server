@@ -123,7 +123,7 @@ void Webserver::HandleResponse(int fd)
     Response res(servers[fd][0], req_map[fd]);
     req_map[fd].InitData();
     char *tello = (char *)("HTTP/1.1 200 OK\nContent-length: 17\n\r\nTello from server");
-    int returnWrite = write(fd, tello, strlen(tello));
+    int returnWrite = write(fd, res.gethadak().c_str(), strlen(tello));
     FD_CLR(fd, &writecopy);
     close(fd);
 }

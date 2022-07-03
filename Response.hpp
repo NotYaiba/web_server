@@ -16,16 +16,20 @@
 # include <sys/types.h>
 #include "Request.hpp"
 #include "Location.hpp"
-
+#define _POSIX_SOURCE
 class Response
 {
     private:
     Server _server;
     Request _req;
     std::string  _path;
-    Location _loc;
+    std::string _loc;
     int validMethod;
-    int statusCode;
+    std::string _method;
+    std::string header;
+    std::string body;
+
+    std::pair<int , std::string> statusCode;
     Location  matching_location;
     public:
     Response(Server  serv , Request req);
@@ -34,4 +38,10 @@ class Response
     void findMatchingLocation();
     void getLocation();
     void getMethod();
+    void KaynatMethod();
+    void Delete();
+    void Get();
+    void Post();
+    void generateHeader();
+    std::string gethadak();
 };

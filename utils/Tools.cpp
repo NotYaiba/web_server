@@ -46,16 +46,18 @@ std::vector< std::string > split(std::string line, std::string del)
     while (found != std::string::npos)
     {
         ret = line.substr(start,  found  - start);
-        line.erase(start, found + 1) ;
-        ret =trim(ret);
+        line.erase(start, found + del.size()) ;
+        ret = trim(ret);
+
+
         if (ret != "")
             v.push_back(ret);
-
+        
         found = line.find(del ,0);
 
     }
-
-    v.push_back(line);
+    
+        v.push_back(line);
     return (v);
 }
 
@@ -162,4 +164,25 @@ std::string removeRepeated(std::string str , char s)
         ss[k] = v[k];
     ss[k] = '\0';
     return ss;
+}
+
+std::string tuUpper(std::string str)
+{
+    std::string ret; 
+    for (size_t i = 0; i < str.size(); i++)
+    {
+        /* code */
+        ret.append(1, str[i]);
+    }
+    return (ret);
+}
+
+bool file_exists(std::string filename)
+{
+	int fd = open(filename.c_str(), O_RDONLY);
+	std::cout << "fd: >>>>" << fd << std::endl;
+	if (fd < 0)
+		return (false);
+	close(fd);
+	return (true);
 }

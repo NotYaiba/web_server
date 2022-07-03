@@ -37,7 +37,7 @@ void    Request::fillRequest(char *buff, int read)
         fillHeaders( vect[0]);
         checkHeaders();
         createFile();
-        int testoffset = vect[0].size() + 4;
+        int testoffset = vect[0].size();
         fillBody( buff + testoffset , read - testoffset, _bodyfd);
         isFrstRead = false;
     }
@@ -81,12 +81,11 @@ void Request::fillMethod()
 {
     std::cout << Muv << std::endl;
     std::vector<std::string> s  = split(Muv, " ");
-    std::cout << "size " << s.size() << std::endl;
     method = s[0];
     Uri = fixIt(s[1]);
     if (Uri != "POST" || Uri != "GET" || Uri != "DELETE")
         invalidMethod = -1;
- 
+    
 }
 
 void Request::fillHeaders(std::string header)
@@ -250,5 +249,6 @@ Request &Request::operator=(Request  const & src)
 {
     status_code = src.getStatusCode();
     Uri = src.getUri();
+    method = src.getMethod();
     return *this;
 }

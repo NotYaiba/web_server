@@ -1,6 +1,7 @@
 #ifndef  TOOLS_HPP
 #define  TOOLS_HPP
-
+ #include <unistd.h>
+#include <fcntl.h>
 #include <iostream>
 #include <string.h>
 #include <fstream>
@@ -52,5 +53,6 @@ std::string random_string();
 std::string  get_file_ext(std::string res);
 std::string fixIt(std::string str);
 std::string removeRepeated(std::string str , char s);
-
+std::string tuUpper(std::string str);
+bool file_exists(std::string filename);
 #endif

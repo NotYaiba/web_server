@@ -8,19 +8,35 @@ Response::Response(Server  serv , Request req)
     _server = serv;
     _req  = req;
     _path = _req.getUri();
+    _method  = _req.getMethod();
     validMethod = 0;
-    statusCode =  req.getStatusCode();
+    statusCode.first =  req.getStatusCode();
     // if (statusCode != 200 || statusCode != 201)
     // {
     //          // todo send response with status code; 
     // }
     // check 400 413 uri errors
-    if (statusCode == 400 || statusCode == 413)
+    if (statusCode.first == 400 || statusCode.first == 413)
     {
 
     }
     findMatchingLocation();
-    matching_location.debug();
+    _loc = matching_location.getLocation();
+    KaynatMethod();
+    // matching_location.debug();
+    if (validMethod)
+    {
+        if (_method == "DELETE")
+            Delete();
+        else if (_method == "GET")
+            Get();
+        else if (_method == "POST")
+            Post();
+
+    }
+    else
+        std::cout << "meeh\n";
+    generateHeader();
     // if get method | 404 403 405 | 200 | 301 redirect
 
     // if delete Method | 405 404 403 | 200
@@ -41,7 +57,7 @@ void   Response::findMatchingLocation()
     std::map<int , int > locScore;
     locations = _server.getLocations();
     std::cout << _path <<std::endl;
-    std::cout << "--------------"<<std::endl;
+    // std::cout << "--------------"<<std::endl;
 
     for (int i = 0; i < locations.size(); i++)
     {
@@ -62,36 +78,82 @@ void   Response::findMatchingLocation()
                     break;
                 }
         }
-        std::cout << "location : " << loc << " | score : " << score  << " iterations : " << iterations << " |\n";
+        // std::cout << "location : " << loc << " | score : " << score  << " iterations : " << iterations << " |\n";
         
         std::pair<std::map<int ,int >::iterator , bool > ret = locScore.insert(std::make_pair(score, iterations));
-        else if (ret.second == false)
+        // std::cout << "max : " << (--locScore.end())->first << std::endl;
+        if (ret.second == false)
         {
             if (iterations < (ret.first)->second)
             {
-                if (ret=>first ==(--locScore.end())->first)
+                if (ret.first->first >= (--locScore.end())->first)
                 {
-                    
+                    locScore[score] = iterations;
+                    matching_location = locations[i];
                 }
-                locScore[score] = iterations;
-                matching_location = locations[i];
             }
         }
-        if (score > (--locScore.end())->first )
+        else if (score >= (--locScore.end())->first )
             matching_location = locations[i];
     }
+}
+
+void Response::KaynatMethod()
+{
+    // matching_location.debug();
+    std::string tmp = matching_location.getMethod();
+    tmp = trim(tmp);
+    std::vector <std::string> v = split(tmp, " ");
+    for (size_t i = 0 ; i < v.size() ; i++)
+    {
+        if (_method == v[i] )
+        {
+            validMethod = 1;  
+            return ;
+        }
+    }
+    validMethod = 0;
+    
+}
+
+
+
+void Response::Delete()
+{
+    matching_location.debug();
+    std::cout << "file to delete " << _path << std::endl;
+    std::string path = _loc + matching_location.getRoot() + "/" +_path;
+    std::cout << "where : " << path<< std::endl;
+    path = removeRepeated(path, '/');
+    path.erase(path.size() - 1);
+    std::cout << "removed : " <<path<< std::endl;
+    if (file_exists(path))
+    {
+        if (std::remove(path.c_str()) < 0)
+            statusCode.first = 403;
+        else
+            statusCode.first = 200;
+    }
+    else
+       statusCode.first  = 404;
+}
+void Response::Get()
+{
+
+}
+void Response::Post()
+{
 
 }
 
-// void Response::getMethod()
-// {
-//     std::vector <std::string> v = split(_loc.getMethod(), " ");
-//     for (size_t i = 0 ; v.size() ; i++)
-//     {
-//         if (_req.getMethod() == v[i])
-//             validMethod = 1;
-//     }
-//     std::cout << validMethod << std::endl;
-// }
+void Response::generateHeader()
+{
 
+    header += "HTTP/1.1 " + std::to_string(statusCode.first) + statusCode.second + "\r\n" ;
+    header += "Content-length: 17\n\r\nTello from 666666\r\n";
+}
 
+std::string Response::gethadak()
+{
+    return header;
+}
