@@ -139,7 +139,9 @@ bool Request::checkEndRequest( char const *buff, int read)
     {
         
         FILE *p_file = NULL;
-        p_file = fopen(body.c_str(),"rb");
+        std::string tmp = "./tmp/" + body;
+        
+        p_file = fopen(tmp.c_str(),"rb");
         fseek(p_file,0,SEEK_END);
         int size = ftell(p_file);
         fclose(p_file);
@@ -204,8 +206,9 @@ void  Request::createFile()
     std::map<std::string, std::string>::iterator it =  headers.find("Content-Type");
     if (it != headers.end())
         content_type = it->second;
-    body +=   "./tmp/"  +  random_string() + get_file_ext(content_type);
-    _bodyfd = open(body.c_str(), O_RDWR | O_CREAT | O_APPEND, 0666);
+    body +=     random_string() + get_file_ext(content_type);
+    std::string tmp = "./tmp/" + body;
+    _bodyfd = open(tmp.c_str(), O_RDWR | O_CREAT | O_APPEND, 0666);
 }
 void   Request::checkHeaders()
 {
@@ -250,5 +253,6 @@ Request &Request::operator=(Request  const & src)
     status_code = src.getStatusCode();
     Uri = src.getUri();
     method = src.getMethod();
+    body = src.getBody();
     return *this;
 }

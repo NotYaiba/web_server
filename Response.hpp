@@ -45,5 +45,6 @@ class Response
     void generateHeader();
     std::string gethadak();
     std::string generateBody();
+    void setStatusCode(int code);
     
 };

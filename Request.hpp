@@ -57,6 +57,9 @@ class Request
         std::string const & getMethod() const{
             return method;
         }
+        std::string const & getBody() const{
+            return body;
+        }
 
         // void validUri(std::string s);
 

@@ -130,36 +130,46 @@ void Response::Delete()
     if (file_exists(path))
     {
         if (std::remove(path.c_str()) < 0)
-            statusCode.first = 403;
+            setStatusCode(403);
         else
-            statusCode.first = 200;
+            setStatusCode(200);
     }
     else
-    {
-       statusCode.first  = 404;
-       statusCode.second  = " Not Found";
+        setStatusCode(404);
 
-    }
 }
+
 void Response::Get()
 {
 
 }
 void Response::Post()
 {
-
+    //  if (s.get_max_body_size() < size_t(fsize(req.get_body().c_str())))
+    // {
+    //     std::cout << "Request body too large" << std::endl;
+    //     remove(req.get_body().c_str());
+    //     set_status_code(413);
+    //     return ;
+    // }
+    std::string new_file(_req.getBody().c_str());
+    std::cout << blue << new_file << reset<<std::endl;
+    std::string file_name = removeRepeated(matching_location.getUpload() + "/" + new_file, '/');
+    std::string tmp = "./tmp/" + new_file;
+    std::ifstream in(tmp.c_str(), std::ios::in | std::ios::binary);
+    std::ofstream out(file_name, std::ios::out | std::ios::binary);
+    out << in.rdbuf();
+    in.close();
+    out.close();
+    std::cout << "here" << std::endl;
+    remove(_req.getBody().c_str());
+    setStatusCode(201);
 }
 
 void Response::generateHeader()
 {   
     int len;
-    if (statusCode.first== 404)
-    {
-            std::cout << "salam\n";
-            body = generateBody();
-    }
-    else
-        body = "";
+    body = generateBody();
     len = body.size();
     header += "HTTP/1.1 " + std::to_string(statusCode.first) + statusCode.second + "\r\n" ;
     header += "Content-type: text/html\r\n";
@@ -175,8 +185,22 @@ std::string Response::gethadak()
 }
 std::string Response::generateBody()
 {
+
    std::string msg = std::to_string(statusCode.first) +  statusCode.second;
    std::string tmp;
    tmp = "<html>\n<head><title>" + msg + "</title></head>\n<body bgcolor='white'>\n<center><h1>"  +msg + "</h1></center>\n</body>\n</html>";
    return tmp;
+}
+
+void Response::setStatusCode(int code)
+{
+    statusCode.first = code;
+    if (code == 200)
+        statusCode.second = " OK";
+    else if (code == 404)
+        statusCode.second = " Not Found";
+    else if (code == 403)
+        statusCode.second = " Forbidden";
+    else if (code == 201)
+        statusCode.second = " Created";
 }
