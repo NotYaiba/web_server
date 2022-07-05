@@ -14,6 +14,8 @@
 #include <cstring>
 #include "Server.hpp"
 # include <sys/types.h>
+# include <sys/stat.h>
+#include <dirent.h>
 #include "Request.hpp"
 #include "Location.hpp"
 #define _POSIX_SOURCE
@@ -28,6 +30,9 @@ class Response
     std::string _method;
     std::string header;
     std::string body;
+    std::string _redirect;
+    std::string _def;
+    int flag;
 
     std::pair<int , std::string> statusCode;
     Location  matching_location;
@@ -46,5 +51,10 @@ class Response
     std::string gethadak();
     std::string generateBody();
     void setStatusCode(int code);
+    void generateredeHeader();
+void getIndex(std::string path);
+bool isDir(std::string path);
+
+
     
 };

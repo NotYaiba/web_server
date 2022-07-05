@@ -8,8 +8,10 @@ Response::Response(Server  serv , Request req)
     _server = serv;
     _req  = req;
     _path = _req.getUri();
+    std::cout << "_path   :" << _path << std::endl;
     _method  = _req.getMethod();
     validMethod = 0;
+    flag = 0;
     statusCode.first =  req.getStatusCode();
     // if (statusCode != 200 || statusCode != 201)
     // {
@@ -22,6 +24,8 @@ Response::Response(Server  serv , Request req)
     }
     findMatchingLocation();
     _loc = matching_location.getLocation();
+    _redirect = matching_location.getRedirect();
+    _def = matching_location.getDefaultt();
     KaynatMethod();
     // matching_location.debug();
     if (validMethod)
@@ -56,7 +60,6 @@ void   Response::findMatchingLocation()
     int iterations = 0;
     std::map<int , int > locScore;
     locations = _server.getLocations();
-    std::cout << _path <<std::endl;
     // std::cout << "--------------"<<std::endl;
 
     for (int i = 0; i < locations.size(); i++)
@@ -139,10 +142,100 @@ void Response::Delete()
 
 }
 
+bool Response::isDir(std::string path)
+{
+    std::string tmp =  removeRepeated(path + '/'+ _path , '/');
+    std::cout << blue << tmp << std::endl;
+    std::cout << blue << tmp.erase(tmp.size() - 1) << std::endl;
+    struct stat statbuf;
+	if (tmp == "/")
+		return true;
+	std::string s = tmp;
+	if (stat(s.c_str(), &statbuf) != 0)
+		return 0;
+	return S_ISDIR(statbuf.st_mode);
+}
+
+void Response::generateredeHeader()
+{   
+    int len;
+    body = generateBody();
+    len = body.size();
+    header += "HTTP/1.1 " + std::to_string(statusCode.first) + statusCode.second + "\r\n" ;
+    header += "Location :" + _redirect.erase(0, 3) + "\r\n";
+    header +=  "\r\n";
+
+}
+
+void Response::getIndex(std::string path)
+{
+    std::cout << "get index \n";
+   DIR *dr;
+   struct dirent *en;
+   path =  removeRepeated(path  + "/" + _path, '/');
+   std::cout << "path  :" << path << std::endl;
+   dr = opendir(path.c_str());
+
+   this->body = "<html>\n<head>\n<body>\n<table>\n";
+    if (dr) {
+        while ((en = readdir(dr)) != NULL) 
+        {
+            if(en->d_name != std::string(".") && en->d_name != std::string(".."))
+            {
+                this->body += std::string("<br>");
+                this->body += std::string("<a href=\"") + _path + en->d_name + std::string("\">")+ en->d_name + std::string("</a>"); 
+            }
+        }
+   }
+   this->body += "</table>\n</body>\n</head>\n</html>\n";
+   std::cout <<" end index \n";
+   flag = 1;
+   closedir(dr);
+}
+
 void Response::Get()
 {
-    setStatusCode(405);
+
+    std::string path = removeRepeated(matching_location.getRoot() +"/" +matching_location.getDefaultt(), '/');
+    if (_redirect != "")
+    {
+        setStatusCode(301);
+        generateredeHeader();
+    }
+    else
+    {
+        std::cout << isDir(path ) << std::endl;
+        if (isDir(path ))
+        {
+
+            if (_def.size() > 1)
+            {
+            }
+            else
+            {
+                if (matching_location.getAutoindex() == false)
+                {
+                    setStatusCode(403);
+                    return ;
+                }
+                else
+                     getIndex(path);
+            }
+        }
+        if (access(_path.c_str(), R_OK) == -1 && access(_path.c_str(), F_OK) == 0)
+        {
+            setStatusCode(403);
+            return ;
+        }
+        else if (access(_path.c_str(), F_OK) == -1)
+        {
+            setStatusCode(404);
+            return ;
+        }
+    }
+
 }
+
 void Response::Post()
 {
     //  if (s.get_max_body_size() < size_t(fsize(req.get_body().c_str())))
@@ -169,7 +262,8 @@ void Response::Post()
 void Response::generateHeader()
 {   
     int len;
-    body = generateBody();
+    if  (!flag)
+        body = generateBody();
     len = body.size();
     header += "HTTP/1.1 " + std::to_string(statusCode.first) + statusCode.second + "\r\n" ;
     header += "Content-type:  text/html\r\n";
@@ -205,4 +299,6 @@ void Response::setStatusCode(int code)
         statusCode.second = " Created";
     else if (code == 405)
         statusCode.second = " leeda";
+    else if (code == 301)
+        statusCode.second = " Moved Permanently";
 }

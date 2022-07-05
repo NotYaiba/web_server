@@ -1,6 +1,5 @@
 make --dry-run --always-make --keep-going --print-directory
-make: Entering directory `/Users/mamali/Desktop/web_server'
-clang++ -std=c++98  main.cpp Parser.cpp Server.cpp Location.cpp Socket.cpp Connection.cpp WebServer.cpp Request.cpp ./utils/Tools.cpp    -o webserv
- 
-make: Leaving directory `/Users/mamali/Desktop/web_server'
+make: Entering directory `/Users/mamali/Desktop/webserve_push'
+clang++ -std=c++98  main.cpp Parser.cpp Server.cpp Location.cpp Socket.cpp Connection.cpp WebServer.cpp Request.cpp Response.cpp ./utils/Tools.cpp    -o webserv
+make: Leaving directory `/Users/mamali/Desktop/webserve_push'
  
