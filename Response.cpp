@@ -1,14 +1,12 @@
 #include "Response.hpp"
 
-
-
 Response::Response(Server  serv , Request req)
 {
     std::cout << red << "\n\n start Response \n\n" << reset <<  std::endl;
     _server = serv;
     _req  = req;
     _path = _req.getUri();
-    std::cout << "_path   :" << _path << std::endl;
+    std::cout << "_path: " <<  _path << std::endl;
     _method  = _req.getMethod();
     validMethod = 0;
     flag = 0;
@@ -24,6 +22,7 @@ Response::Response(Server  serv , Request req)
     }
     findMatchingLocation();
     _loc = matching_location.getLocation();
+    std::cout << "location: " <<  _loc << std::endl;
     _redirect = matching_location.getRedirect();
     _def = matching_location.getDefaultt();
     KaynatMethod();
@@ -50,96 +49,6 @@ Response::Response(Server  serv , Request req)
 
     // addistional info in CGI case 500 is returnrd when CGI fails
     // else 500
-
-}
-
-void   Response::findMatchingLocation()
- {
-    int score = 0;
-
-    int iterations = 0;
-    std::map<int , int > locScore;
-    locations = _server.getLocations();
-    // std::cout << "--------------"<<std::endl;
-
-    for (int i = 0; i < locations.size(); i++)
-    {
-        score = 0;
-        iterations = 0;
-        std::string loc = locations[i].getLocation();
-        for(int i = 0 ; i < _path.size() || i < loc.size() ; i++)
-        {
-                if (_path[i] == loc[i])
-                {
-                    if (loc[i] == '/')
-                        score++;
-                    iterations++;
-                }
-                else
-                { 
-                    iterations = loc.size();
-                    break;
-                }
-        }
-        // std::cout << "location : " << loc << " | score : " << score  << " iterations : " << iterations << " |\n";
-        
-        std::pair<std::map<int ,int >::iterator , bool > ret = locScore.insert(std::make_pair(score, iterations));
-        // std::cout << "max : " << (--locScore.end())->first << std::endl;
-        if (ret.second == false)
-        {
-            if (iterations < (ret.first)->second)
-            {
-                if (ret.first->first >= (--locScore.end())->first)
-                {
-                    locScore[score] = iterations;
-                    matching_location = locations[i];
-                }
-            }
-        }
-        else if (score >= (--locScore.end())->first )
-            matching_location = locations[i];
-    }
-}
-
-void Response::KaynatMethod()
-{
-    // matching_location.debug();
-    std::string tmp = matching_location.getMethod();
-    tmp = trim(tmp);
-    std::vector <std::string> v = split(tmp, " ");
-    for (size_t i = 0 ; i < v.size() ; i++)
-    {
-        if (_method == v[i] )
-        {
-            validMethod = 1;  
-            return ;
-        }
-    }
-    validMethod = 0;
-    
-}
-
-
-
-void Response::Delete()
-{
-    matching_location.debug();
-    std::cout << "file to delete " << _path << std::endl;
-    std::string path = _loc + matching_location.getRoot() + "/" +_path;
-    std::cout << "where : " << path<< std::endl;
-    path = removeRepeated(path, '/');
-    path.erase(path.size() - 1);
-    std::cout << "removed : " <<path<< std::endl;
-    if (file_exists(path))
-    {
-        if (std::remove(path.c_str()) < 0)
-            setStatusCode(403);
-        else
-            setStatusCode(200);
-    }
-    else
-        setStatusCode(404);
-
 }
 
 bool Response::isDir(std::string path)
@@ -195,20 +104,19 @@ void Response::getIndex(std::string path)
 
 void Response::Get()
 {
-
     std::string path = removeRepeated(matching_location.getRoot() +"/", '/');
+    std::cout << "path: " <<  path << std::endl;
     if (_redirect != "")
     {
         setStatusCode(301);
-        generateredeHeader();
+        path = _redirect;
+        // std::cout << "yoooo: " << _redirect.substr(3, _redirect.length()) << std::endl;
     }
     else
     {
-        std::cout << isDir(path ) << std::endl;
         if (isDir(path ))
         {
             std::cout  << _def.size()  << std::endl;
-
             if (_def.size() > 1)
             {
                 path = removeRepeated(path +"/" + _def, '/');
@@ -231,25 +139,121 @@ void Response::Get()
                      getIndex(path);
             }
         }
-        path =  removeRepeated(path + '/'+ _path , '/');
-        path.erase(path.size() - 1);
-        if (access(path.c_str(), R_OK) == -1 && access(path.c_str(), F_OK) == 0)
+        else
         {
-            setStatusCode(403);
-            return ;
+            path =  removeRepeated(path + '/'+ _path , '/');
+            path.erase(path.size() - 1);
+            if (access(path.c_str(), R_OK) == -1 && access(path.c_str(), F_OK) == 0)
+            {
+                setStatusCode(403);
+                return ;
+            }
+            else if (access(path.c_str(), F_OK) == -1)
+            {
+                std::cout << "yes you are right\n";
+                setStatusCode(404);
+                return ;
+            }
+            else
+            {
+                std::ifstream f(path);
+                std::string str;
+                if(f) {
+                    std::ostringstream ss;
+                    ss << f.rdbuf();
+                    ss << std::endl;
+                    str = ss.str();
+                }
+                body = str;
+                flag = 1;
+            }
         }
-        else if (access(path.c_str(), F_OK) == -1)
-        {
-            std::cout << "yes you are right\n";
-            setStatusCode(404);
-            return ;
-        }
-        
         setStatusCode(200);
-
     }
+}
+
+void   Response::findMatchingLocation()
+{
+    int score = 0;
+    int iterations = 0;
+    std::map<int , int > locScore;
+    locations = _server.getLocations();
+    for (int i = 0; i < locations.size(); i++)
+    {
+        score = 0;
+        iterations = 0;
+        std::string loc = locations[i].getLocation();
+        for(int i = 0 ; i < _path.size() || i < loc.size() ; i++)
+        {
+                if (_path[i] == loc[i])
+                {
+                    if (loc[i] == '/')
+                        score++;
+                    iterations++;
+                }
+                else
+                { 
+                    iterations = loc.size();
+                    break;
+                }
+        }
+        std::pair<std::map<int ,int >::iterator , bool > ret = locScore.insert(std::make_pair(score, iterations));
+        if (ret.second == false)
+        {
+            if (iterations < (ret.first)->second)
+            {
+                if (ret.first->first >= (--locScore.end())->first)
+                {
+                    locScore[score] = iterations;
+                    matching_location = locations[i];
+                }
+            }
+        }
+        else if (score >= (--locScore.end())->first )
+            matching_location = locations[i];
+    }
+}
+
+void Response::KaynatMethod()
+{
+    std::string tmp = matching_location.getMethod();
+    tmp = trim(tmp);
+    std::vector <std::string> v = split(tmp, " ");
+    for (size_t i = 0 ; i < v.size() ; i++)
+    {
+        if (_method == v[i] )
+        {
+            validMethod = 1;  
+            return ;
+        }
+    }
+    validMethod = 0;
+    
+}
+
+
+
+void Response::Delete()
+{
+    matching_location.debug();
+    std::cout << "file to delete " << _path << std::endl;
+    std::string path = _loc + matching_location.getRoot() + "/" +_path;
+    std::cout << "where : " << path<< std::endl;
+    path = removeRepeated(path, '/');
+    path.erase(path.size() - 1);
+    std::cout << "removed : " <<path<< std::endl;
+    if (file_exists(path))
+    {
+        if (std::remove(path.c_str()) < 0)
+            setStatusCode(403);
+        else
+            setStatusCode(200);
+    }
+    else
+        setStatusCode(404);
 
 }
+
 
 void Response::Post()
 {
@@ -269,7 +273,6 @@ void Response::Post()
     out << in.rdbuf();
     in.close();
     out.close();
-    std::cout << "here" << std::endl;
     remove(_req.getBody().c_str());
     setStatusCode(201);
 }
@@ -292,6 +295,7 @@ std::string Response::gethadak()
 {
     return header;
 }
+
 std::string Response::generateBody()
 {
 

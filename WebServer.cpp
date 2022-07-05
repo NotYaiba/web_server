@@ -119,6 +119,9 @@ void Webserver::HandleRequest(int fd)
 void Webserver::HandleResponse(int fd)
 {
     // std::vector <Server> serv =  servers[fd];
+    // find if response exists in this fd
+    // if true | written bytes | path to file => open file, lseek ritten bytes, close fd, compare written bytes with file size (if written bytes == file size) erase from map 
+    // if false construct new resonse || compare written bytes with file size (if written bytes == file size)
     Response res(servers[fd][0], req_map[fd]);
     req_map[fd].InitData();
     char *tello = (char *)("HTTP/1.1 200 OK\nContent-length: 17\n\r\nTello from server");

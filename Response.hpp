@@ -52,8 +52,8 @@ class Response
     std::string generateBody();
     void setStatusCode(int code);
     void generateredeHeader();
-void getIndex(std::string path);
-bool isDir(std::string path);
+    void getIndex(std::string path);
+    bool isDir(std::string path);
 
 
     
