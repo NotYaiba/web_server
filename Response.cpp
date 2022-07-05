@@ -196,7 +196,7 @@ void Response::getIndex(std::string path)
 void Response::Get()
 {
 
-    std::string path = removeRepeated(matching_location.getRoot() +"/" +matching_location.getDefaultt(), '/');
+    std::string path = removeRepeated(matching_location.getRoot() +"/", '/');
     if (_redirect != "")
     {
         setStatusCode(301);
@@ -207,9 +207,18 @@ void Response::Get()
         std::cout << isDir(path ) << std::endl;
         if (isDir(path ))
         {
+            std::cout  << _def.size()  << std::endl;
 
             if (_def.size() > 1)
             {
+                path = removeRepeated(path +"/" + _def, '/');
+                path.erase(path.size() - 1 ) ;
+                std::ifstream in(path.c_str(), std::ios::in | std::ios::binary);
+                std::stringstream strStream;
+                strStream << in.rdbuf(); 
+                body = strStream.str();
+                flag = 1;
+                in.close();
             }
             else
             {
@@ -222,16 +231,22 @@ void Response::Get()
                      getIndex(path);
             }
         }
-        if (access(_path.c_str(), R_OK) == -1 && access(_path.c_str(), F_OK) == 0)
+        path =  removeRepeated(path + '/'+ _path , '/');
+        path.erase(path.size() - 1);
+        if (access(path.c_str(), R_OK) == -1 && access(path.c_str(), F_OK) == 0)
         {
             setStatusCode(403);
             return ;
         }
-        else if (access(_path.c_str(), F_OK) == -1)
+        else if (access(path.c_str(), F_OK) == -1)
         {
+            std::cout << "yes you are right\n";
             setStatusCode(404);
             return ;
         }
+        
+        setStatusCode(200);
+
     }
 
 }
