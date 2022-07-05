@@ -11,7 +11,7 @@ Request::Request()
     this->invalidMethod = 0;
     this->Uri = "";
     this->Muv = "";
-    this->content_length = -1;
+    this->content_length = 0;
     body = "";
     content_type = "";
     god_vect.push_back('\r');
@@ -37,13 +37,13 @@ void    Request::fillRequest(char *buff, int read)
         fillHeaders( vect[0]);
         checkHeaders();
         createFile();
-        int testoffset = vect[0].size();
+        int testoffset = vect[0].size() + 4 ;
         fillBody( buff + testoffset , read - testoffset, _bodyfd);
         isFrstRead = false;
     }
     else
         fillBody( buff, read, _bodyfd);
-    // debug();
+    debug();
 }
 
 void    Request::debug()
@@ -69,6 +69,7 @@ void Request::fillBody( char  *buff, int read, int _bodyfd)
     }   
     else 
     {
+        
         write (_bodyfd,  buff, read );  
     }
     int debug_fd = open("body_debug", O_RDWR | O_CREAT | O_APPEND, 0666);
@@ -118,6 +119,8 @@ void Request::fillHeaders(std::string header)
 
 bool Request::checkEndRequest( char const *buff, int read)
 {
+    
+    
     if (ischuncked == 1 )
     {
          int i = 0;
@@ -137,7 +140,15 @@ bool Request::checkEndRequest( char const *buff, int read)
     }
     else
     {
-        
+        if (content_length == 0)
+        {
+            /* code */
+            std::cout << "ENDD OF REQUEST\n";
+            
+            isslastRead = true;
+            isFrstRead = true;
+            return true;
+        }
         FILE *p_file = NULL;
         std::string tmp = "./tmp/" + body;
         
@@ -206,7 +217,7 @@ void  Request::createFile()
     std::map<std::string, std::string>::iterator it =  headers.find("Content-Type");
     if (it != headers.end())
         content_type = it->second;
-    body +=     random_string() + get_file_ext(content_type);
+    body += random_string() + get_file_ext(content_type);
     std::string tmp = "./tmp/" + body;
     _bodyfd = open(tmp.c_str(), O_RDWR | O_CREAT | O_APPEND, 0666);
 }
@@ -228,7 +239,7 @@ void   Request::checkHeaders()
         status_code = 404;
     else if (invalidMethod == -1)
         status_code = 405;
-    
+    std::cout << yellow << "content lenght : " << content_length << std::endl;
 }
 
 void  Request::InitData()
@@ -240,7 +251,7 @@ void  Request::InitData()
     this->Uri = "";
     this->Muv = "";
     this->method = "";
-    this->content_length = -1;
+    this->content_length = 0;
     body = "";
     content_type = "";
     headers.clear();
@@ -254,5 +265,6 @@ Request &Request::operator=(Request  const & src)
     Uri = src.getUri();
     method = src.getMethod();
     body = src.getBody();
+
     return *this;
 }

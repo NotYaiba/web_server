@@ -141,7 +141,7 @@ void Response::Delete()
 
 void Response::Get()
 {
-
+    setStatusCode(405);
 }
 void Response::Post()
 {
@@ -172,7 +172,7 @@ void Response::generateHeader()
     body = generateBody();
     len = body.size();
     header += "HTTP/1.1 " + std::to_string(statusCode.first) + statusCode.second + "\r\n" ;
-    header += "Content-type: text/html\r\n";
+    header += "Content-type:  text/html\r\n";
     header += "Content-length: " + std::to_string(len) + "\r\n";
 	header += "Server: mywebserver\r\n";
     header += "Date: " + formatted_time() + "\r\n";
@@ -203,4 +203,6 @@ void Response::setStatusCode(int code)
         statusCode.second = " Forbidden";
     else if (code == 201)
         statusCode.second = " Created";
+    else if (code == 405)
+        statusCode.second = " leeda";
 }

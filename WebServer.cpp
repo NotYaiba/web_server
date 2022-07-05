@@ -28,7 +28,6 @@ void  Webserver::InitData(Connection const &connection)
             FD_SET(it->first, &readset);
             Request req;
             req_map.insert(std::make_pair(it->first,req));
-
     }
     maxfd = (--fd_map.end())->first ;
     readcopy = readset;
@@ -70,8 +69,9 @@ void Webserver::RunWebServer()
 
 void Webserver::NewConnectionRead(int fd)
 {
-   int new_fd = Socket::AccectSock(fd);
+    int new_fd = Socket::AccectSock(fd);
     fcntl(new_fd, F_SETFL,  O_NONBLOCK);
+    std::cout << red  << "|"<< new_fd <<  "|" << reset << std::endl;
     FD_SET(new_fd, &readcopy);
     fd_map.insert(std::make_pair(new_fd, 1));
     servers.insert(std::make_pair(new_fd, servers[fd]));
@@ -110,7 +110,6 @@ void Webserver::HandleRequest(int fd)
     }
     else if (rb == 0)
     {
-        
         close(fd);
         FD_CLR(fd ,&readcopy);
     }
