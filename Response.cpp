@@ -1,32 +1,32 @@
 #include "Response.hpp"
 
-Response::Response(Server  serv , Request req)
+void Response::initData(Server  serv , Request req)
 {
-    std::cout << red << "\n\n start Response \n\n" << reset <<  std::endl;
     _server = serv;
     _req  = req;
     _path = _req.getUri();
-    std::cout << "_path: " <<  _path << std::endl;
     _method  = _req.getMethod();
+    statusCode.first =  req.getStatusCode();
+    isEndRes = true;
+    /////
+
     validMethod = 0;
     flag = 0;
-    statusCode.first =  req.getStatusCode();
-    // if (statusCode != 200 || statusCode != 201)
-    // {
-    //          // todo send response with status code; 
-    // }
-    // check 400 413 uri errors
-    if (statusCode.first == 400 || statusCode.first == 413)
-    {
+    file_name = "";
+    file_type = "text/html";
+    file_size = 0;
 
-    }
     findMatchingLocation();
     _loc = matching_location.getLocation();
-    std::cout << "location: " <<  _loc << std::endl;
     _redirect = matching_location.getRedirect();
     _def = matching_location.getDefaultt();
-    KaynatMethod();
-    // matching_location.debug();
+    setIsvalid();
+}
+Response::Response(Server  serv , Request req)
+{
+
+    // check 400 413 uri errors
+    initData(serv, req);
     if (validMethod)
     {
         if (_method == "DELETE")
@@ -35,17 +35,14 @@ Response::Response(Server  serv , Request req)
             Get();
         else if (_method == "POST")
             Post();
-
     }
     else
-        std::cout << "meeh\n";
-    generateHeader();
+        setStatusCode(405);
     // if get method | 404 403 405 | 200 | 301 redirect
 
     // if delete Method | 405 404 403 | 200
 
     // if post method | 405 | 201
-
 
     // addistional info in CGI case 500 is returnrd when CGI fails
     // else 500
@@ -54,8 +51,6 @@ Response::Response(Server  serv , Request req)
 bool Response::isDir(std::string path)
 {
     std::string tmp =  removeRepeated(path + '/'+ _path , '/');
-    std::cout << blue << tmp << std::endl;
-    std::cout << blue << tmp.erase(tmp.size() - 1) << std::endl;
     struct stat statbuf;
 	if (tmp == "/")
 		return true;
@@ -65,16 +60,7 @@ bool Response::isDir(std::string path)
 	return S_ISDIR(statbuf.st_mode);
 }
 
-void Response::generateredeHeader()
-{   
-    int len;
-    body = generateBody();
-    len = body.size();
-    header += "HTTP/1.1 " + std::to_string(statusCode.first) + statusCode.second + "\r\n" ;
-    header += "Location :" + _redirect.erase(0, 3) + "\r\n";
-    header +=  "\r\n";
 
-}
 
 void Response::getIndex(std::string path)
 {
@@ -99,6 +85,7 @@ void Response::getIndex(std::string path)
    this->body += "</table>\n</body>\n</head>\n</html>\n";
    std::cout <<" end index \n";
    flag = 1;
+   file_size = body.size();
    closedir(dr);
 }
 
@@ -109,6 +96,7 @@ void Response::Get()
     if (_redirect != "")
     {
         setStatusCode(301);
+        generateredeHeader();
         path = _redirect;
         // std::cout << "yoooo: " << _redirect.substr(3, _redirect.length()) << std::endl;
     }
@@ -121,51 +109,38 @@ void Response::Get()
             {
                 path = removeRepeated(path +"/" + _def, '/');
                 path.erase(path.size() - 1 ) ;
-                std::ifstream in(path.c_str(), std::ios::in | std::ios::binary);
-                std::stringstream strStream;
-                strStream << in.rdbuf(); 
-                body = strStream.str();
-                flag = 1;
-                in.close();
+                file_name = path;
             }
             else
             {
                 if (matching_location.getAutoindex() == false)
-                {
                     setStatusCode(403);
-                    return ;
-                }
                 else
                      getIndex(path);
+                return ;
+                
             }
         }
         else
         {
             path =  removeRepeated(path + '/'+ _path , '/');
             path.erase(path.size() - 1);
-            if (access(path.c_str(), R_OK) == -1 && access(path.c_str(), F_OK) == 0)
+            file_name = path;
+            file_size = fsize(file_name.c_str());
+            file_type = get_file_type(file_name);
+
+            std::cout << "file name " << file_name << std::endl;
+            std::cout << "file size " << file_size << std::endl;
+            std::cout << "file type " << file_type << std::endl;
+            if (access(file_name.c_str(), R_OK) == -1 && access(file_name.c_str(), F_OK) == 0)
             {
                 setStatusCode(403);
                 return ;
             }
-            else if (access(path.c_str(), F_OK) == -1)
+            else if (access(file_name.c_str(), F_OK) == -1)
             {
-                std::cout << "yes you are right\n";
                 setStatusCode(404);
                 return ;
-            }
-            else
-            {
-                std::ifstream f(path);
-                std::string str;
-                if(f) {
-                    std::ostringstream ss;
-                    ss << f.rdbuf();
-                    ss << std::endl;
-                    str = ss.str();
-                }
-                body = str;
-                flag = 1;
             }
         }
         setStatusCode(200);
@@ -214,7 +189,7 @@ void   Response::findMatchingLocation()
     }
 }
 
-void Response::KaynatMethod()
+void Response::setIsvalid()
 {
     std::string tmp = matching_location.getMethod();
     tmp = trim(tmp);
@@ -228,7 +203,6 @@ void Response::KaynatMethod()
         }
     }
     validMethod = 0;
-    
 }
 
 
@@ -280,20 +254,37 @@ void Response::Post()
 void Response::generateHeader()
 {   
     int len;
-    if  (!flag)
+    if  (!flag && file_size == 0)
+    {
         body = generateBody();
-    len = body.size();
-    header += "HTTP/1.1 " + std::to_string(statusCode.first) + statusCode.second + "\r\n" ;
-    header += "Content-type:  text/html\r\n";
-    header += "Content-length: " + std::to_string(len) + "\r\n";
-	header += "Server: mywebserver\r\n";
-    header += "Date: " + formatted_time() + "\r\n";
-    header += "\r\n"+ body;
+    }
+    if (_redirect == "" )
+    {  
+
+            header += "HTTP/1.1 " + std::to_string(statusCode.first) + statusCode.second + "\r\n" ;
+            header += "Content-type: "+ file_type + "\r\n";
+            header += "Content-length: " + std::to_string((int)file_size) + "\r\n";
+            header += "Server: mywebserver\r\n";
+            header += "Date: " + formatted_time() + "\r\n";
+            header += "\r\n";
+            if (flag ==  1)
+                header += body;
+            else
+            {
+                written = 0;
+                isEndRes = false;
+            }
+        }
 }
 
-std::string Response::gethadak()
+  char * Response::getHeader()
 {
-    return header;
+     char *buf;   
+    generateHeader(); 
+	buf = (char *)malloc(sizeof(char) * header.size());
+    buf = strcpy(new char[header.length() + 1], header.c_str());
+    std::cout << buf << std::endl;
+    return buf;
 }
 
 std::string Response::generateBody()
@@ -302,7 +293,9 @@ std::string Response::generateBody()
    std::string msg = std::to_string(statusCode.first) +  statusCode.second;
    std::string tmp;
    tmp = "<html>\n<head><title>" + msg + "</title></head>\n<body bgcolor='white'>\n<center><h1>"  +msg + "</h1></center>\n</body>\n</html>";
-   return tmp;
+    flag = true;
+    file_size = body.size();
+    return tmp;
 }
 
 void Response::setStatusCode(int code)
@@ -320,4 +313,61 @@ void Response::setStatusCode(int code)
         statusCode.second = " leeda";
     else if (code == 301)
         statusCode.second = " Moved Permanently";
+}
+
+
+void Response::generateredeHeader()
+{   
+    header += "HTTP/1.1 " + std::to_string(statusCode.first) + statusCode.second + "\r\n" ;
+    header += "Location :" + _redirect.erase(0, 3) + "\r\n";
+    header +=  "\r\n";
+    flag = 1;
+}
+
+std::pair<char * , size_t> Response::getBody()
+{   
+    char *buf;
+    int ret;
+    int len;
+    std::cout << red << "File to render " << file_name << reset<< std::endl;
+    int fd = open (file_name.c_str(), O_RDONLY);
+
+    std::cout << blue << "fd " << fd << reset<< std::endl;
+    if (file_size  - written <= BUFFER_SIZE )
+    {
+        len = file_size - written;
+        isEndRes =  true;
+    }
+    else
+    {
+        len = BUFFER_SIZE;
+        isEndRes =  false;
+    }
+    std::cout<< "len :" << len << std::endl;
+	buf = (char *)malloc(sizeof(char) * len);
+     memset (buf,'\0',len);
+	lseek(fd, written, SEEK_SET);
+
+	if (fd == -1)
+	{
+		perror("open");
+	}
+	ret = read(fd, buf, len);
+    written += len;
+//     std::cout<< "ret :" << ret << std::endl;
+//     std::cout << blue << "written :" << written << reset<< std::endl;
+//   std::ofstream MyFile("filename.txt", std::ios_base::app);
+
+  // Write to the file
+    // MyFile << buf;
+    
+    // std::cout << buf <<std::endl;
+	if (ret == -1)
+	{
+		perror("read");
+	}
+    if (ret == 0)
+        isEndRes =  true;
+	close(fd);
+    return std::make_pair(buf, ret);
 }

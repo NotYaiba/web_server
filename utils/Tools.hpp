@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string.h>
 #include <fstream>
+#include <sys/stat.h>
 #include <vector>
 # define DUP 0
 # define EMPTY 1
@@ -56,4 +57,6 @@ std::string removeRepeated(std::string str , char s);
 std::string tuUpper(std::string str);
 bool file_exists(std::string filename);
 std::string	formatted_time();
+off_t fsize(const char *filename) ;
+std::string     get_file_type(std::string type);
 #endif

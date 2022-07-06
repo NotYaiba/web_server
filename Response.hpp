@@ -22,6 +22,7 @@
 class Response
 {
     private:
+    bool isEndRes;
     Server _server;
     Request _req;
     std::string  _path;
@@ -32,9 +33,14 @@ class Response
     std::string body;
     std::string _redirect;
     std::string _def;
+    std::string file_name;
+    size_t file_size;
+    std::string file_type;
     int flag;
+    int written;
 
     std::pair<int , std::string> statusCode;
+    std::pair<char* , size_t> bufpair;
     Location  matching_location;
     public:
     Response(Server  serv , Request req);
@@ -48,12 +54,19 @@ class Response
     void Get();
     void Post();
     void generateHeader();
-    std::string gethadak();
+     char *getHeader();
     std::string generateBody();
     void setStatusCode(int code);
     void generateredeHeader();
     void getIndex(std::string path);
     bool isDir(std::string path);
+    void initData(Server  serv , Request req);
+    void setIsvalid();
+   std::pair<char* , size_t> getBody();
+   bool getIsend()
+   {
+       return (isEndRes);
+   }
 
 
     

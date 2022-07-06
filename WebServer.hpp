@@ -14,6 +14,7 @@
 #include <string.h>
 #include <string>
 #include "Request.hpp"
+#include "Response.hpp"
 
 // class Connextion;
 class Webserver 
@@ -26,6 +27,7 @@ class Webserver
     int maxfd;
     std::map < int, int > fd_map;
     std::map<int , Request> req_map;
+    std::map<int , Response> res_map;
     std::map<int , std::vector<Server> > servers;
     Request req;
     

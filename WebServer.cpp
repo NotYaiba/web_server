@@ -123,11 +123,33 @@ void Webserver::HandleResponse(int fd)
     // if true | written bytes | path to file => open file, lseek ritten bytes, close fd, compare written bytes with file size (if written bytes == file size) erase from map 
     // if false construct new resonse || compare written bytes with file size (if written bytes == file size)
     Response res(servers[fd][0], req_map[fd]);
-    req_map[fd].InitData();
-    char *tello = (char *)("HTTP/1.1 200 OK\nContent-length: 17\n\r\nTello from server");
-   
-    int returnWrite = write(fd,  res.gethadak().c_str(),  res.gethadak().size());
-    FD_CLR(fd, &writecopy);
-    close(fd);
+    std::pair <char * , size_t>buffer_new;
+    int returnWrite;
+    std::pair<std::map<int, Response>::iterator, bool> value = res_map.insert(std::make_pair(fd, res));
+    if (value.second == false)
+    {
+        
+        buffer_new = res.getBody();
+            int debug_fd = open("body_debug", O_RDWR | O_CREAT | O_APPEND, 0666);
+	    write(debug_fd, buffer_new.first, buffer_new.second);
+        std::cout << "\n\n";
+
+    }
+    else
+    {
+        
+        std::cout << red << "\n\n start Response \n\n" << reset <<  std::endl;
+        buffer_new = std::make_pair(res.getHeader(), strlen(res.getHeader()));
+
+    }
+	returnWrite =  write(fd, buffer_new.first, buffer_new.second);
+    if (res.getIsend())
+    {
+        std::cout << "END RESPONSE\n";
+        res_map.erase((value.first)->first);
+        req_map[fd].InitData();
+        FD_CLR(fd, &writecopy);
+        close(fd);
+    }
 }
 

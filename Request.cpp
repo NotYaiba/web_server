@@ -72,8 +72,7 @@ void Request::fillBody( char  *buff, int read, int _bodyfd)
         
         write (_bodyfd,  buff, read );  
     }
-    int debug_fd = open("body_debug", O_RDWR | O_CREAT | O_APPEND, 0666);
-    write (debug_fd,  buff, read );
+
     checkEndRequest(buff , read);
 }
 
@@ -237,8 +236,7 @@ void   Request::checkHeaders()
         status_code = 400;
     else if (Uri.size() > 2048)
         status_code = 404;
-    else if (invalidMethod == -1)
-        status_code = 405;
+
     std::cout << yellow << "content lenght : " << content_length << std::endl;
 }
 
