@@ -54,7 +54,7 @@ class Response
     void Get();
     void Post();
     void generateHeader();
-     char *getHeader();
+    std::pair<char * , size_t> getHeader();
     std::string generateBody();
     void setStatusCode(int code);
     void generateredeHeader();
@@ -63,11 +63,16 @@ class Response
     void initData(Server  serv , Request req);
     void setIsvalid();
    std::pair<char* , size_t> getBody();
-   bool getIsend()
+   bool getIsend() const
    {
        return (isEndRes);
    }
 
+    Response &operator=(Response  const & src)
+    {
+        isEndRes = src.getIsend();
+        return *this;
+    }
 
     
 };

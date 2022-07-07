@@ -43,7 +43,7 @@ void    Request::fillRequest(char *buff, int read)
     }
     else
         fillBody( buff, read, _bodyfd);
-    debug();
+   
 }
 
 void    Request::debug()
@@ -122,6 +122,7 @@ bool Request::checkEndRequest( char const *buff, int read)
     
     if (ischuncked == 1 )
     {
+        std::cout << yellow << "request id chunked !\n" << reset ;
          int i = 0;
         while (i < read)
         {
@@ -227,21 +228,22 @@ void   Request::checkHeaders()
     it = headers.find("Content-Length");
     if (it != headers.end())
         content_length = stoi(it->second);
-        it =  headers.find("Transfer-Encoding");
+
+
+    it =  headers.find("Transfer-Encoding");
     if (it != headers.end())
         ischuncked = (it ->second == "chunked") ? 1  : 0;
     else if (ischuncked == 0)
         status_code = 501;
-    else if (ischuncked == -1 && content_length == -1)
+    else if (ischuncked == -1 && content_length == 0)
         status_code = 400;
     else if (Uri.size() > 2048)
         status_code = 404;
-
-    std::cout << yellow << "content lenght : " << content_length << std::endl;
 }
 
 void  Request::InitData()
 {
+    close(_bodyfd);
     this->isFrstRead = true;
     this->isslastRead =  false;
     this->ischuncked = -1;

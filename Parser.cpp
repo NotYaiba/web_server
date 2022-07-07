@@ -16,7 +16,11 @@ void Parser::checkFile(char *path)
 {
     std::ifstream fs(path);
     if (fs.is_open() ==  false)
+    {
+        fs.close();
         throw "ERROR : FILE NOT FOUND!";
+    }
+    fs.close();
     readFile(path);
 }
 void Parser::readFile(char *path)

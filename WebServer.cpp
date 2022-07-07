@@ -36,18 +36,21 @@ void  Webserver::InitData(Connection const &connection)
 void Webserver::RunWebServer()
 {
     std::cout << red << "MY SERVER IS LISTING!" << reset << std::endl;
+    signal(SIGPIPE, SIG_IGN);
     for (;;)
     {
+        
         readset = readcopy;
         writeset = writecopy;
         int rs = select(maxfd + 1 , &readset, &writeset, NULL, NULL);
+        std::cout << red << rs << reset << std::endl;
         if (rs == -1)
             throw "errooor";
         for (int fd = 0; fd <= maxfd; fd++)
         {
             if (FD_ISSET(fd, &readset) || FD_ISSET(fd, &writeset))
             {
-                
+                std::cout << "fd >> " << fd << std::endl;
                 if (FD_ISSET(fd, &readset))
                 {
                     if (fd_map[fd] == 0)
@@ -87,8 +90,12 @@ void Webserver::HandleRequest(int fd)
     char buf[BUFFER_SIZE];
     int allread  = 0;
 
+    std::cout << "handle request \n";
     int rb = read(fd,buf,BUFFER_SIZE );
-
+    std::cout << red;
+    write(1, buf, rb);
+    std::cout << reset;
+    std::cout << "handle request \n";
     if (rb == -1)
     {
         std::cout << std::strerror( errno)  << std::endl;
@@ -122,31 +129,32 @@ void Webserver::HandleResponse(int fd)
     // find if response exists in this fd
     // if true | written bytes | path to file => open file, lseek ritten bytes, close fd, compare written bytes with file size (if written bytes == file size) erase from map 
     // if false construct new resonse || compare written bytes with file size (if written bytes == file size)
-    Response res(servers[fd][0], req_map[fd]);
+    // req_map[fd].debug();
     std::pair <char * , size_t>buffer_new;
     int returnWrite;
-    std::pair<std::map<int, Response>::iterator, bool> value = res_map.insert(std::make_pair(fd, res));
-    if (value.second == false)
+    std::map<int, Response >::iterator it =  res_map.find(fd);
+    std::map<int, Response >::iterator it2;
+    if (it  == res_map.end())
     {
-        
-        buffer_new = res.getBody();
-            int debug_fd = open("body_debug", O_RDWR | O_CREAT | O_APPEND, 0666);
-	    write(debug_fd, buffer_new.first, buffer_new.second);
-        std::cout << "\n\n";
+        std::cout << red << "\n\n start Response \n\n" << reset <<  std::endl;
+        Response res(servers[fd][0], req_map[fd]);
+
+        res_map.insert(std::make_pair(fd, res));
+        it = res_map.find(fd);
+        buffer_new = it->second.getHeader();
 
     }
     else
     {
-        
-        std::cout << red << "\n\n start Response \n\n" << reset <<  std::endl;
-        buffer_new = std::make_pair(res.getHeader(), strlen(res.getHeader()));
-
+        std::cout << red << "\n\n get rest of body \n\n" << reset <<  std::endl;
+        buffer_new = it->second.getBody();
     }
 	returnWrite =  write(fd, buffer_new.first, buffer_new.second);
-    if (res.getIsend())
+
+    if (it->second.getIsend())
     {
         std::cout << "END RESPONSE\n";
-        res_map.erase((value.first)->first);
+        res_map.erase(it);
         req_map[fd].InitData();
         FD_CLR(fd, &writecopy);
         close(fd);

@@ -15,6 +15,7 @@ void Response::initData(Server  serv , Request req)
     file_name = "";
     file_type = "text/html";
     file_size = 0;
+    written = 0;
 
     findMatchingLocation();
     _loc = matching_location.getLocation();
@@ -86,6 +87,8 @@ void Response::getIndex(std::string path)
    std::cout <<" end index \n";
    flag = 1;
    file_size = body.size();
+    setStatusCode(200);
+
    closedir(dr);
 }
 
@@ -102,7 +105,7 @@ void Response::Get()
     }
     else
     {
-        if (isDir(path ))
+        if (isDir(path))
         {
             std::cout  << _def.size()  << std::endl;
             if (_def.size() > 1)
@@ -139,6 +142,7 @@ void Response::Get()
             }
             else if (access(file_name.c_str(), F_OK) == -1)
             {
+                file_size = 0;
                 setStatusCode(404);
                 return ;
             }
@@ -257,10 +261,10 @@ void Response::generateHeader()
     if  (!flag && file_size == 0)
     {
         body = generateBody();
+        
     }
     if (_redirect == "" )
     {  
-
             header += "HTTP/1.1 " + std::to_string(statusCode.first) + statusCode.second + "\r\n" ;
             header += "Content-type: "+ file_type + "\r\n";
             header += "Content-length: " + std::to_string((int)file_size) + "\r\n";
@@ -268,23 +272,28 @@ void Response::generateHeader()
             header += "Date: " + formatted_time() + "\r\n";
             header += "\r\n";
             if (flag ==  1)
+            {
                 header += body;
+                std::cout << header;
+                std::cout << "END HEADERS\n";
+            }
             else
             {
-                written = 0;
+                std::cout << "salam\n";
                 isEndRes = false;
             }
-        }
+    }
 }
 
-  char * Response::getHeader()
+std::pair<char *, size_t> Response::getHeader()
 {
      char *buf;   
     generateHeader(); 
 	buf = (char *)malloc(sizeof(char) * header.size());
     buf = strcpy(new char[header.length() + 1], header.c_str());
-    std::cout << buf << std::endl;
-    return buf;
+    std::cout << "Please10 : " << getIsend() << std::endl;
+
+    return std::make_pair(buf, strlen(buf));
 }
 
 std::string Response::generateBody()
@@ -293,8 +302,9 @@ std::string Response::generateBody()
    std::string msg = std::to_string(statusCode.first) +  statusCode.second;
    std::string tmp;
    tmp = "<html>\n<head><title>" + msg + "</title></head>\n<body bgcolor='white'>\n<center><h1>"  +msg + "</h1></center>\n</body>\n</html>";
-    flag = true;
-    file_size = body.size();
+    flag = 1;
+    file_size = tmp.size();
+    file_type = "text/html";
     return tmp;
 }
 
@@ -310,7 +320,7 @@ void Response::setStatusCode(int code)
     else if (code == 201)
         statusCode.second = " Created";
     else if (code == 405)
-        statusCode.second = " leeda";
+        statusCode.second = " Not Allowed";
     else if (code == 301)
         statusCode.second = " Moved Permanently";
 }
@@ -331,42 +341,15 @@ std::pair<char * , size_t> Response::getBody()
     int len;
     std::cout << red << "File to render " << file_name << reset<< std::endl;
     int fd = open (file_name.c_str(), O_RDONLY);
-
-    std::cout << blue << "fd " << fd << reset<< std::endl;
-    if (file_size  - written <= BUFFER_SIZE )
-    {
-        len = file_size - written;
-        isEndRes =  true;
-    }
-    else
-    {
-        len = BUFFER_SIZE;
-        isEndRes =  false;
-    }
-    std::cout<< "len :" << len << std::endl;
-	buf = (char *)malloc(sizeof(char) * len);
-     memset (buf,'\0',len);
+	buf = (char *)malloc(BUFFER_SIZE);
 	lseek(fd, written, SEEK_SET);
-
 	if (fd == -1)
-	{
 		perror("open");
-	}
-	ret = read(fd, buf, len);
-    written += len;
-//     std::cout<< "ret :" << ret << std::endl;
-//     std::cout << blue << "written :" << written << reset<< std::endl;
-//   std::ofstream MyFile("filename.txt", std::ios_base::app);
-
-  // Write to the file
-    // MyFile << buf;
-    
-    // std::cout << buf <<std::endl;
+	ret = read(fd, buf, BUFFER_SIZE);
+    written += ret;
 	if (ret == -1)
-	{
 		perror("read");
-	}
-    if (ret == 0)
+    if (written >= file_size)
         isEndRes =  true;
 	close(fd);
     return std::make_pair(buf, ret);
