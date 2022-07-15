@@ -113,6 +113,19 @@ void Response::Get()
                 path = removeRepeated(path +"/" + _def, '/');
                 path.erase(path.size() - 1 ) ;
                 file_name = path;
+                if (access(file_name.c_str(), R_OK) == -1 && access(file_name.c_str(), F_OK) == 0)
+                {
+                    setStatusCode(403);
+                    return ;
+                }
+                else if (access(file_name.c_str(), F_OK) == -1)
+                {
+                    file_size = 0;
+                    setStatusCode(404);
+                    return ;
+                }
+                file_size = fsize(file_name.c_str());
+                file_type = get_file_type(file_name);
             }
             else
             {
@@ -260,8 +273,8 @@ void Response::generateHeader()
     int len;
     if  (!flag && file_size == 0)
     {
-        body = generateBody();
-        
+        if (statusCode.first != 200 && statusCode.first !=  201)
+            body = generateBody();  
     }
     if (_redirect == "" )
     {  
@@ -344,11 +357,17 @@ std::pair<char * , size_t> Response::getBody()
 	buf = (char *)malloc(BUFFER_SIZE);
 	lseek(fd, written, SEEK_SET);
 	if (fd == -1)
+    {
 		perror("open");
+    }
 	ret = read(fd, buf, BUFFER_SIZE);
     written += ret;
 	if (ret == -1)
 		perror("read");
+    std::cout << ret << std::endl;
+    std::cout << buf << std::endl;
+    std::cout << file_size << std::endl;
+    std::cout << written << std::endl;
     if (written >= file_size)
         isEndRes =  true;
 	close(fd);
