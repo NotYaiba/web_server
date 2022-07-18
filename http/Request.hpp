@@ -1,18 +1,7 @@
 #pragma once
 
-#include <iostream>
-#include <map>
-#include <fcntl.h>
-#include <fstream>
-#include <vector>
-#include <cstring>
-#include <string>
-#include <unistd.h>
-#include <ctype.h>
-#include <stdio.h>
-#include <cstdlib>
-#include <cstring>
-# include <sys/types.h>
+#include "../utils/Tools.hpp"
+
 class Request
 {
     private:

@@ -1,20 +1,9 @@
 #ifndef  PARSER_HPP
 #define  PARSER_HPP
 
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <map>
+
 #include "Server.hpp"
-#include <fcntl.h>
-#include <string>
-#include <algorithm> 
-#include <functional> 
-#include <cctype>
-#include <locale>
 #include "./utils/Tools.hpp"
-#define  STARTSERV -1
-#define  ENDSERV   1
 
 class Server;
 

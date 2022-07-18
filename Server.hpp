@@ -1,16 +1,10 @@
 #ifndef  SERVER_HPP
 #define  SERVER_HPP
-#include "Parser.hpp"
 
-#include <iostream>
-#include <sstream>
-#include <string.h>
-#include <fstream>
-#include <vector>
-#include <map>
-#include "Location.hpp"
 #include "./utils/Tools.hpp"
-#include <iomanip>
+
+#include "Parser.hpp"
+#include "Location.hpp"
 
 class Location;
 class Server 

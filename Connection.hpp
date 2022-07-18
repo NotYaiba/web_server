@@ -1,14 +1,9 @@
 #ifndef  CONNECTION_HPP
 #define  CONNECTION_HPP
 
-#include <iostream>
-#include <string.h>
-#include <fstream>
-#include <vector>
-#include "./utils/Tools.hpp"
-#include <iomanip>
-#include <sstream>
-#include <map>
+
+#include "utils/Tools.hpp"
+
 #include "Socket.hpp"
 
 class Connection 

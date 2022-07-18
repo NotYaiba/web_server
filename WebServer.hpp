@@ -1,21 +1,12 @@
 #ifndef  WEBSERVER_HPP
 #define  WEBSERVER_HPP
 
-#include <fstream>
-#include <vector>
-#include <map>
+#include "utils/Tools.hpp"
+
 #include "Server.hpp"
 #include "Connection.hpp"
-#include <sys/types.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <string.h>
-#include <string>
-#include "Request.hpp"
-#include "Response.hpp"
-
+#include "http/Request.hpp"
+#include "http/Response.hpp"
 // class Connextion;
 class Webserver 
 {   

@@ -1,8 +1,5 @@
 #include "WebServer.hpp"
-#include <fstream>
-#include <iostream>
-#include <filesystem>
-#include "Response.hpp"
+
 Webserver::Webserver(Connection const &connection)
 {
     InitData(connection);

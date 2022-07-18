@@ -1,5 +1,5 @@
 #include "Socket.hpp"
-#include <fcntl.h>
+
 Socket::Socket(int const &port)
 {
     _port = port;
@@ -33,7 +33,10 @@ int Socket::BindSock(int const &socket)
 {
 
     int new_socket=0;
-
+    int flag = 1;  
+    if (-1 == setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag))) {  
+        perror("setsockopt fail");  
+    }  
         fcntl(socket, F_SETFL,  O_NONBLOCK);
     if (bind(socket,(struct sockaddr *)&hint,sizeof(hint)) < 0) 
     { 

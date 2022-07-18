@@ -1,16 +1,43 @@
 #ifndef  TOOLS_HPP
 #define  TOOLS_HPP
- #include <unistd.h>
+
+#include <unistd.h>
 #include <fcntl.h>
 #include <iostream>
 #include <string.h>
-#include <fstream>
 #include <sys/stat.h>
+#include <fstream>
 #include <vector>
+#include <map>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <string>
+#include <filesystem>
+#include <sstream>
+#include <iomanip>
+
+#include <dirent.h>
+
+#include <ctype.h>
+#include <stdio.h>
+#include <cstdlib>
+#include <cstring>
+#include <algorithm> 
+#include <functional> 
+#include <cctype>
+#include <locale>
+
+
+#define _POSIX_SOURCE
 # define DUP 0
 # define EMPTY 1
 # define IVA 2
 # define SYN 3
+
+#define  STARTSERV -1
+#define  ENDSERV   1
 
 # define BUFFER_SIZE 4096
 
