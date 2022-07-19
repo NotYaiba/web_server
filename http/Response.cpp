@@ -312,13 +312,23 @@ std::pair<char *, size_t> Response::getHeader()
 std::string Response::generateBody()
 {
 
-   std::string msg = std::to_string(statusCode.first) +  statusCode.second;
-   std::string tmp;
-   tmp = "<html>\n<head><title>" + msg + "</title></head>\n<body bgcolor='white'>\n<center><h1>"  +msg + "</h1></center>\n</body>\n</html>";
-    flag = 1;
-    file_size = tmp.size();
-    file_type = "text/html";
-    return tmp;
+    if (_server.getErrorpage() == "")
+    {
+    std::string msg = std::to_string(statusCode.first) +  statusCode.second;
+    std::string tmp;
+    tmp = "<html>\n<head><title>" + msg + "</title></head>\n<body bgcolor='white'>\n<center><h1>"  +msg + "</h1></center>\n</body>\n</html>";
+        flag = 1;
+        file_size = tmp.size();
+        file_type = "text/html";
+        return tmp;
+    }
+    else
+    {
+        file_name = (_server.getErrorpage() + "/" + std::to_string(statusCode.first) + ".html");
+        file_size = fsize(file_name.c_str());
+        file_type = "text/html";
+    }
+    return ("");
 }
 
 void Response::setStatusCode(int code)

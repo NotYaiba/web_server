@@ -13,29 +13,20 @@
 int main(int ac , char *av[])
 {
     (void)ac;
-    (void)av;
-    std::vector<std::string> v = split("GET POST\r\n\r\nDELETE", "\r\n\r\n");
-    for (size_t i = 0; i < v.size(); i++)
-    {
-        /* code */
-        std::cout << v[i] << std::endl;
-    }
-    
+    (void)av; 
     try{
         Parser pars(ac, av);
         std::vector < Server > servers = pars.getServers();
         pars.debug();
+
         Connection connection(pars.getMapServers());
         Webserver ws(connection);
         ws.RunWebServer();
     }
-    catch(std::string  er)
+    catch(const char * er)
     {
         std::cout << er << std::endl;
     }
-        
-
-        
     return 0;
-
+    //TODO check hostname if there is multiple servers per port
 }
