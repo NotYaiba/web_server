@@ -15,6 +15,6 @@ class Cgi {
     Cgi(Server serv , Request  req ,  Location const & loc);
     void initData();
     void SetEnv();
-    char **  initarr();
+    char **initarr();
 };
 

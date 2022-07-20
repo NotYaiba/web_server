@@ -50,6 +50,9 @@ class Request
         std::string const & getBody() const{
             return body;
         }
+       size_t  getContentLength() const{
+            return content_length;
+        }
 
         // void validUri(std::string s);
 

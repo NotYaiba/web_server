@@ -52,9 +52,26 @@ void Cgi::SetEnv()
     std::map<std::string , std::string> mp;
     mp["REQUEST_METHOD"] = "GET";
     mp["SERVER_PROTOCOL"] = "HTTP/1.1";
-    mp["SERVER_"] = "hole";
     mp["CONTENT_TYPE"] = filetype;
-    std::vector<std::string > v;
+    mp["CONTENT_LENGTH"] = std::to_string(_req.getContentLength());
+    mp["SERVER_PORT"] = std::to_string(_server.getPort());
+    mp["SERVER_NAME"] = (_server.getServerName())[0];
+    mp["REMOTE_HOST"] = _server.getHost();
+    // mp["AUTH_TYPE"]
+    // mp["GATEWAY_INTERFACE"]
+    std::vector <std::string> tmp = split(path, "/");
+    std::string path_info = "/";
+    for (std::vector<std::string>::iterator it = tmp.begin(); it != --tmp.end(); it++)
+        path_info += *it + "/";
+    mp["PATH_INFO"] = removeRepeated(path_info, '/');
+    // mp["PATH_TRANSLATED"]
+    // mp["QUERY_STRING"]
+    // mp["REMOTE_ADDR"]
+    // mp["REMOTE_IDENT"]
+    // mp["REMOTE_USER"]
+    // mp["SCRIPT_NAME"]
+    // mp["SERVER_SOFTWARE"]
+    std::vector<std::string> v;
     for ( std::map<std::string , std::string>::iterator it = mp.begin() ; it != mp.end(); it++)
     {
         std::string tmp = it->first + "=" + it->second;
