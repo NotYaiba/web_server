@@ -1,56 +1,84 @@
 #include "Cgi.hpp"
 
-Cgi::Cgi(Server serv , Request  req , Location loc)
+Cgi::Cgi(Server serv , Request  req , Location const & loc) : _server(serv), _req(req), _loc(loc)
 {
 
-    initData(serv , req , loc);
+    initData();
 }
 
-void Cgi::initData(Server serv , Request  req ,  Location loc)
+void Cgi::initData()
 {
-    _server = serv;
-    _req = req;
-    cgimap = _server.getCgiMap();
-    std::string path =  removeRepeated(_loc.getRoot() + "/" + _req.getUri(), '/');
-    std::cout << blue << "===> "<< _loc.getRoot() << reset << std::endl;
-    std::cout << blue << path.erase(path.size()) << reset << std::endl;
+    bool is_post = false;
     pid_t pid;
     int post_fd;
-    bool is_post = false;
-    char *args[3];
+
+    cgimap = _server.getCgiMap();
+    path = _req.getUri();
+    path =   path.erase(path.size() - 1) ;
+    filetype =  get_file_type(path);
+
     int outfile_fd = open("./index.html", O_CREAT | O_WRONLY | O_TRUNC, 0666);
-
-
     //arguments
-    std::vector<char*> ar;
-	ar.push_back((char*)"/usr/bin/python");
-	ar.push_back((char*)"cgi_test/script.py");
-	ar.push_back(0);
-
+    char **arr = initarr();
     //envirement variables
-    std::vector<char*> env;
-	env.push_back((char*)"REQUEST_METHOD=GET");
-	env.push_back((char*)"SERVER_PROTOCOL=HTTP/1.1");
-	env.push_back((char*)"SERVER_=hola");
-	env.push_back(0);
-
-    // args[0] = "/usr/bin/python3";
-    // args[0] = "/usr/bin/php";
-    // args[1] = "./script.php";
-    // args[1] = NULL;
-    // args[2] = NULL;
+    SetEnv();
     pid = fork();
+        std::cout << "=========>fork \n";
 
     if (pid == 0)
     {
-        //set_env();
         if (is_post)
             dup2(post_fd, STDIN_FILENO);
+        std::cout << "=========>dup out excutr \n";
+
         dup2(outfile_fd, STDOUT_FILENO);
-        close(post_fd);
-        execve(ar[0], &ar.front(), &env.front());
+        std::cout << "=========>close  out excutr \n";
+
+        // close(post_fd);
+        // close(outfile_fd);
+        std::cout << "=========>start excutr \n";
+        if (execve(arr[0] ,arr, env) < 0)
+        {
+
+        }
+        std::cout << "=========> end excutr \n";
+            // throw "ERROR execve "; // TODO
+            // std::cout << "dd\n";
     }
     waitpid(0, NULL, 0);
-    std::cout << "hole\n";
+}
+void Cgi::SetEnv()
+{
+    std::map<std::string , std::string> mp;
+    mp["REQUEST_METHOD"] = "GET";
+    mp["SERVER_PROTOCOL"] = "HTTP/1.1";
+    mp["SERVER_"] = "hole";
+    mp["CONTENT_TYPE"] = filetype;
+    std::vector<std::string > v;
+    for ( std::map<std::string , std::string>::iterator it = mp.begin() ; it != mp.end(); it++)
+    {
+        std::string tmp = it->first + "=" + it->second;
+        std::cout << tmp << std::endl;
+        v.push_back(tmp);
+    }
+	env = vectToArr(v);
+	// env.push_back((char*)"REQUEST_METHOD=GET");
+	// env.push_back((char*)"SERVER_PROTOCOL=HTTP/1.1");
+	// env.push_back((char*)"SERVER_=hola");
+	// env.push_back((char*)"CONTENT_TYPE=hola");
+	// env.push_back((char*)std::string("CONTENT_TYPE=" + filetype ).c_str() );
+	// env.push_back((char*)("CONTENT_TYPE=" + filetype ) );
 
+}
+char **  Cgi::initarr()
+{
+    std::vector<std::string> ar;
+    
+    std::string filepath =  removeRepeated(_loc.getRoot() + "/" +  path , '/');
+    std::cout << "file path ===>" << filepath << std::endl;
+    // if ()
+	ar.push_back(cgimap["python"]);
+	ar.push_back(filepath);
+
+    return(vectToArr(ar));
 }

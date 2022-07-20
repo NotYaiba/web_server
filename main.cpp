@@ -23,7 +23,7 @@ int main(int ac , char *av[])
         Webserver ws(connection);
         ws.RunWebServer();
     }
-    catch(const char * er)
+    catch(std::string er)
     {
         std::cout << er << std::endl;
     }

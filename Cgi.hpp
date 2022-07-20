@@ -7,10 +7,14 @@ class Cgi {
     Server _server;
     Request _req;
     Location _loc;
+    std::string path;
     std::map<std::string, std::string> cgimap ;
+    char** env;
+    std::string filetype;
     public :
-    Cgi(Server serv , Request  req ,  Location loc);
-    void initData(Server serv , Request  req ,  Location loc);
-
+    Cgi(Server serv , Request  req ,  Location const & loc);
+    void initData();
+    void SetEnv();
+    char **  initarr();
 };
 

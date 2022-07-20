@@ -31,7 +31,7 @@ Response::Response(Server  serv , Request req)
     initData(serv, req);
     if (serv.getCgiMap().size() > 0)
     {
-        std::cout << matching_location.getRoot() << std::endl;
+        std::cout << yellow <<matching_location.getRoot() <<reset << std::endl;
         Cgi c(serv, req , matching_location); 
     }
     if (validMethod)
@@ -152,7 +152,10 @@ void Response::Get()
         {
             path =  removeRepeated(path + '/'+ _path , '/');
             path.erase(path.size() - 1);
-            file_name = path;
+            if (cgimap.size() > 0)
+                file_name = "index.html";
+            else
+                file_name = path;
             file_size = fsize(file_name.c_str());
             file_type = get_file_type(file_name);
 

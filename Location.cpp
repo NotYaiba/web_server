@@ -161,3 +161,9 @@ Location &Location::operator=(Location  const & src)
     redirect = src.getRedirect();
     return (*this);
 }
+    Location::Location(Location  const & src)
+    {
+        *this = src;
+
+        // std::cout << yellow << "ya salam \n";
+    }

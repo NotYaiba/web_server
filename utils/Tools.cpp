@@ -289,3 +289,15 @@ std::string     get_file_type(std::string type)
 	}
     return "plain/text";
 }
+
+
+char ** vectToArr(std::vector<std::string> ar)
+{
+ 	char ** par2 = (char**) malloc( sizeof(char*)*(ar.size() + 1) );
+    for(size_t i = 0; i < ar.size(); ++i)
+    {
+        par2[i] = strdup(ar[i].c_str());
+    }
+    par2[ar.size()] = nullptr;
+    return(par2);
+}
