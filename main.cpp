@@ -27,6 +27,10 @@ int main(int ac , char *av[])
     {
         std::cout << er << std::endl;
     }
+    catch(const char * er)
+    {
+        std::cout << er << std::endl;
+    }
     return 0;
     //TODO check hostname if there is multiple servers per port
 }

@@ -4,6 +4,7 @@ Cgi::Cgi(Server serv , Request  req , Location const & loc) : _server(serv), _re
 {
 
     initData();
+    exit(0);
 }
 
 void Cgi::initData()
@@ -29,10 +30,7 @@ void Cgi::initData()
     {
         if (is_post)
             dup2(post_fd, STDIN_FILENO);
-        std::cout << "=========>dup out excutr \n";
-
         dup2(outfile_fd, STDOUT_FILENO);
-        std::cout << "=========>close  out excutr \n";
 
         // close(post_fd);
         // close(outfile_fd);
@@ -64,6 +62,7 @@ void Cgi::SetEnv()
     for (std::vector<std::string>::iterator it = tmp.begin(); it != --tmp.end(); it++)
         path_info += *it + "/";
     mp["PATH_INFO"] = removeRepeated(path_info, '/');
+    mp["REDIRECT_STATUS"] = "1";
     // mp["PATH_TRANSLATED"]
     // mp["QUERY_STRING"]
     // mp["REMOTE_ADDR"]
@@ -94,7 +93,7 @@ char **  Cgi::initarr()
     std::string filepath =  removeRepeated(_loc.getRoot() + "/" +  path , '/');
     std::cout << "file path ===>" << filepath << std::endl;
     // if ()
-	ar.push_back(cgimap["python"]);
+	ar.push_back(cgimap["php"]);
 	ar.push_back(filepath);
 
     return(vectToArr(ar));
