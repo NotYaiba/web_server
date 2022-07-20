@@ -1,38 +1,30 @@
+#include "Cgi.hpp"
 
-#include <unistd.h>
-#include <stdlib.h>
-#include <iostream>
- #include <fcntl.h>
-#include <vector>
-
-extern char **environ;
-
-void set_env()
+Cgi::Cgi(Server serv , Request  req , Location loc)
 {
-    setenv("REQUEST_METHOD","GET",1);
-    setenv("SERVER_PROTOCOL","HTTP/1.1",1);
-    setenv("PATH_INFO","/Users/aez-zaou/Desktop/cgi/script.php",1);
-    setenv("SERVER_NAME","holaaa",1);
-    setenv("REQUEST_METHOD","GET",1);
-    // setenv("REQUEST_METHOD","GET",1);
-    // setenv("REQUEST_METHOD","GET",1);
-    // setenv("REQUEST_METHOD","GET",1);
+
+    initData(serv , req , loc);
 }
 
-int main (int ac, char** av)
+void Cgi::initData(Server serv , Request  req ,  Location loc)
 {
-    (void)ac;
-    (void)av;
+    _server = serv;
+    _req = req;
+    cgimap = _server.getCgiMap();
+    std::string path =  removeRepeated(_loc.getRoot() + "/" + _req.getUri(), '/');
+    std::cout << blue << "===> "<< _loc.getRoot() << reset << std::endl;
+    std::cout << blue << path.erase(path.size()) << reset << std::endl;
     pid_t pid;
     int post_fd;
     bool is_post = false;
     char *args[3];
     int outfile_fd = open("./index.html", O_CREAT | O_WRONLY | O_TRUNC, 0666);
 
+
     //arguments
     std::vector<char*> ar;
 	ar.push_back((char*)"/usr/bin/python");
-	ar.push_back((char*)"./script.py");
+	ar.push_back((char*)"cgi_test/script.py");
 	ar.push_back(0);
 
     //envirement variables
@@ -61,5 +53,4 @@ int main (int ac, char** av)
     waitpid(0, NULL, 0);
     std::cout << "hole\n";
 
-    return 0;
 }

@@ -58,6 +58,11 @@ class Location
     void debug ();
     void throwError(int type, std::string para);
     Location &operator=(Location  const & src);
+    Location(Location  const & src)
+    {
+        *this = src;
+        // std::cout << yellow << "ya salam \n";
+    }
 };
 
 

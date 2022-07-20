@@ -1,4 +1,5 @@
 #include "Response.hpp"
+#include "../Cgi.hpp"
 
 void Response::initData(Server  serv , Request req)
 {
@@ -16,7 +17,7 @@ void Response::initData(Server  serv , Request req)
     file_type = "text/html";
     file_size = 0;
     written = 0;
-
+    cgimap = _server.getCgiMap();
     findMatchingLocation();
     _loc = matching_location.getLocation();
     _redirect = matching_location.getRedirect();
@@ -28,6 +29,11 @@ Response::Response(Server  serv , Request req)
 
     // check 400 413 uri errors
     initData(serv, req);
+    if (serv.getCgiMap().size() > 0)
+    {
+        std::cout << matching_location.getRoot() << std::endl;
+        Cgi c(serv, req , matching_location); 
+    }
     if (validMethod)
     {
         if (_method == "DELETE")
@@ -65,7 +71,7 @@ bool Response::isDir(std::string path)
 
 void Response::getIndex(std::string path)
 {
-    std::cout << "get index \n";
+    // std::cout << "get index \n";
    DIR *dr;
    struct dirent *en;
    path =  removeRepeated(path  + "/" + _path, '/');
@@ -83,8 +89,13 @@ void Response::getIndex(std::string path)
             }
         }
    }
+   else 
+    {
+        setStatusCode(404);
+        return ;
+    }
    this->body += "</table>\n</body>\n</head>\n</html>\n";
-   std::cout <<" end index \n";
+//    std::cout <<" end index \n";
    flag = 1;
    file_size = body.size();
     setStatusCode(200);
@@ -95,7 +106,7 @@ void Response::getIndex(std::string path)
 void Response::Get()
 {
     std::string path = removeRepeated(matching_location.getRoot() +"/", '/');
-    std::cout << "path: " <<  path << std::endl;
+    // std::cout << "path: " <<  path << std::endl;
     if (_redirect != "")
     {
         setStatusCode(301);
@@ -107,7 +118,7 @@ void Response::Get()
     {
         if (isDir(path))
         {
-            std::cout  << _def.size()  << std::endl;
+            // std::cout  << _def.size()  << std::endl;
             if (_def.size() > 1)
             {
                 path = removeRepeated(path +"/" + _def, '/');
@@ -227,12 +238,12 @@ void Response::setIsvalid()
 void Response::Delete()
 {
     matching_location.debug();
-    std::cout << "file to delete " << _path << std::endl;
+    // std::cout << "file to delete " << _path << std::endl;
     std::string path = _loc + matching_location.getRoot() + "/" +_path;
-    std::cout << "where : " << path<< std::endl;
+    // std::cout << "where : " << path<< std::endl;
     path = removeRepeated(path, '/');
     path.erase(path.size() - 1);
-    std::cout << "removed : " <<path<< std::endl;
+    // std::cout << "removed : " <<path<< std::endl;
     if (file_exists(path))
     {
         if (std::remove(path.c_str()) < 0)
@@ -256,7 +267,7 @@ void Response::Post()
     //     return ;
     // }
     std::string new_file(_req.getBody().c_str());
-    std::cout << blue << new_file << reset<<std::endl;
+    // std::cout << blue << new_file << reset<<std::endl;
     std::string file_name = removeRepeated(matching_location.getUpload() + "/" + new_file, '/');
     std::string tmp = "./tmp/" + new_file;
     std::ifstream in(tmp.c_str(), std::ios::in | std::ios::binary);
@@ -287,12 +298,12 @@ void Response::generateHeader()
             if (flag ==  1)
             {
                 header += body;
-                std::cout << header;
-                std::cout << "END HEADERS\n";
+                // std::cout << header;
+                // std::cout << "END HEADERS\n";
             }
             else
             {
-                std::cout << "salam\n";
+                // std::cout << "salam\n";
                 isEndRes = false;
             }
     }
@@ -304,7 +315,7 @@ std::pair<char *, size_t> Response::getHeader()
     generateHeader(); 
 	buf = (char *)malloc(sizeof(char) * header.size());
     buf = strcpy(new char[header.length() + 1], header.c_str());
-    std::cout << "Please10 : " << getIsend() << std::endl;
+    // std::cout << "Please10 : " << getIsend() << std::endl;
 
     return std::make_pair(buf, strlen(buf));
 }
@@ -374,10 +385,10 @@ std::pair<char * , size_t> Response::getBody()
     written += ret;
 	if (ret == -1)
 		perror("read");
-    std::cout << ret << std::endl;
-    std::cout << buf << std::endl;
-    std::cout << file_size << std::endl;
-    std::cout << written << std::endl;
+    // std::cout << ret << std::endl;
+    // std::cout << buf << std::endl;
+    // std::cout << file_size << std::endl;
+    // std::cout << written << std::endl;
     if (written >= file_size)
         isEndRes =  true;
 	close(fd);

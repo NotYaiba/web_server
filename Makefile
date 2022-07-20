@@ -8,6 +8,7 @@ SRCS =  main.cpp \
 		./http/Request.cpp\
 		./http/Response.cpp\
 		./utils/Tools.cpp \
+		Cgi.cpp\
 
 NAME = webserv
 

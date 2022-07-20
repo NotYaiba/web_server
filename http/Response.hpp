@@ -24,6 +24,8 @@ class Response
     std::string file_name;
     size_t file_size;
     std::string file_type;
+    std::map<std::string, std::string> cgimap ;
+
     int flag;
     int written;
 
