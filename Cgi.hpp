@@ -8,6 +8,11 @@ class Cgi {
     Request _req;
     Location _loc;
     std::string path;
+    std::string uri;
+    std::string method;
+    std::string cgikey;
+    std::string query;
+    bool on;
     std::map<std::string, std::string> cgimap ;
     char** env;
     std::string filetype;
@@ -17,5 +22,10 @@ class Cgi {
     void initData();
     void SetEnv();
     char **initarr();
+    bool getOn()const 
+    {
+        return on;
+    }
+
 };
 

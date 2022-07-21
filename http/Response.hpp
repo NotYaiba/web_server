@@ -11,6 +11,7 @@ class Response
 {
     private:
     bool isEndRes;
+    bool cgiOn;
     Server _server;
     Request _req;
     std::string  _path;

@@ -29,10 +29,13 @@ Response::Response(Server  serv , Request req)
 
     // check 400 413 uri errors
     initData(serv, req);
-    if (serv.getCgiMap().size() > 0)
+    if (serv.getCgiMap().size() > 0 )
     {
-        std::cout << yellow <<matching_location.getRoot() <<reset << std::endl;
+        std::cout << yellow << req.getUri() << std::endl;
+        std::cout << red <<"CGI start!" << std::endl;
         Cgi c(serv, req , matching_location); 
+        cgiOn = c.getOn();
+        std::cout << red <<"CGI DONE!" << std::endl;
     }
     if (validMethod)
     {
@@ -106,7 +109,6 @@ void Response::getIndex(std::string path)
 void Response::Get()
 {
     std::string path = removeRepeated(matching_location.getRoot() +"/", '/');
-    // std::cout << "path: " <<  path << std::endl;
     if (_redirect != "")
     {
         setStatusCode(301);
@@ -154,10 +156,12 @@ void Response::Get()
         {
             path =  removeRepeated(path + '/'+ _path , '/');
             path.erase(path.size() - 1);
+            std::cout << "=======> isFile!\n";
             if (cgimap.size() > 0)
                 file_name = "index.html";
             else
                 file_name = path;
+            std::cout << "=======> isFile : " << file_name << std::endl;
             file_size = fsize(file_name.c_str());
             file_type = get_file_type(file_name);
 
@@ -263,6 +267,7 @@ void Response::Delete()
 
 void Response::Post()
 {
+    std::cout << "Merhba end POST!\n";
     //  if (s.get_max_body_size() < size_t(fsize(req.get_body().c_str())))
     // {
     //     std::cout << "Request body too large" << std::endl;
@@ -272,15 +277,26 @@ void Response::Post()
     // }
     std::string new_file(_req.getBody().c_str());
     // std::cout << blue << new_file << reset<<std::endl;
-    std::string file_name = removeRepeated(matching_location.getUpload() + "/" + new_file, '/');
+    std::string file_name1 = removeRepeated(matching_location.getUpload() + "/" + new_file, '/');
     std::string tmp = "./tmp/" + new_file;
-    std::ifstream in(tmp.c_str(), std::ios::in | std::ios::binary);
-    std::ofstream out(file_name, std::ios::out | std::ios::binary);
-    out << in.rdbuf();
-    in.close();
-    out.close();
-    remove(_req.getBody().c_str());
-    setStatusCode(201);
+    if (cgiOn ==  true)
+    {
+        file_name = "index.html";
+        file_size = fsize(file_name.c_str());
+        file_type = get_file_type(file_name);
+        std::cout << blue << "CGION" <<file_name << reset<<std::endl;
+    }
+    else
+    {
+        std::ifstream in(tmp.c_str(), std::ios::in | std::ios::binary);
+
+        std::ofstream out(file_name1, std::ios::out | std::ios::binary);
+        out << in.rdbuf();
+        in.close();
+        out.close();
+        remove(_req.getBody().c_str());
+        setStatusCode(201);
+    }
 }
 
 void Response::generateHeader()

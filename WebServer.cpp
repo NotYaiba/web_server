@@ -86,13 +86,7 @@ void Webserver::HandleRequest(int fd)
 {
     char buf[BUFFER_SIZE];
     int allread  = 0;
-
-    std::cout << "handle request \n";
     int rb = read(fd,buf,BUFFER_SIZE );
-    std::cout << red;
-    write(1, buf, rb);
-    std::cout << reset;
-    std::cout << "handle request \n";
     if (rb == -1)
     {
         std::cout << std::strerror( errno)  << std::endl;
@@ -122,11 +116,7 @@ void Webserver::HandleRequest(int fd)
 
 void Webserver::HandleResponse(int fd)
 {
-    // std::vector <Server> serv =  servers[fd];
-    // find if response exists in this fd
-    // if true | written bytes | path to file => open file, lseek ritten bytes, close fd, compare written bytes with file size (if written bytes == file size) erase from map 
-    // if false construct new resonse || compare written bytes with file size (if written bytes == file size)
-    // req_map[fd].debug();
+
     std::pair <char * , size_t>buffer_new;
     int returnWrite;
     std::map<int, Response >::iterator it =  res_map.find(fd);

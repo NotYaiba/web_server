@@ -87,4 +87,6 @@ std::string	formatted_time();
 off_t fsize(const char *filename) ;
 std::string     get_file_type(std::string type);
 char ** vectToArr(std::vector<std::string> ar);
+bool isDirictory(std::string path);
+
 #endif

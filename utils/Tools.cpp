@@ -301,3 +301,16 @@ char ** vectToArr(std::vector<std::string> ar)
     par2[ar.size()] = nullptr;
     return(par2);
 }
+
+bool isDirictory(std::string path)
+{
+  
+    struct stat statbuf;
+	if (path == "/")
+		return true;
+	std::string s = path;
+	if (stat(s.c_str(), &statbuf) != 0)
+		return 0;
+	return S_ISDIR(statbuf.st_mode);
+}
+
