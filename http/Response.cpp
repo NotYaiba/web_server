@@ -239,7 +239,6 @@ void Response::setIsvalid()
 }
 
 
-
 void Response::Delete()
 {
     matching_location.debug();

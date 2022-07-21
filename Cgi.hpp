@@ -11,6 +11,7 @@ class Cgi {
     std::map<std::string, std::string> cgimap ;
     char** env;
     std::string filetype;
+    std::string filepath;
     public :
     Cgi(Server serv , Request  req ,  Location const & loc);
     void initData();

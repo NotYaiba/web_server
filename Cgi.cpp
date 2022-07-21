@@ -12,13 +12,22 @@ void Cgi::initData()
     bool is_post = false;
     pid_t pid;
     int post_fd;
-
+    if (_req.getMethod() == "POST")
+        is_post = true; 
     cgimap = _server.getCgiMap();
     path = _req.getUri();
     path =   path.erase(path.size() - 1) ;
     filetype =  get_file_type(path);
+    filepath =  removeRepeated(_loc.getRoot() + "/" +  path , '/');
+    std::string def =  _loc.getDefaultt();
+    if (def.size() > 1)
+    {
+        filepath = removeRepeated(filepath +"/" + def + "/", '/');
+        filepath.erase(filepath.size() - 1);
+    }
 
     int outfile_fd = open("./index.html", O_CREAT | O_WRONLY | O_TRUNC, 0666);
+     post_fd = open(_req.getBody().c_str(),   O_RDONLY | O_TRUNC, 0666);
     //arguments
     char **arr = initarr();
     //envirement variables
@@ -32,13 +41,13 @@ void Cgi::initData()
             dup2(post_fd, STDIN_FILENO);
         dup2(outfile_fd, STDOUT_FILENO);
 
-        // close(post_fd);
         // std::cout << "=========>start excutr \n";
         if (execve(arr[0] ,arr, env) < 0)
         {
 
         }
         close(outfile_fd);
+        // close(post_fd);
         // std::cout << "=========> end excutr \n";
             // throw "ERROR execve "; // TODO
             // std::cout << "dd\n";
@@ -48,6 +57,13 @@ void Cgi::initData()
 void Cgi::SetEnv()
 {
     std::map<std::string , std::string> mp;
+    std::vector<std::string> tmpv = split(filepath, "?");
+    std::string query;
+    if(tmpv.size() > 1)
+    {
+         query = tmpv[1];
+        std::cout << "query string "<< query<< std::endl;
+    }
     mp["REQUEST_METHOD"] = "GET";
     mp["SERVER_PROTOCOL"] = "HTTP/1.1";
     mp["CONTENT_TYPE"] = filetype;
@@ -67,8 +83,8 @@ void Cgi::SetEnv()
     std::cout << "------ Location : " << _loc.getLocation() << std::endl;
     mp["PATH_INFO"] = "/wp-admin/setup-config.php";
     mp["REDIRECT_STATUS"] = "1";
-    // mp["PATH_TRANSLATED"]
-    // mp["QUERY_STRING"]
+    // mp["PATH_TRANSLATED"]a
+    mp["QUERY_STRING"] = query;
     // mp["REMOTE_ADDR"]
     // mp["REMOTE_IDENT"]
     // mp["REMOTE_USER"]
@@ -90,18 +106,11 @@ char **  Cgi::initarr()
 {
     std::vector<std::string> ar;
     
-    std::string filepath =  removeRepeated(_loc.getRoot() + "/" +  path , '/');
-    std::string def =  _loc.getDefaultt();
-    if (def.size() > 1)
-    {
-        filepath = removeRepeated(filepath +"/" + def + "/", '/');
-        filepath.erase(filepath.size() - 1);
-    }
+
     std::cout << "file path ===>" << filepath << std::endl;
     // if ()
 	ar.push_back(cgimap["php"]);
 	ar.push_back(filepath);
-	// ar.push_back("./cgi_test/script.php");
 
     return(vectToArr(ar));
 }
