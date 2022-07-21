@@ -33,12 +33,12 @@ void Cgi::initData()
         dup2(outfile_fd, STDOUT_FILENO);
 
         // close(post_fd);
-        close(outfile_fd);
         // std::cout << "=========>start excutr \n";
         if (execve(arr[0] ,arr, env) < 0)
         {
 
         }
+        close(outfile_fd);
         // std::cout << "=========> end excutr \n";
             // throw "ERROR execve "; // TODO
             // std::cout << "dd\n";
@@ -82,23 +82,21 @@ void Cgi::SetEnv()
     for ( std::map<std::string , std::string>::iterator it = mp.begin() ; it != mp.end(); it++)
     {
         std::string tmp = it->first + "=" + it->second;
-        std::cout << tmp << std::endl;
         v.push_back(tmp);
     }
 	env = vectToArr(v);
-	// env.push_back((char*)"REQUEST_METHOD=GET");
-	// env.push_back((char*)"SERVER_PROTOCOL=HTTP/1.1");
-	// env.push_back((char*)"SERVER_=hola");
-	// env.push_back((char*)"CONTENT_TYPE=hola");
-	// env.push_back((char*)std::string("CONTENT_TYPE=" + filetype ).c_str() );
-	// env.push_back((char*)("CONTENT_TYPE=" + filetype ) );
-
 }
 char **  Cgi::initarr()
 {
     std::vector<std::string> ar;
     
     std::string filepath =  removeRepeated(_loc.getRoot() + "/" +  path , '/');
+    std::string def =  _loc.getDefaultt();
+    if (def.size() > 1)
+    {
+        filepath = removeRepeated(filepath +"/" + def + "/", '/');
+        filepath.erase(filepath.size() - 1);
+    }
     std::cout << "file path ===>" << filepath << std::endl;
     // if ()
 	ar.push_back(cgimap["php"]);

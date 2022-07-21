@@ -118,12 +118,13 @@ void Response::Get()
     {
         if (isDir(path))
         {
-            // std::cout  << _def.size()  << std::endl;
+            std::cout  << "is Dir " <<_def.size()  << std::endl;
             if (_def.size() > 1)
             {
-                path = removeRepeated(path +"/" + _def, '/');
+                path = removeRepeated(path +"/" + _loc +"/"+ _def, '/');
                 path.erase(path.size() - 1 ) ;
                 file_name = path;
+                std::cout << "def on " <<  file_name << std::endl;
                 if (access(file_name.c_str(), R_OK) == -1 && access(file_name.c_str(), F_OK) == 0)
                 {
                     setStatusCode(403);
@@ -132,6 +133,7 @@ void Response::Get()
                 else if (access(file_name.c_str(), F_OK) == -1)
                 {
                     file_size = 0;
+
                     setStatusCode(404);
                     return ;
                 }

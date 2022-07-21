@@ -78,7 +78,8 @@ void Request::fillBody( char  *buff, int read, int _bodyfd)
 
 void Request::fillMethod()
 {
-    std::cout << Muv << std::endl;
+    // std::cout << Muv << std::endl;
+
     std::vector<std::string> s  = split(Muv, " ");
     method = s[0];
     Uri = fixIt(s[1]);
@@ -121,7 +122,7 @@ bool Request::checkEndRequest( char const *buff, int read)
     
     if (ischuncked == 1 )
     {
-        std::cout << yellow << "request id chunked !\n" << reset ;
+        // std::cout << yellow << "request id chunked !\n" << reset ;
          int i = 0;
         while (i < read)
         {
