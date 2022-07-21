@@ -4,7 +4,7 @@ Cgi::Cgi(Server serv , Request  req , Location const & loc) : _server(serv), _re
 {
 
     initData();
-    exit(0);
+    // exit(0);
 }
 
 void Cgi::initData()
@@ -33,13 +33,13 @@ void Cgi::initData()
         dup2(outfile_fd, STDOUT_FILENO);
 
         // close(post_fd);
-        // close(outfile_fd);
-        std::cout << "=========>start excutr \n";
+        close(outfile_fd);
+        // std::cout << "=========>start excutr \n";
         if (execve(arr[0] ,arr, env) < 0)
         {
 
         }
-        std::cout << "=========> end excutr \n";
+        // std::cout << "=========> end excutr \n";
             // throw "ERROR execve "; // TODO
             // std::cout << "dd\n";
     }
@@ -61,14 +61,18 @@ void Cgi::SetEnv()
     std::string path_info = "/";
     for (std::vector<std::string>::iterator it = tmp.begin(); it != --tmp.end(); it++)
         path_info += *it + "/";
-    mp["PATH_INFO"] = removeRepeated(path_info, '/');
+    // mp["PATH_INFO"] = removeRepeated(path_info, '/');
+    mp["PATH_INFO"] = "/wp-admin/setup-config.php";
     mp["REDIRECT_STATUS"] = "1";
+    std::cout << "--------------" << path << std::endl;
     // mp["PATH_TRANSLATED"]
     // mp["QUERY_STRING"]
     // mp["REMOTE_ADDR"]
     // mp["REMOTE_IDENT"]
     // mp["REMOTE_USER"]
-    // mp["SCRIPT_NAME"]
+    mp["SCRIPT_NAME"] = path;
+    mp["SCRIPT_FILENAME"] = "/Users/aez-zaou/Desktop/wordpress/index.php";
+    mp["HTTP_HOST"] = "127.0.0.1:8000";
     // mp["SERVER_SOFTWARE"]
     std::vector<std::string> v;
     for ( std::map<std::string , std::string>::iterator it = mp.begin() ; it != mp.end(); it++)
@@ -95,6 +99,7 @@ char **  Cgi::initarr()
     // if ()
 	ar.push_back(cgimap["php"]);
 	ar.push_back(filepath);
+	// ar.push_back("./cgi_test/script.php");
 
     return(vectToArr(ar));
 }
