@@ -57,22 +57,26 @@ void Cgi::SetEnv()
     mp["REMOTE_HOST"] = _server.getHost();
     // mp["AUTH_TYPE"]
     // mp["GATEWAY_INTERFACE"]
-    std::vector <std::string> tmp = split(path, "/");
-    std::string path_info = "/";
-    for (std::vector<std::string>::iterator it = tmp.begin(); it != --tmp.end(); it++)
-        path_info += *it + "/";
-    // mp["PATH_INFO"] = removeRepeated(path_info, '/');
+    {
+        std::vector <std::string> tmp = split(path, "/");
+        std::string path_info = "/";
+        for (std::vector<std::string>::iterator it = tmp.begin(); it != --tmp.end(); it++)
+            path_info += *it + "/";
+    }
+    //TODO : fill the variables bellow dinammically
+    std::cout << "------ Location : " << _loc.getLocation() << std::endl;
     mp["PATH_INFO"] = "/wp-admin/setup-config.php";
     mp["REDIRECT_STATUS"] = "1";
-    std::cout << "--------------" << path << std::endl;
     // mp["PATH_TRANSLATED"]
     // mp["QUERY_STRING"]
     // mp["REMOTE_ADDR"]
     // mp["REMOTE_IDENT"]
     // mp["REMOTE_USER"]
     mp["SCRIPT_NAME"] = path;
-    mp["SCRIPT_FILENAME"] = "/Users/aez-zaou/Desktop/wordpress/index.php";
-    mp["HTTP_HOST"] = "127.0.0.1:8000";
+    // mp["SCRIPT_FILENAME"] = "/Users/aez-zaou/Desktop/wordpress/index.php";
+    mp["SCRIPT_FILENAME"] = removeRepeated(_loc.getRoot() + "/" +  path , '/');
+    // mp["HTTP_HOST"] = "127.0.0.1:8000";
+    mp["HTTP_HOST"] = _server.getHost() + ":" + std::to_string(_server.getPort());
     // mp["SERVER_SOFTWARE"]
     std::vector<std::string> v;
     for ( std::map<std::string , std::string>::iterator it = mp.begin() ; it != mp.end(); it++)
