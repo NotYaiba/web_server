@@ -27,7 +27,7 @@ public:
     void makeMap();
     void debug();
     void throwError(int type, std::string para , int lineNB);
-    
+    void checkServer(Server  s , int line);
 };
    
 

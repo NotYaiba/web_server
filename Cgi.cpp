@@ -56,6 +56,9 @@ void Cgi::initData()
     std::cout << "Merhba !" << on << std::endl;
     
     int outfile_fd = open("./index.html", O_CREAT | O_WRONLY | O_TRUNC, 0666);
+    std::ifstream MyReadFile("index.html");
+    std::string lineheader;
+    // std::cout 
     post_fd = open(_req.getBody().c_str(),   O_RDONLY | O_TRUNC, 0666);
     //arguments
     char **arr = initarr();
@@ -70,8 +73,8 @@ void Cgi::initData()
             dup2(post_fd, STDIN_FILENO);
         dup2(outfile_fd, STDOUT_FILENO);
 
-        std::cout << "=========>start excutr \n";
-        std::cout << "execve params : " << arr[0] << " --  " << arr[1] <<  std::endl;
+        // std::cout << "=========>start excutr \n";
+        // std::cout << "execve params : " << arr[0] << " --  " << arr[1] <<  std::endl;
         if (execve(arr[0] ,arr, env) < 0)
         {
             throw "ERROR execve "; // TODO
@@ -86,6 +89,14 @@ void Cgi::initData()
     if (is_post)
         close(post_fd);
     waitpid(0, NULL, 0);
+        std::cout <<reset << "=========> haniaa \n";
+
+    while (std::getline(MyReadFile, lineheader)) 
+    {
+        std::cout << "yoooo: " << lineheader << std::endl;
+        if (lineheader == "\n")
+            break;
+    }
 }
 void Cgi::SetEnv()
 {
@@ -109,7 +120,8 @@ void Cgi::SetEnv()
     //TODO : fill the variables bellow dinammically
     std::cout << "------ Location : " << _loc.getLocation() << std::endl;
     std::cout << "------ URI : " << uri << std::endl;
-    mp["PATH_INFO"] = uri;
+    // mp["PATH_INFO"] = uri;
+    mp["PATH_INFO"] = "mohamed";
     mp["REDIRECT_STATUS"] = "1";
     // mp["PATH_TRANSLATED"]a
     mp["QUERY_STRING"] = query;
@@ -141,3 +153,5 @@ char **  Cgi::initarr()
 
     return(vectToArr(ar));
 }
+
+

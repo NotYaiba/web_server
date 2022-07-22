@@ -50,6 +50,7 @@ void Parser::readFile(char *path)
             isServ = true;
             break;
         case ENDSERV :
+            checkServer(server, lineNb);
             if (isServ == false)
                 throwError(SYN, "" , lineNb);
             servers.push_back(server);
@@ -211,4 +212,19 @@ std::vector < Server > const & Parser::getServers() const
 std::map < int ,  std::vector < Server > >const & Parser::getMapServers()const 
 {
     return (mapServers);
+}
+
+void Parser::checkServer(Server  s , int line)
+{
+    if (s.getCgiMap().size() != 0)
+    {
+        std::vector<Location> v = s.getLocations();
+        for (size_t i = 0; i < v.size(); i++)
+        {
+           if(v[i].getUpload() != "")
+                throwError(IVA, "hadchi mablanch" , line);
+        }
+        
+    }
+    
 }

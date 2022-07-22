@@ -35,6 +35,7 @@ Response::Response(Server  serv , Request req)
         std::cout << red <<"CGI start!" << std::endl;
         Cgi c(serv, req , matching_location); 
         cgiOn = c.getOn();
+
         std::cout << red <<"CGI DONE!" << std::endl;
     }
     if (validMethod)
@@ -100,7 +101,7 @@ void Response::getIndex(std::string path)
    this->body += "</table>\n</body>\n</head>\n</html>\n";
 //    std::cout <<" end index \n";
    flag = 1;
-   file_size = body.size();
+   file_size = body.size();   
     setStatusCode(200);
 
    closedir(dr);
