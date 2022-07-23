@@ -29,6 +29,7 @@ Response::Response(Server  serv , Request req)
 
     // check 400 413 uri errors
     initData(serv, req);
+
     if (serv.getCgiMap().size() > 0 )
     {
         std::cout << yellow << req.getUri() << std::endl;
@@ -36,6 +37,13 @@ Response::Response(Server  serv , Request req)
         Cgi c(serv, req , matching_location); 
         cgiOn = c.getOn();
 
+        if (c.getStatus() != -1)
+            setStatusCode(c.getStatus());
+        if (c.getLocation().size())
+            _redirect = c.getLocation();
+        cgi_file = c.gettoRender_file();
+        cgi_header = c.getHeader();
+        std::cout << "cgi:file=="<<cgi_header << std::endl;
         std::cout << red <<"CGI DONE!" << std::endl;
     }
     if (validMethod)
@@ -112,9 +120,8 @@ void Response::Get()
     std::string path = removeRepeated(matching_location.getRoot() +"/", '/');
     if (_redirect != "")
     {
-        setStatusCode(301);
         generateredeHeader();
-        path = _redirect;
+        // path = _redirect;
         // std::cout << "yoooo: " << _redirect.substr(3, _redirect.length()) << std::endl;
     }
     else
@@ -158,13 +165,17 @@ void Response::Get()
             path =  removeRepeated(path + '/'+ _path , '/');
             path.erase(path.size() - 1);
             std::cout << "=======> isFile!\n";
-            if (cgimap.size() > 0)
-                file_name = "index.html";
+            if (cgiOn  == true)
+                file_name = cgi_file;
             else
                 file_name = path;
+            size_t index = file_name.find( "?" );
+            if (index != std::string::npos)
+                file_name.erase(index);
             std::cout << "=======> isFile : " << file_name << std::endl;
             file_size = fsize(file_name.c_str());
             file_type = get_file_type(file_name);
+
 
             std::cout << "file name " << file_name << std::endl;
             std::cout << "file size " << file_size << std::endl;
@@ -259,6 +270,7 @@ void Response::Delete()
             setStatusCode(403);
         else
             setStatusCode(200);
+        
     }
     else
         setStatusCode(404);
@@ -282,10 +294,11 @@ void Response::Post()
     std::string tmp = "./tmp/" + new_file;
     if (cgiOn ==  true)
     {
-        file_name = "index.html";
+        file_name = cgi_file;
         file_size = fsize(file_name.c_str());
         file_type = get_file_type(file_name);
         std::cout << blue << "CGION" <<file_name << reset<<std::endl;
+        setStatusCode(200);
     }
     else
     {
@@ -378,16 +391,29 @@ void Response::setStatusCode(int code)
         statusCode.second = " Not Allowed";
     else if (code == 301)
         statusCode.second = " Moved Permanently";
+    else if (code == 302)
+        statusCode.second = " found";
 }
 
 
 void Response::generateredeHeader()
 {   
+        std::string tmp_redirect = matching_location.getRedirect();
+    if (tmp_redirect.size())
+    {
+        std::vector<std::string> v = split(tmp_redirect, " ");
+        setStatusCode(std::stoi(v[0]));
+        _redirect = v[1];
+    }
+    std::cout <<"STATUS COSE +++ " << statusCode.first << std::endl;
     header += "HTTP/1.1 " + std::to_string(statusCode.first) + statusCode.second + "\r\n" ;
-    header += "Location :" + _redirect.erase(0, 3) + "\r\n";
+    header += cgi_header;
+    header += "Location :" + _redirect + "\r\n";
     header +=  "\r\n";
-    flag = 1;
+        
+    // flag = 1;
 }
+
 
 std::pair<char * , size_t> Response::getBody()
 {   
@@ -395,6 +421,7 @@ std::pair<char * , size_t> Response::getBody()
     int ret;
     int len;
     std::cout << red << "File to render " << file_name << reset<< std::endl;
+   
     int fd = open (file_name.c_str(), O_RDONLY);
 	buf = (char *)malloc(BUFFER_SIZE);
 	lseek(fd, written, SEEK_SET);

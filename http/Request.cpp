@@ -227,18 +227,23 @@ void   Request::checkHeaders()
     std::map<std::string, std::string>::iterator it;
     it = headers.find("Content-Length");
     if (it != headers.end())
-        content_length = stoi(it->second);
-
+    {
+    content_length = stoi(it->second);
+    std::cout << blue << "=============>"<< content_length << reset<< std::endl;
+    std::cout << blue << "=============>"<< ischuncked << reset<< std::endl;
+    
+    }
 
     it =  headers.find("Transfer-Encoding");
     if (it != headers.end())
         ischuncked = (it ->second == "chunked") ? 1  : 0;
     else if (ischuncked == 0)
         status_code = 501;
-    else if (ischuncked == -1 && content_length == 0)
+    else if (ischuncked == -1 && content_length == 0 && method == "POST")
         status_code = 400;
     else if (Uri.size() > 2048)
         status_code = 404;
+    
 }
 
 void  Request::InitData()

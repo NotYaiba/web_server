@@ -19,12 +19,14 @@ class Response
     int validMethod;
     std::string _method;
     std::string header;
+    std::string cgi_header;
     std::string body;
     std::string _redirect;
     std::string _def;
     std::string file_name;
     size_t file_size;
     std::string file_type;
+    std::string cgi_file;
     std::map<std::string, std::string> cgimap ;
 
     int flag;

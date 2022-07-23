@@ -9,7 +9,7 @@ Cgi::Cgi(Server serv , Request  req , Location const & loc) : _server(serv), _re
 
 void Cgi::initData()
 {
-    
+    _req.debug();
     bool is_post = false;
     pid_t pid;
     int post_fd;
@@ -39,12 +39,10 @@ void Cgi::initData()
     filetype =  get_file_type(filepath);
     std::cout << "file path ===>" << filepath << std::endl;
     std::cout << "query string "<< query<< std::endl;
-    std::cout << "file type "<< filetype << std::endl;
     if (isDirictory(filepath) ||( filetype != "application/x-php" && filetype != "application/x-python" ))
         return ;
     else
     {
-        std::cout << "ALLGOOSSSS!\n";
         if (filetype == "application/x-php")
             cgikey = cgimap["php"];
         else
@@ -53,50 +51,65 @@ void Cgi::initData()
             throw "BAD GET AWAY !"; // TODO
         on = true;
     }
-    std::cout << "Merhba !" << on << std::endl;
+    std::cout << yellow<< "DKHEL CGIII"<<  reset << std::endl;
     
     int outfile_fd = open("./index.html", O_CREAT | O_WRONLY | O_TRUNC, 0666);
-    std::ifstream MyReadFile("index.html");
-    std::string lineheader;
     // std::cout 
-    post_fd = open(_req.getBody().c_str(),   O_RDONLY | O_TRUNC, 0666);
+    post_fd = open(("tmp/" + _req.getBody()).c_str(),   O_RDONLY , 0666);
+    // std::fstream fillle(_req.getBody());
+    char buff[5000];
+    int bytes = read(post_fd, buff, 5000);
+    std::cerr << "===========>>>>";
+    // std::cerr << fillle.rdbuf();
+    std::cerr << "+++++" << bytes << std::endl;
+    // fillle.close();
+    // std::cout << _req.getBody() << std::endl;
+    write(2, buff, bytes);
+    std::cerr << "===========>>>>";
     //arguments
     char **arr = initarr();
     //envirement variables
     SetEnv();
     pid = fork();
-        std::cout << "=========>fork \n";
 
     if (pid == 0)
+        std::cout << "=========>fork child \n";
+    else 
+        std::cout << "=========>fork parent \n";
+    if (pid == 0)
     {
+        // int saved_stdout = dup(STDOUT_FILENO);
         if (is_post)
             dup2(post_fd, STDIN_FILENO);
         dup2(outfile_fd, STDOUT_FILENO);
 
-        // std::cout << "=========>start excutr \n";
+        // close(outfile_fd);
+        // if (is_post)
+        //     close(post_fd);
+        std::cerr << "=========>start excutr \n";
         // std::cout << "execve params : " << arr[0] << " --  " << arr[1] <<  std::endl;
         if (execve(arr[0] ,arr, env) < 0)
         {
             throw "ERROR execve "; // TODO
         }
-        close(outfile_fd);
-        if (is_post)
-            close(post_fd);
+        // exit(1);
+        // dup2(saved_stdout, STDOUT_FILENO);
+        // close(saved_stdout);
         // std::cout << "=========> end excutr \n";
             // std::cout << "dd\n";
     }
     close(outfile_fd);
     if (is_post)
-        close(post_fd);
-    waitpid(0, NULL, 0);
-        std::cout <<reset << "=========> haniaa \n";
-
-    while (std::getline(MyReadFile, lineheader)) 
     {
-        std::cout << "yoooo: " << lineheader << std::endl;
-        if (lineheader == "\n")
-            break;
+        close(post_fd);
+
     }
+        std::cout <<reset << "=========> haniaa \n";
+    // wait(NULL);
+    waitpid(0, NULL, 0);
+        std::cout <<reset << "=========> haniaaaaa \n";
+    pars_file();
+
 }
 void Cgi::SetEnv()
 {
@@ -118,16 +131,21 @@ void Cgi::SetEnv()
             path_info += *it + "/";
     }
     //TODO : fill the variables bellow dinammically
-    std::cout << "------ Location : " << _loc.getLocation() << std::endl;
-    std::cout << "------ URI : " << uri << std::endl;
     // mp["PATH_INFO"] = uri;
     mp["PATH_INFO"] = "mohamed";
     mp["REDIRECT_STATUS"] = "1";
     // mp["PATH_TRANSLATED"]a
+    std::cout << "queryyyy ----->|" << query << "|" << std::endl;
+    std::cout << "uriiiiii ----->|" << uri << "|" << std::endl;
     mp["QUERY_STRING"] = query;
+    // mp["QUERY_STRING"] = "step=1";
     // mp["REMOTE_ADDR"]
     // mp["REMOTE_IDENT"]
     // mp["REMOTE_USER"]
+    size_t i = path.find("?");
+    if (i != std::string::npos)
+        path.erase(i);
+    std::cout << "pathhhhh ----->|" << path << "|" << std::endl;
     mp["SCRIPT_NAME"] = path;
     // mp["SCRIPT_FILENAME"] = "/Users/aez-zaou/Desktop/wordpress/index.php";
     mp["SCRIPT_FILENAME"] = removeRepeated(_loc.getRoot() + "/" +  path , '/');
@@ -153,5 +171,76 @@ char **  Cgi::initarr()
 
     return(vectToArr(ar));
 }
+std::string Cgi::find(std::string str, std::string line)
+{
+    size_t found = line.find(str);
+    if (found != std::string::npos)
+        return line;
+    return "";
+}
 
+void Cgi::pars_file()
+{
+    //  std::cout << "ex: "<<  << std::endl;
 
+     std::cout << "toRender_file: "<< toRender_file << std::endl;
+    std::ifstream MyReadFile("index.html");
+    _header = "";
+    for (std::string line; std::getline(MyReadFile, line);) 
+    {
+        std::cout << line << std::endl;
+        if (line == "\r")
+            break;
+        std::string tmp;
+        if ((tmp = find("Location", line)) != "")
+        {
+            _location = tmp;
+            continue;
+        }
+        if ((tmp = find("Status", line)) != "")
+        {
+            _status = tmp;
+            continue;
+        }
+        _header += line + "\r\n";
+    }
+    if (_status.size())
+    {
+        std::vector<std::string> v = split(_status, ":");
+        v = split(v[1], " ");
+        _status = v[0];
+    }
+    if (_location.size())
+    {
+        std::vector<std::string> v = split(_location, ": ");
+        _location = v[1];
+    }
+    int newfile_fd = open("index1.html", O_CREAT | O_WRONLY | O_TRUNC, 0666);
+    int saved_stdout = dup(STDOUT_FILENO);
+    dup2(newfile_fd, STDOUT_FILENO);
+    for (std::string line; std::getline(MyReadFile, line);) 
+    {
+        std::cout << line;
+    }
+    std::cout << std::endl;
+    close(newfile_fd);
+    dup2(saved_stdout, STDOUT_FILENO);
+    close(saved_stdout);
+
+    std::cout << "----------------header----------------" << std::endl;
+    std::cout << yellow << _header << reset;
+    std::cout << _location << std::endl;
+    std::cout << "|" << _status << "|" << std::endl;
+    std::cout << "--------------------------------------" << std::endl;
+}
+
+int Cgi::getStatus() const 
+{
+    if (_status.size())
+        return std::stoi(_status);
+    return -1;
+}
+std::string Cgi::getHeader() const {return _header;}
+std::string Cgi::getLocation() const {return _location;}
+
+std::string Cgi::gettoRender_file() const{return "index1.html";}

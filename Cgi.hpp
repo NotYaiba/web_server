@@ -12,11 +12,15 @@ class Cgi {
     std::string method;
     std::string cgikey;
     std::string query;
+    std::string _header;
+    std::string _status;
+    std::string _location;
     bool on;
     std::map<std::string, std::string> cgimap ;
     char** env;
     std::string filetype;
     std::string filepath;
+    std::string toRender_file;
     public :
     Cgi(Server serv , Request  req ,  Location const & loc);
     void initData();
@@ -26,6 +30,12 @@ class Cgi {
     {
         return on;
     }
+    std::string find(std::string, std::string);
+    void pars_file();
+    int getStatus() const;
+    std::string getHeader() const;
+    std::string getLocation() const;
+    std::string gettoRender_file() const;
 
 };
 
