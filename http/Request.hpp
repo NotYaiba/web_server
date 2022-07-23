@@ -53,6 +53,9 @@ class Request
        size_t  getContentLength() const{
             return content_length;
         }
+        std::string const & getContentType() const{
+            return content_type;
+        }
 
         // void validUri(std::string s);
 

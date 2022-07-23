@@ -56,16 +56,13 @@ void Cgi::initData()
     int outfile_fd = open("./index.html", O_CREAT | O_WRONLY | O_TRUNC, 0666);
     // std::cout 
     post_fd = open(("tmp/" + _req.getBody()).c_str(),   O_RDONLY , 0666);
+    if (post_fd == -1)
+    {
+        std::cerr << "error open file " << "tmp/" + _req.getBody() << std::endl;
+    }
     // std::fstream fillle(_req.getBody());
-    char buff[5000];
-    int bytes = read(post_fd, buff, 5000);
-    std::cerr << "===========>>>>";
-    // std::cerr << fillle.rdbuf();
-    std::cerr << "+++++" << bytes << std::endl;
-    // fillle.close();
-    // std::cout << _req.getBody() << std::endl;
-    write(2, buff, bytes);
-    std::cerr << "===========>>>>";
+ 
+    
     //arguments
     char **arr = initarr();
     //envirement variables
@@ -79,13 +76,31 @@ void Cgi::initData()
     if (pid == 0)
     {
         // int saved_stdout = dup(STDOUT_FILENO);
-        if (is_post)
-            dup2(post_fd, STDIN_FILENO);
-        dup2(outfile_fd, STDOUT_FILENO);
+        char buff[5000];
+        int bytes = read(post_fd, buff, 5000);
+        std::cerr << "===========>>>>";
+        // std::cerr << fillle.rdbuf();
+        std::cerr << "+++++" << bytes << std::endl;
+        // fillle.close();
+        // std::cout << _req.getBody() << std::endl;
+        write(2, buff, bytes);
+        std::cerr << "===========>>>>";
 
-        // close(outfile_fd);
-        // if (is_post)
-        //     close(post_fd);
+        if (is_post)
+        {
+            std::cerr << "yess its post"  << std::endl;
+
+            if (dup2(post_fd, STDIN_FILENO) == -1)
+                std::cerr << "error dup2 file " << "tmp/" + _req.getBody() << std::endl;
+
+        }
+        if (dup2(outfile_fd, STDOUT_FILENO) == -1)
+            std::cerr << "error dup2 file out file " << std::endl;
+
+
+        close(outfile_fd);
+        if (is_post)
+            close(post_fd);
         std::cerr << "=========>start excutr \n";
         // std::cout << "execve params : " << arr[0] << " --  " << arr[1] <<  std::endl;
         if (execve(arr[0] ,arr, env) < 0)
@@ -105,8 +120,9 @@ void Cgi::initData()
 
     }
         std::cout <<reset << "=========> haniaa \n";
-    // wait(NULL);
-    waitpid(0, NULL, 0);
+    while (wait(NULL) > 0)
+        ;
+    // waitpid(0, NULL, 0);
         std::cout <<reset << "=========> haniaaaaa \n";
     pars_file();
 
@@ -117,8 +133,12 @@ void Cgi::SetEnv()
     
     mp["REQUEST_METHOD"] = method;
     mp["SERVER_PROTOCOL"] = "HTTP/1.1";
-    mp["CONTENT_TYPE"] = filetype;
+    // mp["CONTENT_TYPE"] = filetype;
+    mp["CONTENT_TYPE"] = _req.getContentType();
+    std::cerr << "Content_ Type : " << _req.getContentType() << std::endl;
     mp["CONTENT_LENGTH"] = std::to_string(_req.getContentLength());
+    // mp["CONTENT_LENGTH"] = ;
+    std::cerr << "Content_ length : " << _req.getContentLength() << std::endl;
     mp["SERVER_PORT"] = std::to_string(_server.getPort());
     mp["SERVER_NAME"] = (_server.getServerName())[0];
     mp["REMOTE_HOST"] = _server.getHost();
@@ -132,7 +152,7 @@ void Cgi::SetEnv()
     }
     //TODO : fill the variables bellow dinammically
     // mp["PATH_INFO"] = uri;
-    mp["PATH_INFO"] = "mohamed";
+    mp["PATH_INFO"] = "";
     mp["REDIRECT_STATUS"] = "1";
     // mp["PATH_TRANSLATED"]a
     std::cout << "queryyyy ----->|" << query << "|" << std::endl;

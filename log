@@ -1,22 +1,25 @@
+Content_ Type : 
+Content_ length : 0
 ===========>>>>+++++0
 ===========>>>>=========>start excutr 
+Content_ Type : 
+Content_ length : 0
 ===========>>>>+++++0
 ===========>>>>=========>start excutr 
-===========>>>>+++++0
-===========>>>>=========>start excutr 
-===========>>>>+++++0
-===========>>>>=========>start excutr 
-===========>>>>+++++0
-===========>>>>=========>start excutr 
+Content_ Type : application/x-www-form-urlencoded
+Content_ length : 11
 ===========>>>>+++++11
-language=bo===========>>>>=========>start excutr 
-===========>>>>+++++0
-===========>>>>=========>start excutr 
-===========>>>>+++++0
-===========>>>>=========>start excutr 
-===========>>>>+++++11
-language=ar===========>>>>=========>start excutr 
-===========>>>>+++++23
-name=defds&email=sdfdsg===========>>>>=========>start excutr 
-PHP Warning:  Undefined array key "name" in /Users/aez-zaou/Desktop/wordpress/welcome.php on line 4
-PHP Warning:  Undefined array key "email" in /Users/aez-zaou/Desktop/wordpress/welcome.php on line 5
+language=ar===========>>>>yess its post
+=========>start excutr 
+Content_ Type : application/x-www-form-urlencoded
+Content_ length : 197
+===========>>>>+++++197
+weblog_title=holaaaaa&user_name=alae&admin_password=V7050iJWkfpGgT9%24FC&admin_password2=V7050iJWkfpGgT9%24FC&admin_email=aez-zaou%40student.1337.ma&blog_public=0&Submit=Install+WordPress&language============>>>>yess its post
+=========>start excutr 
+Content_ Type : application/x-www-form-urlencoded
+Content_ length : 31
+===========>>>>+++++31
+name=Aliii&email=bilal%40df.com===========>>>>yess its post
+=========>start excutr 
+PHP Warning:  Undefined array key "name" in /Users/aez-zaou/Desktop/welcome.php on line 4
+PHP Warning:  Undefined array key "email" in /Users/aez-zaou/Desktop/welcome.php on line 5

@@ -298,7 +298,7 @@ void Response::Post()
         file_size = fsize(file_name.c_str());
         file_type = get_file_type(file_name);
         std::cout << blue << "CGION" <<file_name << reset<<std::endl;
-        setStatusCode(200);
+        // setStatusCode(200);
     }
     else
     {

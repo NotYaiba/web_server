@@ -14,7 +14,7 @@ NAME = webserv
 
 all : $(NAME)
 
-FLAGS =  -std=c++98  -g #-Wall -Wextra -Werror
+FLAGS =  -std=c++98  #-Wall -Wextra -Werror
 
 $(NAME) : $(SRCS)
 		@clang++ ${FLAGS} ${SRCS}   -o $(NAME)
