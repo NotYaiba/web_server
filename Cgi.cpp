@@ -55,7 +55,9 @@ void Cgi::initData()
     
     int outfile_fd = open("./index.html", O_CREAT | O_WRONLY | O_TRUNC, 0666);
     // std::cout 
-    post_fd = open(("tmp/" + _req.getBody()).c_str(),   O_RDONLY , 0666);
+    dupp_file("tmp/" + _req.getBody());
+    // post_fd = open(("tmp/" + _req.getBody()).c_str(),   O_RDONLY , 0666);
+    post_fd = open("new_file",   O_RDONLY , 0666);
     if (post_fd == -1)
     {
         std::cerr << "error open file " << "tmp/" + _req.getBody() << std::endl;
@@ -78,13 +80,14 @@ void Cgi::initData()
         // int saved_stdout = dup(STDOUT_FILENO);
         char buff[5000];
         int bytes = read(post_fd, buff, 5000);
-        std::cerr << "===========>>>>";
+        std::cerr << "===========>>>>\n";
         // std::cerr << fillle.rdbuf();
-        std::cerr << "+++++" << bytes << std::endl;
+        std::cerr << "bytes read: " << bytes << std::endl;
         // fillle.close();
         // std::cout << _req.getBody() << std::endl;
         write(2, buff, bytes);
-        std::cerr << "===========>>>>";
+        std::cerr << std::endl;
+        std::cerr << "===========>>>>\n";
 
         if (is_post)
         {
@@ -264,3 +267,20 @@ std::string Cgi::getHeader() const {return _header;}
 std::string Cgi::getLocation() const {return _location;}
 
 std::string Cgi::gettoRender_file() const{return "index1.html";}
+
+void Cgi::dupp_file(std::string filename)
+{
+    std::ifstream MyReadFile(filename.c_str());
+    int newfile_fd = open("new_file", O_CREAT | O_WRONLY | O_TRUNC, 0666);
+    int saved_stdout = dup(STDOUT_FILENO);
+    dup2(newfile_fd, STDOUT_FILENO);
+    for (std::string line; std::getline(MyReadFile, line);) 
+    {
+        std::cout << line;
+        std::cerr << line;
+    }
+    close(newfile_fd);
+    dup2(saved_stdout, STDOUT_FILENO);
+    close(saved_stdout);
+
+}
