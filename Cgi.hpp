@@ -15,15 +15,18 @@ class Cgi {
     std::string _header;
     std::string _status;
     std::string _location;
+    char **arr;
     bool on;
     std::map<std::string, std::string> cgimap ;
     char** env;
     std::string filetype;
     std::string filepath;
     std::string toRender_file;
+    bool is_post;
     public :
     Cgi(Server serv , Request  req ,  Location const & loc);
     void initData();
+    void execute_cgi();
     void SetEnv();
     char **initarr();
     bool getOn()const 

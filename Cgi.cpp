@@ -3,26 +3,20 @@
 Cgi::Cgi(Server serv , Request  req , Location const & loc) : _server(serv), _req(req), _loc(loc)
 {
     on = false;
+    is_post = false;
     initData();
-    // exit(0);
+    if (on == true)
+    {
+        execute_cgi();
+        pars_file();
+    }
 }
-
 void Cgi::initData()
 {
-    _req.debug();
-    bool is_post = false;
-    pid_t pid;
-    int post_fd;
     cgimap = _server.getCgiMap();
     path = _req.getUri();
     path =   path.erase(path.size() - 1) ;
     filepath =  removeRepeated(_loc.getRoot() + "/" +  path , '/');
-    uri = _req.getUri();
-    uri.erase(uri.size() - 1);
-    method = _req.getMethod();
-    if (method == "POST")
-        is_post = true;
-    std::cout << "--- is post : "  << is_post << std::endl;
     std::string def =  _loc.getDefaultt();
     if (def.size() > 1)
     {
@@ -30,17 +24,26 @@ void Cgi::initData()
         filepath.erase(filepath.size() - 1);
     }
     std::vector<std::string> tmpv = split(filepath, "?");
-
     if(tmpv.size() > 1)
     {
         query = tmpv[1];
         filepath = tmpv[0];
     }
+    uri = _req.getUri();
+    uri.erase(uri.size() - 1);
+    method = _req.getMethod();
     filetype =  get_file_type(filepath);
-    std::cout << "file path ===>" << filepath << std::endl;
-    std::cout << "query string "<< query<< std::endl;
+
+    if (method == "POST")
+        is_post = true;
+
+    std::cout <<blue <<"hellow cgi is on " << on << reset << std::endl;
     if (isDirictory(filepath) ||( filetype != "application/x-php" && filetype != "application/x-python" ))
+    {
+    std::cout <<blue <<"hellow cgi is on " << on << reset << std::endl;
+
         return ;
+    }
     else
     {
         if (filetype == "application/x-php")
@@ -51,6 +54,15 @@ void Cgi::initData()
             throw "BAD GET AWAY !"; // TODO
         on = true;
     }
+}
+
+void Cgi::execute_cgi()
+{
+
+    pid_t pid;
+    int post_fd;
+    std::cout << "file path ===>" << filepath << std::endl;
+    std::cout << "query string "<< query<< std::endl;
     std::cout << yellow<< "DKHEL CGIII"<<  reset << std::endl;
     
     int outfile_fd = open("./index.html", O_CREAT | O_WRONLY | O_TRUNC, 0666);
@@ -62,73 +74,32 @@ void Cgi::initData()
     {
         std::cerr << "error open file " << "tmp/" + _req.getBody() << std::endl;
     }
-    // std::fstream fillle(_req.getBody());
- 
-    
-    //arguments
-    char **arr = initarr();
-    //envirement variables
+    arr = initarr();
     SetEnv();
     pid = fork();
 
     if (pid == 0)
-        std::cout << "=========>fork child \n";
-    else 
-        std::cout << "=========>fork parent \n";
-    if (pid == 0)
     {
-        // int saved_stdout = dup(STDOUT_FILENO);
-        char buff[5000];
-        int bytes = read(post_fd, buff, 5000);
-        std::cerr << "===========>>>>\n";
-        // std::cerr << fillle.rdbuf();
-        std::cerr << "bytes read: " << bytes << std::endl;
-        // fillle.close();
-        // std::cout << _req.getBody() << std::endl;
-        write(2, buff, bytes);
-        std::cerr << std::endl;
-        std::cerr << "===========>>>>\n";
-
         if (is_post)
         {
             std::cerr << "yess its post"  << std::endl;
-
             if (dup2(post_fd, STDIN_FILENO) == -1)
                 std::cerr << "error dup2 file " << "tmp/" + _req.getBody() << std::endl;
-
         }
         if (dup2(outfile_fd, STDOUT_FILENO) == -1)
             std::cerr << "error dup2 file out file " << std::endl;
-
-
         close(outfile_fd);
         if (is_post)
             close(post_fd);
-        std::cerr << "=========>start excutr \n";
-        // std::cout << "execve params : " << arr[0] << " --  " << arr[1] <<  std::endl;
         if (execve(arr[0] ,arr, env) < 0)
         {
-            throw "ERROR execve "; // TODO
+            perror ("ERROR execve "); // TODO
         }
-        // exit(1);
-        // dup2(saved_stdout, STDOUT_FILENO);
-        // close(saved_stdout);
-        // std::cout << "=========> end excutr \n";
-            // std::cout << "dd\n";
     }
     close(outfile_fd);
     if (is_post)
-    {
         close(post_fd);
-
-    }
-        std::cout <<reset << "=========> haniaa \n";
-    while (wait(NULL) > 0)
-        ;
-    // waitpid(0, NULL, 0);
-        std::cout <<reset << "=========> haniaaaaa \n";
-    pars_file();
-
+    while (wait(NULL) > 0);
 }
 void Cgi::SetEnv()
 {
@@ -136,17 +107,13 @@ void Cgi::SetEnv()
     
     mp["REQUEST_METHOD"] = method;
     mp["SERVER_PROTOCOL"] = "HTTP/1.1";
-    // mp["CONTENT_TYPE"] = filetype;
     mp["CONTENT_TYPE"] = _req.getContentType();
     std::cerr << "Content_ Type : " << _req.getContentType() << std::endl;
     mp["CONTENT_LENGTH"] = std::to_string(_req.getContentLength());
-    // mp["CONTENT_LENGTH"] = ;
-    std::cerr << "Content_ length : " << _req.getContentLength() << std::endl;
     mp["SERVER_PORT"] = std::to_string(_server.getPort());
     mp["SERVER_NAME"] = (_server.getServerName())[0];
     mp["REMOTE_HOST"] = _server.getHost();
-    // mp["AUTH_TYPE"]
-    // mp["GATEWAY_INTERFACE"]
+
     {
         std::vector <std::string> tmp = split(path, "/");
         std::string path_info = "/";
@@ -157,24 +124,13 @@ void Cgi::SetEnv()
     // mp["PATH_INFO"] = uri;
     mp["PATH_INFO"] = "";
     mp["REDIRECT_STATUS"] = "1";
-    // mp["PATH_TRANSLATED"]a
-    std::cout << "queryyyy ----->|" << query << "|" << std::endl;
-    std::cout << "uriiiiii ----->|" << uri << "|" << std::endl;
     mp["QUERY_STRING"] = query;
-    // mp["QUERY_STRING"] = "step=1";
-    // mp["REMOTE_ADDR"]
-    // mp["REMOTE_IDENT"]
-    // mp["REMOTE_USER"]
     size_t i = path.find("?");
     if (i != std::string::npos)
         path.erase(i);
-    std::cout << "pathhhhh ----->|" << path << "|" << std::endl;
     mp["SCRIPT_NAME"] = path;
-    // mp["SCRIPT_FILENAME"] = "/Users/aez-zaou/Desktop/wordpress/index.php";
     mp["SCRIPT_FILENAME"] = removeRepeated(_loc.getRoot() + "/" +  path , '/');
-    // mp["HTTP_HOST"] = "127.0.0.1:8000";
     mp["HTTP_HOST"] = _server.getHost() + ":" + std::to_string(_server.getPort());
-    // mp["SERVER_SOFTWARE"]
     std::vector<std::string> v;
     for ( std::map<std::string , std::string>::iterator it = mp.begin() ; it != mp.end(); it++)
     {
@@ -186,14 +142,11 @@ void Cgi::SetEnv()
 char **  Cgi::initarr()
 {
     std::vector<std::string> ar;
-    
-
-    std::cout <<"|"<< cgikey <<  "|"<<std::endl;
 	ar.push_back(cgikey);
 	ar.push_back(filepath);
-
     return(vectToArr(ar));
 }
+
 std::string Cgi::find(std::string str, std::string line)
 {
     size_t found = line.find(str);

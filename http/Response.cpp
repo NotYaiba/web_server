@@ -119,11 +119,7 @@ void Response::Get()
 {
     std::string path = removeRepeated(matching_location.getRoot() +"/", '/');
     if (_redirect != "")
-    {
         generateredeHeader();
-        // path = _redirect;
-        // std::cout << "yoooo: " << _redirect.substr(3, _redirect.length()) << std::endl;
-    }
     else
     {
         if (isDir(path))
@@ -164,7 +160,6 @@ void Response::Get()
         {
             path =  removeRepeated(path + '/'+ _path , '/');
             path.erase(path.size() - 1);
-            std::cout << "=======> isFile!\n";
             if (cgiOn  == true)
                 file_name = cgi_file;
             else
@@ -172,11 +167,8 @@ void Response::Get()
             size_t index = file_name.find( "?" );
             if (index != std::string::npos)
                 file_name.erase(index);
-            std::cout << "=======> isFile : " << file_name << std::endl;
             file_size = fsize(file_name.c_str());
             file_type = get_file_type(file_name);
-
-
             std::cout << "file name " << file_name << std::endl;
             std::cout << "file size " << file_size << std::endl;
             std::cout << "file type " << file_type << std::endl;
@@ -258,12 +250,9 @@ void Response::setIsvalid()
 void Response::Delete()
 {
     matching_location.debug();
-    // std::cout << "file to delete " << _path << std::endl;
     std::string path = _loc + matching_location.getRoot() + "/" +_path;
-    // std::cout << "where : " << path<< std::endl;
     path = removeRepeated(path, '/');
     path.erase(path.size() - 1);
-    // std::cout << "removed : " <<path<< std::endl;
     if (file_exists(path))
     {
         if (std::remove(path.c_str()) < 0)
@@ -298,12 +287,10 @@ void Response::Post()
         file_size = fsize(file_name.c_str());
         file_type = get_file_type(file_name);
         std::cout << blue << "CGION" <<file_name << reset<<std::endl;
-        // setStatusCode(200);
     }
     else
     {
         std::ifstream in(tmp.c_str(), std::ios::in | std::ios::binary);
-
         std::ofstream out(file_name1, std::ios::out | std::ios::binary);
         out << in.rdbuf();
         in.close();
@@ -330,16 +317,10 @@ void Response::generateHeader()
             header += "Date: " + formatted_time() + "\r\n";
             header += "\r\n";
             if (flag ==  1)
-            {
                 header += body;
-                // std::cout << header;
-                // std::cout << "END HEADERS\n";
-            }
+
             else
-            {
-                // std::cout << "salam\n";
                 isEndRes = false;
-            }
     }
 }
 
