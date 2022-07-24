@@ -56,6 +56,13 @@ class Request
         std::string const & getContentType() const{
             return content_type;
         }
+        std::string getCookie() 
+        {
+            std::map<std::string, std::string>::iterator it =  headers.find("Cookie");
+            if (it != headers.end())
+                return (it->second);
+            return "";
+        }
 
         // void validUri(std::string s);
 

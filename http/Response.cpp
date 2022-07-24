@@ -315,6 +315,9 @@ void Response::generateHeader()
             header += "Content-length: " + std::to_string((int)file_size) + "\r\n";
             header += "Server: mywebserver\r\n";
             header += "Date: " + formatted_time() + "\r\n";
+            if (cgiOn)
+                header += cgi_header;
+
             header += "\r\n";
             if (flag ==  1)
                 header += body;

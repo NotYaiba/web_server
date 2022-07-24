@@ -68,9 +68,9 @@ void Cgi::execute_cgi()
     
     int outfile_fd = open("./index.html", O_CREAT | O_WRONLY | O_TRUNC, 0666);
     // std::cout 
-    dupp_file("tmp/" + _req.getBody());
-    // post_fd = open(("tmp/" + _req.getBody()).c_str(),   O_RDONLY , 0666);
-    post_fd = open("new_file",   O_RDONLY , 0666);
+    // dupp_file("tmp/" + _req.getBody());
+    post_fd = open(("tmp/" + _req.getBody()).c_str(),   O_RDONLY , 0666);
+    // post_fd = open("new_file",   O_RDONLY , 0666);
     if (post_fd == -1)
     {
         std::cerr << "error open file " << "tmp/" + _req.getBody() << std::endl;
@@ -108,13 +108,14 @@ void Cgi::SetEnv()
     
     mp["REQUEST_METHOD"] = method;
     mp["SERVER_PROTOCOL"] = "HTTP/1.1";
+    mp["GATEWAY_INTERFACE"] = "CGI/1.1";
+
     mp["CONTENT_TYPE"] = _req.getContentType();
     std::cerr << "Content_ Type : " << _req.getContentType() << std::endl;
     mp["CONTENT_LENGTH"] = std::to_string(_req.getContentLength());
     mp["SERVER_PORT"] = std::to_string(_server.getPort());
     mp["SERVER_NAME"] = (_server.getServerName())[0];
-    mp["REMOTE_HOST"] = _server.getHost();
-
+    mp["REMOTE_ADDR"] = _server.getHost();
     {
         std::vector <std::string> tmp = split(path, "/");
         std::string path_info = "/";
@@ -122,17 +123,21 @@ void Cgi::SetEnv()
             path_info += *it + "/";
     }
     //TODO : fill the variables bellow dinammically
-    // mp["PATH_INFO"] = uri;
     mp["PATH_INFO"] = "";
-    mp["REDIRECT_STATUS"] = "1";
+    mp["PATH_TRANSLATED"] = removeRepeated(_loc.getRoot() + "/" +  path , '/');
+    mp["REDIRECT_STATUS"] = "200";
     mp["QUERY_STRING"] = query;
     size_t i = path.find("?");
     if (i != std::string::npos)
         path.erase(i);
     mp["SCRIPT_NAME"] = path;
     mp["SCRIPT_FILENAME"] = removeRepeated(_loc.getRoot() + "/" +  path , '/');
+    std::cerr << "script_name : " << path <<std::endl;
+    std::cerr << "script_Filename : " << removeRepeated(_loc.getRoot() + "/" +  path , '/') <<std::endl;
+
     mp["HTTP_HOST"] = _server.getHost() + ":" + std::to_string(_server.getPort());
-    // TODO : ADD COOCKIE
+    // TODO : ADD HTTP_COOKIE
+    mp["HTTP_COOKIE"] = _req.getCookie();
     std::vector<std::string> v;
     for ( std::map<std::string , std::string>::iterator it = mp.begin() ; it != mp.end(); it++)
     {
