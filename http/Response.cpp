@@ -414,6 +414,7 @@ std::pair<char * , size_t> Response::getBody()
     written += ret;
 	if (ret == -1)
 		perror("read");
+    std::cout << yellow << "SALAAM"<< reset << std::endl;
     // std::cout << ret << std::endl;
     // std::cout << buf << std::endl;
     // std::cout << file_size << std::endl;

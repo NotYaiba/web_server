@@ -2,6 +2,7 @@
 
 Cgi::Cgi(Server serv , Request  req , Location const & loc) : _server(serv), _req(req), _loc(loc)
 {
+    _status = "";
     on = false;
     is_post = false;
     initData();
@@ -131,6 +132,7 @@ void Cgi::SetEnv()
     mp["SCRIPT_NAME"] = path;
     mp["SCRIPT_FILENAME"] = removeRepeated(_loc.getRoot() + "/" +  path , '/');
     mp["HTTP_HOST"] = _server.getHost() + ":" + std::to_string(_server.getPort());
+    // TODO : ADD COOCKIE
     std::vector<std::string> v;
     for ( std::map<std::string , std::string>::iterator it = mp.begin() ; it != mp.end(); it++)
     {
@@ -143,6 +145,7 @@ char **  Cgi::initarr()
 {
     std::vector<std::string> ar;
 	ar.push_back(cgikey);
+    std::cerr << filepath << std::endl;
 	ar.push_back(filepath);
     return(vectToArr(ar));
 }
@@ -180,6 +183,7 @@ void Cgi::pars_file()
         }
         _header += line + "\r\n";
     }
+    // _header += "Access-Control-Expose-Headers: Set-Cookie\r\n";
     if (_status.size())
     {
         std::vector<std::string> v = split(_status, ":");
@@ -214,7 +218,7 @@ int Cgi::getStatus() const
 {
     if (_status.size())
         return std::stoi(_status);
-    return -1;
+    return 200;
 }
 std::string Cgi::getHeader() const {return _header;}
 std::string Cgi::getLocation() const {return _location;}
