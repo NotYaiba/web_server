@@ -14,13 +14,15 @@ Cgi::Cgi(Server serv , Request  req , Location const & loc) : _server(serv), _re
 }
 void Cgi::initData()
 {
-    cgimap = _server.getCgiMap();
+    cgimap = _loc.getCgiMap();
     path = _req.getUri();
     path =   path.erase(path.size() - 1) ;
     filepath =  removeRepeated(_loc.getRoot() + "/" +  path , '/');
+    std::cout << "matching Location: " <<_loc.getLocation() << std::endl;
     std::string def =  _loc.getDefaultt();
     if (def.size() > 1)
     {
+    std::cout << " def: " <<def << std::endl;
         filepath = removeRepeated(filepath +"/" + def + "/", '/');
         filepath.erase(filepath.size() - 1);
     }
@@ -83,7 +85,6 @@ void Cgi::execute_cgi()
     {
         if (is_post)
         {
-            std::cerr << "yess its post"  << std::endl;
             if (dup2(post_fd, STDIN_FILENO) == -1)
                 std::cerr << "error dup2 file " << "tmp/" + _req.getBody() << std::endl;
         }
@@ -166,8 +167,6 @@ std::string Cgi::find(std::string str, std::string line)
 void Cgi::pars_file()
 {
     //  std::cout << "ex: "<<  << std::endl;
-
-     std::cout << "toRender_file: "<< toRender_file << std::endl;
     std::ifstream MyReadFile("index.html");
     _header = "";
     for (std::string line; std::getline(MyReadFile, line);) 

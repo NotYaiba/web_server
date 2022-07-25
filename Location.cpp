@@ -159,6 +159,7 @@ Location &Location::operator=(Location  const & src)
     defaultt = src.getDefaultt();
     upload = src.getUpload();
     redirect = src.getRedirect();
+    cgimap = src.getCgiMap();
     return (*this);
 }
     Location::Location(Location  const & src)
@@ -166,4 +167,14 @@ Location &Location::operator=(Location  const & src)
         *this = src;
 
         // std::cout << yellow << "ya salam \n";
+    }
+
+    void Location::addtoCgiMap(std::string key, std::string val)
+    {
+    cgimap.insert(std::make_pair(key, val));
+    }
+
+    std::map<std::string, std::string> const &  Location::getCgiMap() const 
+    {
+    return cgimap;
     }

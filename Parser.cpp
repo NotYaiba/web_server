@@ -100,13 +100,13 @@ void Parser::readFile(char *path)
                 else if (vtmp[0] == "error_page")
                     server.setErrorpage(vtmp[1]);
                 else if (vtmp[0] == "redirect")
-                    location.setRedirect(vtmp[1]);
+                    location.setRedirect(vtmpSpace[1]);
                 else if (vtmp[0] == "cgi")
                 {
                         std::vector< std::string > tmp = split(line, "=");
                         std::vector< std::string > tmp2 = split(tmp[1], " ");
                     if (tmp2.size() >= 2 )
-                        server.addtoCgiMap(removeSpaces(tmp2[0]),removeSpaces(tmp2[1]) );
+                        location.addtoCgiMap(removeSpaces(tmp2[0]),removeSpaces(tmp2[1]) );
                 }
                 else
                 {
@@ -216,15 +216,28 @@ std::map < int ,  std::vector < Server > >const & Parser::getMapServers()const
 
 void Parser::checkServer(Server  s , int line)
 {
-    if (s.getCgiMap().size() != 0)
-    {
-        std::vector<Location> v = s.getLocations();
-        for (size_t i = 0; i < v.size(); i++)
+   
+        std::vector<Location> locations = s.getLocations();
+        for (size_t i = 0; i < locations.size(); i++)
         {
-           if(v[i].getUpload() != "")
+            std::map<std::string , std::string> cgi = locations[i].getCgiMap();
+            std::cout << cgi.size() << std::endl;
+            if(locations[i].getUpload() != "" && cgi.size() != 0 )
+            {
+                std::cout <<"sc" << std::endl;
+
                 throwError(IVA, "hadchi mablanch" , line);
+            }
+            for(std::map<std::string, std::string >::iterator it = cgi.begin(); it != cgi.end() ; it++)
+            {
+                if (it->first != "php"  && it->first != "python")
+                    throwError(IVA, "" , line);
+                if (access(it->second.c_str(), R_OK) == -1 && access(it->second.c_str(), F_OK) == 0)
+                    throwError(IVA, "Forbidden" , line);
+                else if (access(it->second.c_str(), F_OK) == -1)
+                    throwError(IVA, "Path Not Found" , line);
+
+            }
         }
-        
-    }
     
 }

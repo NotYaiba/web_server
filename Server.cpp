@@ -92,15 +92,7 @@
     {
         return locations;
     }
-    void Server::addtoCgiMap(std::string key, std::string val)
-    {
-        cgimap.insert(std::make_pair(key, val));
-    }
 
-    std::map<std::string, std::string> const &  Server::getCgiMap() const 
-    {
-        return cgimap;
-    }
 void    Server::debug()
 {
     std::cout  <<blue << "serverNames :" << reset  << serverNames[0] << std::endl; 

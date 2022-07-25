@@ -41,8 +41,7 @@ public:
         line = linne;
     }
     std::vector<Location> const &  getLocations() const ;
-    void addtoCgiMap(std::string key, std::string val);
-    std::map<std::string, std::string> const &  getCgiMap() const ;
+
     void   debug();
     void   clear()
     {

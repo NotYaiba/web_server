@@ -19,6 +19,7 @@ class Location
     std::string defaultt;
     std::string upload;
     std::string redirect;
+        std::map<std::string, std::string> cgimap;
     int line;
     public: 
     void setLine(int const & linne)
@@ -54,12 +55,14 @@ class Location
         defaultt = "";
         upload = "";
         redirect = "";
+        cgimap.clear();
     }
     void debug ();
     void throwError(int type, std::string para);
     Location &operator=(Location  const & src);
     Location(Location  const & src);
-
+    void addtoCgiMap(std::string key, std::string val);
+    std::map<std::string, std::string> const &  getCgiMap() const ;
 };
 
 

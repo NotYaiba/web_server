@@ -129,6 +129,7 @@ void Webserver::HandleResponse(int fd)
         res_map.insert(std::make_pair(fd, res));
         it = res_map.find(fd);
         buffer_new = it->second.getHeader();
+        // std::cout << blue << buffer_new.first <<  reset << std::endl;
 
     }
     else

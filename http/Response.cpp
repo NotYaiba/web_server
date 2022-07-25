@@ -17,11 +17,11 @@ void Response::initData(Server  serv , Request req)
     file_type = "text/html";
     file_size = 0;
     written = 0;
-    cgimap = _server.getCgiMap();
     findMatchingLocation();
     _loc = matching_location.getLocation();
     _redirect = matching_location.getRedirect();
     _def = matching_location.getDefaultt();
+    cgimap = matching_location.getCgiMap();
     setIsvalid();
 }
 Response::Response(Server  serv , Request req)
@@ -30,7 +30,7 @@ Response::Response(Server  serv , Request req)
     // check 400 413 uri errors
     initData(serv, req);
 
-    if (serv.getCgiMap().size() > 0 )
+    if (cgimap.size() > 0 )
     {
         std::cout << yellow << req.getUri() << std::endl;
         std::cout << red <<"CGI start!" << std::endl;
@@ -172,6 +172,7 @@ void Response::Get()
             std::cout << "file name " << file_name << std::endl;
             std::cout << "file size " << file_size << std::endl;
             std::cout << "file type " << file_type << std::endl;
+            // exit(0);
             if (access(file_name.c_str(), R_OK) == -1 && access(file_name.c_str(), F_OK) == 0)
             {
                 setStatusCode(403);
@@ -314,7 +315,12 @@ void Response::generateHeader()
             header += "Content-type: "+ file_type + "\r\n";
             header += "Content-length: " + std::to_string((int)file_size) + "\r\n";
             header += "Server: mywebserver\r\n";
+            //------ to fix cors error
+            header += "Access-Control-Allow-Origin: *\r\n";
+            header += "Access-Control-Allow-Private-Network: true\r\n";
+
             header += "Date: " + formatted_time() + "\r\n";
+            
             if (cgiOn)
                 header += cgi_header;
 
@@ -324,6 +330,10 @@ void Response::generateHeader()
 
             else
                 isEndRes = false;
+    }
+    else
+    {
+        generateredeHeader();
     }
 }
 
@@ -393,9 +403,12 @@ void Response::generateredeHeader()
     header += "HTTP/1.1 " + std::to_string(statusCode.first) + statusCode.second + "\r\n" ;
     header += cgi_header;
     header += "Location :" + _redirect + "\r\n";
+    header += "Access-Control-Allow-Origin: *\r\n";
+    header += "Access-Control-Allow-Private-Network: true\r\n";
+
     header +=  "\r\n";
         
-    // flag = 1;
+    flag = 1;
 }
 
 
@@ -416,12 +429,15 @@ std::pair<char * , size_t> Response::getBody()
 	ret = read(fd, buf, BUFFER_SIZE);
     written += ret;
 	if (ret == -1)
-		perror("read");
+		isEndRes =  true;
+        
+	if (ret == 0)
+		isEndRes =  true;
     std::cout << yellow << "SALAAM"<< reset << std::endl;
-    // std::cout << ret << std::endl;
+    std::cout <<  "ret :"<< ret << std::endl;
     // std::cout << buf << std::endl;
-    // std::cout << file_size << std::endl;
-    // std::cout << written << std::endl;
+    std::cout << "filesize "<< file_size << std::endl;
+    std::cout << "written "<<  written << std::endl;
     if (written >= file_size)
         isEndRes =  true;
 	close(fd);
