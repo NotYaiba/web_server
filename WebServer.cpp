@@ -129,7 +129,6 @@ void Webserver::HandleResponse(int fd)
         res_map.insert(std::make_pair(fd, res));
         it = res_map.find(fd);
         buffer_new = it->second.getHeader();
-        std::cout << "|" << blue << buffer_new.first <<  reset << "|" << std::endl;
 
     }
     else
@@ -142,7 +141,11 @@ void Webserver::HandleResponse(int fd)
     if (it->second.getIsend())
     {
         std::cout << "END RESPONSE\n";
+        // std::cout << "|" << blue << it->second.getIsend() <<  reset << "|" << std::endl;
+        // std::cout << "|" << blue << it->second.getHeader().first <<  reset << "|" << std::endl;
         res_map.erase(it);
+        if (res_map.find(fd)  == res_map.end())
+            std::cout << "|" << blue <<"machat" <<  reset << "|" << std::endl;
         req_map[fd].InitData();
         FD_CLR(fd, &writecopy);
         close(fd);

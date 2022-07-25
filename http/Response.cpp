@@ -8,7 +8,7 @@ void Response::initData(Server  serv , Request req)
     _path = _req.getUri();
     _method  = _req.getMethod();
     statusCode.first =  req.getStatusCode();
-    isEndRes = true;
+    isEndRes = false;
     /////
 
     validMethod = 0;
@@ -125,6 +125,7 @@ void Response::getIndex(std::string path)
 
 void Response::Get()
 {
+    std::cout << _server.getServerName()[0];
     std::string path = removeRepeated(matching_location.getRoot() +"/", '/');
 
         if (isDir(path))
@@ -312,13 +313,10 @@ std::string Response::generateHeader()
     int len;
     std::string headertmp;
     std::cout << "Generate header no cgi \n";
-    std::cout << file_size;
 
-    // if  (!flag && file_size == 0)
-    // {
-    //     if (statusCode.first != 200 && statusCode.first !=  201)
-    //         body = generateBody();  
-    // }
+    if (statusCode.first != 200 && statusCode.first != 201 && statusCode.first != 301 && statusCode.first != 302 )
+      generateBody();
+    
     if (_redirect == "" )
     {  
             headertmp += "HTTP/1.1 " + std::to_string(statusCode.first) + statusCode.second + "\r\n" ;
@@ -330,11 +328,9 @@ std::string Response::generateHeader()
             headertmp += "Access-Control-Allow-Private-Network: true\r\n";
             headertmp += "Date: " + formatted_time() + "\r\n";
             headertmp += "\r\n";
-            isEndRes = false;
     }
-    // else
-    //     generateredeHeader();
-    
+    else
+        generateredeHeader();
     return headertmp;
 }
 
@@ -342,11 +338,11 @@ std::string Response::generateHeader()
 std::pair<char *, size_t> Response::getHeader()
 {
      char *buf;   
+    header = "";
     if (!cgiOn)
         header +=  generateHeader(); 
     else
         header += cgi_header;
-    std::cout << header; 
 	buf = (char *)malloc(sizeof(char) * header.size());
     buf = strcpy(new char[header.length() + 1], header.c_str());
     // std::cout << "Please10 : " << getIsend() << std::endl;
@@ -356,16 +352,17 @@ std::pair<char *, size_t> Response::getHeader()
 
 std::string Response::generateBody()
 {
-
+  std::ofstream bodytmp("body.html", std::ios::out | std::ios::binary);
     if (_server.getErrorpage() == "")
     {
-    std::string msg = std::to_string(statusCode.first) +  statusCode.second;
-    std::string tmp;
-    tmp = "<html>\n<head><title>" + msg + "</title></head>\n<body bgcolor='white'>\n<center><h1>"  +msg + "</h1></center>\n</body>\n</html>";
-        flag = 1;
+        std::string msg = std::to_string(statusCode.first) +  statusCode.second;
+        std::string tmp;
+        tmp = "<html>\n<head><title>" + msg + "</title></head>\n<body bgcolor='white'>\n<center><h1>"  +msg + "</h1></center>\n</body>\n</html>";
+        bodytmp << tmp;
+        file_name = "body.html";
         file_size = tmp.size();
         file_type = "text/html";
-        return tmp;
+        return "body";
     }
     else
     {
@@ -436,11 +433,13 @@ std::pair<char * , size_t> Response::getBody()
     written += ret;
     std::cout << yellow << "SALAAM"<< reset << std::endl;
     std::cout <<  "ret :"<< ret << std::endl;
-    // std::cout << buf << std::endl;
+    std::cout << buf << std::endl;
     std::cout << "filesize "<< file_size << std::endl;
     std::cout << "written "<<  written << std::endl;
     if (written >= file_size)
+    {
         isEndRes =  true;
+    }
 	close(fd);
     return std::make_pair(buf, ret);
 }
