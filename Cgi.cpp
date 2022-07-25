@@ -2,6 +2,7 @@
 
 Cgi::Cgi(Server serv , Request  req , Location const & loc) : _server(serv), _req(req), _loc(loc)
 {
+    toRender_file= "index-" + random_string();
     _status = "";
     on = false;
     is_post = false;
@@ -199,7 +200,8 @@ void Cgi::pars_file()
         std::vector<std::string> v = split(_location, ": ");
         _location = v[1];
     }
-    int newfile_fd = open("index1.html", O_CREAT | O_WRONLY | O_TRUNC, 0666);
+
+    int newfile_fd = open(toRender_file.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0666);
     int saved_stdout = dup(STDOUT_FILENO);
     dup2(newfile_fd, STDOUT_FILENO);
     for (std::string line; std::getline(MyReadFile, line);) 
@@ -227,7 +229,7 @@ int Cgi::getStatus() const
 std::string Cgi::getHeader() const {return _header;}
 std::string Cgi::getLocation() const {return _location;}
 
-std::string Cgi::gettoRender_file() const{return "index1.html";}
+std::string Cgi::gettoRender_file() const{return toRender_file;}
 
 void Cgi::dupp_file(std::string filename)
 {

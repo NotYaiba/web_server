@@ -46,7 +46,7 @@ class Response
     void Delete();
     void Get();
     void Post();
-    void generateHeader();
+    std::string generateHeader();
     std::pair<char * , size_t> getHeader();
     std::string generateBody();
     void setStatusCode(int code);

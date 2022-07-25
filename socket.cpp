@@ -44,7 +44,7 @@ int Socket::BindSock(int const &socket)
         exit (0); 
     }
 
-    if (listen(socket, SOMAXCONN) < 0) 
+    if (listen(socket, 100) < 0) 
     { 
         perror("“In listen”"); 
         exit(0);

@@ -123,13 +123,13 @@ void Webserver::HandleResponse(int fd)
     std::map<int, Response >::iterator it2;
     if (it  == res_map.end())
     {
-        // std::cout << red << "\n\n start Response \n\n" << reset <<  std::endl;
+        std::cout << red << "\n\n start Response \n\n" << reset <<  std::endl;
         Response res(servers[fd][0], req_map[fd]);
 
         res_map.insert(std::make_pair(fd, res));
         it = res_map.find(fd);
         buffer_new = it->second.getHeader();
-        // std::cout << blue << buffer_new.first <<  reset << std::endl;
+        std::cout << "|" << blue << buffer_new.first <<  reset << "|" << std::endl;
 
     }
     else
