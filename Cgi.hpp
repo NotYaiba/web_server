@@ -40,6 +40,7 @@ class Cgi {
     std::string getLocation() const;
     std::string gettoRender_file() const;
     void dupp_file(std::string filename);
+    std::string generateBody();
 
 };
 

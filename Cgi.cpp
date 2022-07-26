@@ -26,6 +26,7 @@ void Cgi::initData()
     std::cout << " def: " <<def << std::endl;
         filepath = removeRepeated(filepath +"/" + def + "/", '/');
         filepath.erase(filepath.size() - 1);
+        std::cout << "default path ; " << filepath << std::endl;
     }
     std::vector<std::string> tmpv = split(filepath, "?");
     if(tmpv.size() > 1)
@@ -125,15 +126,26 @@ void Cgi::SetEnv()
             path_info += *it + "/";
     }
     //TODO : fill the variables bellow dinammically
-    mp["PATH_INFO"] = "";
-    mp["PATH_TRANSLATED"] = removeRepeated(_loc.getRoot() + "/" +  path , '/');
+    std::cout << filepath << " <-- filepath | path " << path;
+    // if (isDirictory(path))
+    // {
+    //     std::cout << "itiiiz directory" << std::endl;
+        mp["PATH_INFO"] = _loc.getDefaultt();
+    // }
+    // else
+    //    mp["PATH_INFO"] = "";
+    // std::
+        // mp["PATH_INFO"] = filepath;
+
+    // mp["PATH_TRANSLATED"] = removeRepeated(_loc.getRoot() + "/" +  path , '/');
+    mp["PATH_TRANSLATED"] = filepath;
     mp["REDIRECT_STATUS"] = "200";
     mp["QUERY_STRING"] = query;
     size_t i = path.find("?");
     if (i != std::string::npos)
         path.erase(i);
     mp["SCRIPT_NAME"] = path;
-    mp["SCRIPT_FILENAME"] = removeRepeated(_loc.getRoot() + "/" +  path , '/');
+    mp["SCRIPT_FILENAME"] = filepath;
     std::cerr << "script_name : " << path <<std::endl;
     std::cerr << "script_Filename : " << removeRepeated(_loc.getRoot() + "/" +  path , '/') <<std::endl;
 
@@ -169,7 +181,11 @@ void Cgi::pars_file()
 {
     //  std::cout << "ex: "<<  << std::endl;
     std::ifstream MyReadFile("index.html");
-    _header = "";
+
+    _header += "Server: mywebserver\r\n";
+
+    _header += "Access-Control-Allow-Origin: *\r\n";
+    _header += "Access-Control-Allow-Private-Network: true\r\n";
     for (std::string line; std::getline(MyReadFile, line);) 
     {
         std::cout << line << std::endl;
@@ -179,7 +195,7 @@ void Cgi::pars_file()
         if ((tmp = find("Location", line)) != "")
         {
             _location = tmp;
-            continue;
+            // continue;
         }
         if ((tmp = find("Status", line)) != "")
         {
@@ -188,13 +204,17 @@ void Cgi::pars_file()
         }
         _header += line + "\r\n";
     }
+
     // _header += "Access-Control-Expose-Headers: Set-Cookie\r\n";
     if (_status.size())
     {
         std::vector<std::string> v = split(_status, ":");
-        v = split(v[1], " ");
-        _status = v[0];
+        // v = split(v[1], " ");
+         _status = v[1];
+        _header = "HTTP/1.1 "+ _status + _header + "\r\n";
     }
+    else
+        _header = "HTTP/1.1 200 OK\n\r"  + _header + "\r\n";
     if (_location.size())
     {
         std::vector<std::string> v = split(_location, ": ");
@@ -247,3 +267,25 @@ void Cgi::dupp_file(std::string filename)
     close(saved_stdout);
 
 }
+// std::string Cgi::generateBody()
+// {
+//   std::ofstream bodytmp("body.html", std::ios::out | std::ios::binary);
+//     if (_server.getErrorpage() == "")
+//     {
+//         std::string msg = std::to_string(statusCode.first) +  statusCode.second;
+//         std::string tmp;
+//         tmp = "<html>\n<head><title>" + msg + "</title></head>\n<body bgcolor='white'>\n<center><h1>"  +msg + "</h1></center>\n</body>\n</html>";
+//         bodytmp << tmp;
+//         file_name = "body.html";
+//         file_size = tmp.size();
+//         file_type = "text/html";
+//         return "body";
+//     }
+//     else
+//     {
+//         file_name = (_server.getErrorpage() + "/" + std::to_string(statusCode.first) + ".html");
+//         file_size = fsize(file_name.c_str());
+//         file_type = "text/html";
+//     }
+//     return ("");
+// }

@@ -1,0 +1,17 @@
+------WebKitFormBoundaryvic8dui6scsiR2Ht
+Content-Disposition: form-data; name="action"
+
+wp-remove-post-lock
+------WebKitFormBoundaryvic8dui6scsiR2Ht
+Content-Disposition: form-data; name="_wpnonce"
+
+f7845652cc
+------WebKitFormBoundaryvic8dui6scsiR2Ht
+Content-Disposition: form-data; name="post_ID"
+
+7
+------WebKitFormBoundaryvic8dui6scsiR2Ht
+Content-Disposition: form-data; name="active_post_lock"
+
+1658801734:1
+------WebKitFormBoundaryvic8dui6scsiR2Ht--

@@ -30,26 +30,24 @@ Response::Response(Server  serv , Request req)
     // check 400 413 uri errors
     initData(serv, req);
 
-    // if (cgimap.size() > 0 )
-    // {
-    //     std::cout << red <<"CGI start!" << reset <<  std::endl;
-    //     Cgi c(serv, req , matching_location); 
-    //     cgiOn = c.getOn();
-    //     if (cgiOn)
-    //     {
-    //         if (c.getStatus() != -1)
-    //             setStatusCode(c.getStatus());
-    //         if (c.getLocation().size())
-    //             _redirect = c.getLocation();
-    //         file_name = c.gettoRender_file();
-    //         file_size = fsize( file_name.c_str());  
+    if (cgimap.size() > 0 )
+    {
+        std::cout << red <<"CGI start!" << reset <<  std::endl;
+        Cgi c(serv, req , matching_location); 
+        cgiOn = c.getOn();
+        if (cgiOn)
+        {
+            // if (c.getStatus() != -1)
+            //     setStatusCode(c.getStatus());
+            file_name = c.gettoRender_file();
+            file_size = fsize( file_name.c_str());  
 
-    //         cgi_header = c.getHeader();
-    //         return ;
-    //     }
-    //     std::cout << red <<"CGI DONE! => " << cgiOn << reset << std::endl;
+            cgi_header = c.getHeader();
+            return ;
+        }
+        std::cout << red <<"CGI DONE! => " << cgiOn << reset << std::endl;
 
-    // }
+    }
     if (validMethod)
     {
         if (_method == "DELETE")
@@ -349,7 +347,7 @@ std::pair<char *, size_t> Response::getHeader()
 
     return std::make_pair(buf, strlen(buf));
 }
-
+    
 std::string Response::generateBody()
 {
   std::ofstream bodytmp("body.html", std::ios::out | std::ios::binary);
@@ -433,7 +431,7 @@ std::pair<char * , size_t> Response::getBody()
     written += ret;
     std::cout << yellow << "SALAAM"<< reset << std::endl;
     std::cout <<  "ret :"<< ret << std::endl;
-    std::cout << buf << std::endl;
+    // std::cout << buf << std::endl;
     std::cout << "filesize "<< file_size << std::endl;
     std::cout << "written "<<  written << std::endl;
     if (written >= file_size)
