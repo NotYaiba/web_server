@@ -18,6 +18,7 @@ class Cgi {
     char **arr;
     bool on;
     std::map<std::string, std::string> cgimap ;
+    std::map<std::string, std::string> req_headers;
     char** env;
     std::string filetype;
     std::string filepath;

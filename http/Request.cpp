@@ -270,6 +270,6 @@ Request &Request::operator=(Request  const & src)
     Uri = src.getUri();
     method = src.getMethod();
     body = src.getBody();
-
+headers = src.getHeaders();
     return *this;
 }

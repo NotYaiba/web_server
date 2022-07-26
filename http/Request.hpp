@@ -56,6 +56,11 @@ class Request
         std::string const & getContentType() const{
             return content_type;
         }
+        std::map<std::string, std::string> getHeaders() const 
+        {
+            return headers;
+        }
+
         std::string getCookie() 
         {
             std::map<std::string, std::string>::iterator it =  headers.find("Cookie");

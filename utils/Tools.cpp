@@ -314,3 +314,12 @@ bool isDirictory(std::string path)
 	return S_ISDIR(statbuf.st_mode);
 }
 
+
+char asciiToUpper(char in)
+{
+	if (in <= 'z' && in >= 'a')
+		return in - ('z' - 'Z');
+	else if (in == '-')
+		return ('_');
+	return in;
+}

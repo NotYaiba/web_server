@@ -19,11 +19,13 @@ void Cgi::initData()
     path = _req.getUri();
     path =   path.erase(path.size() - 1) ;
     filepath =  removeRepeated(_loc.getRoot() + "/" +  path , '/');
+
     std::cout << "matching Location: " <<_loc.getLocation() << std::endl;
     std::string def =  _loc.getDefaultt();
-    if (def.size() > 1)
+
+    if (def.size() > 1 && isDirictory(filepath))
     {
-    std::cout << " def: " <<def << std::endl;
+        std::cout << " def: " <<def << std::endl;
         filepath = removeRepeated(filepath +"/" + def + "/", '/');
         filepath.erase(filepath.size() - 1);
         std::cout << "default path ; " << filepath << std::endl;
@@ -108,49 +110,44 @@ void Cgi::execute_cgi()
 void Cgi::SetEnv()
 {
     std::map<std::string , std::string> mp;
+    std::map<std::string , std::string> req_headers = _req.getHeaders();
+    for(std::map<std::string , std::string>::iterator it = req_headers.begin() ; it != req_headers.end() ; it++ )
+    {
+        std::string key("HTTP_");
+        key += it->first;
+        std::transform(key.begin(), key.end(), key.begin(), asciiToUpper);
+        mp[key] = it->second;
+    }
     
     mp["REQUEST_METHOD"] = method;
     mp["SERVER_PROTOCOL"] = "HTTP/1.1";
     mp["GATEWAY_INTERFACE"] = "CGI/1.1";
-
     mp["CONTENT_TYPE"] = _req.getContentType();
-    std::cerr << "Content_ Type : " << _req.getContentType() << std::endl;
     mp["CONTENT_LENGTH"] = std::to_string(_req.getContentLength());
     mp["SERVER_PORT"] = std::to_string(_server.getPort());
     mp["SERVER_NAME"] = (_server.getServerName())[0];
-    mp["REMOTE_ADDR"] = _server.getHost();
-    {
-        std::vector <std::string> tmp = split(path, "/");
-        std::string path_info = "/";
-        for (std::vector<std::string>::iterator it = tmp.begin(); it != --tmp.end(); it++)
-            path_info += *it + "/";
-    }
-    //TODO : fill the variables bellow dinammically
-    std::cout << filepath << " <-- filepath | path " << path;
-    // if (isDirictory(path))
+    // mp["REMOTE_ADDR"] = _server.getHost();
     // {
-    //     std::cout << "itiiiz directory" << std::endl;
-        mp["PATH_INFO"] = _loc.getDefaultt();
+    //     std::vector <std::string> tmp = split(path, "/");
+    //     std::string path_info = "/";
+    //     for (std::vector<std::string>::iterator it = tmp.begin(); it != --tmp.end(); it++)
+    //         path_info += *it + "/";
     // }
-    // else
-    //    mp["PATH_INFO"] = "";
-    // std::
-        // mp["PATH_INFO"] = filepath;
+    //TODO : fill the variables bellow dinammically
+    // std::cout << filepath << " <-- filepath | path " << path;
+    // std::cout << uri << " <-- uri /\n";
+    mp["PATH_INFO"] = _loc.getDefaultt();
 
-    // mp["PATH_TRANSLATED"] = removeRepeated(_loc.getRoot() + "/" +  path , '/');
     mp["PATH_TRANSLATED"] = filepath;
+    // mp["REQUEST_URI"] = uri;
     mp["REDIRECT_STATUS"] = "200";
+  
     mp["QUERY_STRING"] = query;
-    size_t i = path.find("?");
-    if (i != std::string::npos)
-        path.erase(i);
     mp["SCRIPT_NAME"] = path;
-    mp["SCRIPT_FILENAME"] = filepath;
-    std::cerr << "script_name : " << path <<std::endl;
-    std::cerr << "script_Filename : " << removeRepeated(_loc.getRoot() + "/" +  path , '/') <<std::endl;
+    mp["DOCUMENT_ROOT"] = _loc.getRoot();
+    mp["DOCUMENT_URI"] = filepath;
 
-    mp["HTTP_HOST"] = _server.getHost() + ":" + std::to_string(_server.getPort());
-    // TODO : ADD HTTP_COOKIE
+
     mp["HTTP_COOKIE"] = _req.getCookie();
     std::vector<std::string> v;
     for ( std::map<std::string , std::string>::iterator it = mp.begin() ; it != mp.end(); it++)
