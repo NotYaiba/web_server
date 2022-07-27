@@ -7,11 +7,11 @@ class Cgi {
     Server _server;
     Request _req;
     Location _loc;
-    std::string path;
-    std::string uri;
-    std::string method;
-    std::string cgikey;
-    std::string query;
+    std::string _path;
+    std::string _uri;
+    std::string _method;
+    std::string _cgikey;
+    std::string _query;
     std::string _header;
     std::string _status;
     std::string _location;

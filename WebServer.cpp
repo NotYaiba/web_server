@@ -84,7 +84,7 @@ void Webserver::NewConnectionRead(int fd)
 
 void Webserver::HandleRequest(int fd)
 {
-    char buf[BUFFER_SIZE];
+    char *buf = (char *)malloc(BUFFER_SIZE * sizeof(char));
     int allread  = 0;
     int rb = read(fd,buf,BUFFER_SIZE );
     if (rb == -1)
@@ -96,6 +96,7 @@ void Webserver::HandleRequest(int fd)
     {
         Request req;
         std::map<int , Request>::iterator it = req_map.find(fd);
+        std::cout << "read1 : " << rb << std::endl;
         
         it->second.fillRequest(buf, rb);
 

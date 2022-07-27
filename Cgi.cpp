@@ -16,32 +16,33 @@ Cgi::Cgi(Server serv , Request  req , Location const & loc) : _server(serv), _re
 void Cgi::initData()
 {
     cgimap = _loc.getCgiMap();
-    path = _req.getUri();
-    path =   path.erase(path.size() - 1) ;
-    filepath =  removeRepeated(_loc.getRoot() + "/" +  path , '/');
-
+    _uri = _req.getUri();
+    _uri.erase(_uri.size() - 1);
+    _path = _uri;
+    size_t found = _path.find("?");
+    if (found != std::string::npos)
+        _path.erase(found);
+    filepath =  removeRepeated(_loc.getRoot() + "/" +  _uri , '/');
+    std::vector<std::string> tmpv = split(filepath, "?");
+    if(tmpv.size() > 1)
+    {
+        _query = tmpv[1];
+        filepath = tmpv[0];
+    }
     std::cout << "matching Location: " <<_loc.getLocation() << std::endl;
     std::string def =  _loc.getDefaultt();
-
     if (def.size() > 1 && isDirictory(filepath))
     {
         std::cout << " def: " <<def << std::endl;
         filepath = removeRepeated(filepath +"/" + def + "/", '/');
+        _path = removeRepeated(_path +"/" + def + "/", '/');
         filepath.erase(filepath.size() - 1);
         std::cout << "default path ; " << filepath << std::endl;
     }
-    std::vector<std::string> tmpv = split(filepath, "?");
-    if(tmpv.size() > 1)
-    {
-        query = tmpv[1];
-        filepath = tmpv[0];
-    }
-    uri = _req.getUri();
-    uri.erase(uri.size() - 1);
-    method = _req.getMethod();
+    _method = _req.getMethod();
     filetype =  get_file_type(filepath);
 
-    if (method == "POST")
+    if (_method == "POST")
         is_post = true;
 
     std::cout <<blue <<"hellow cgi is on " << on << reset << std::endl;
@@ -54,10 +55,10 @@ void Cgi::initData()
     else
     {
         if (filetype == "application/x-php")
-            cgikey = cgimap["php"];
+            _cgikey = cgimap["php"];
         else
-            cgikey = cgimap["python"];
-        if (cgikey == "")
+            _cgikey = cgimap["python"];
+        if (_cgikey == "")
             throw "BAD GET AWAY !"; // TODO
         on = true;
     }
@@ -69,7 +70,7 @@ void Cgi::execute_cgi()
     pid_t pid;
     int post_fd;
     std::cout << "file path ===>" << filepath << std::endl;
-    std::cout << "query string "<< query<< std::endl;
+    std::cout << "query string "<< _query<< std::endl;
     std::cout << yellow<< "DKHEL CGIII"<<  reset << std::endl;
     
     int outfile_fd = open("./index.html", O_CREAT | O_WRONLY | O_TRUNC, 0666);
@@ -109,6 +110,8 @@ void Cgi::execute_cgi()
 }
 void Cgi::SetEnv()
 {
+   std::string  def = removeRepeated(_loc.getDefaultt()  + "/" , '/');
+    def.erase(def.size() - 1);
     std::map<std::string , std::string> mp;
     std::map<std::string , std::string> req_headers = _req.getHeaders();
     for(std::map<std::string , std::string>::iterator it = req_headers.begin() ; it != req_headers.end() ; it++ )
@@ -118,14 +121,31 @@ void Cgi::SetEnv()
         std::transform(key.begin(), key.end(), key.begin(), asciiToUpper);
         mp[key] = it->second;
     }
-    
-    mp["REQUEST_METHOD"] = method;
-    mp["SERVER_PROTOCOL"] = "HTTP/1.1";
-    mp["GATEWAY_INTERFACE"] = "CGI/1.1";
+    std::vector<std::string> remote = split(req_headers["Host"], ":");
+    mp["QUERY_STRING"] = _query;
+    mp["REQUEST_METHOD"] = _method;
     mp["CONTENT_TYPE"] = _req.getContentType();
     mp["CONTENT_LENGTH"] = std::to_string(_req.getContentLength());
+    mp["SCRIPT_NAME"] = removeRepeated(_uri + "/" + def, '/');
+    mp["REQUEST_URI"] = _uri;
+    mp["DOCUMENT_URI"] = _path;
+    mp["DOCUMENT_ROOT"] = _loc.getLocation()+"wp-admin/";
+    mp["SERVER_PROTOCOL"] = "HTTP/1.1";
+    mp["REQUEST_SCHEME"] = "http";
+    mp["GATEWAY_INTERFACE"] = "CGI/1.1";
+    mp["SERVER_SOFTWARE"] = "webserv/2.1";
+
+    mp["PATH_TRANSLATED"] = filepath;
+    mp["REMOTE_ADDR"] = remote[0];
+    mp["REMOTE_PORT"] = remote[1];
+    mp["SERVER_ADDR"] = _server.getHost();
     mp["SERVER_PORT"] = std::to_string(_server.getPort());
     mp["SERVER_NAME"] = (_server.getServerName())[0];
+    mp["REDIRECT_STATUS"] = "200";
+    mp["SCRIPT_FILENAME"] =  removeRepeated(_loc.getRoot() + "/" + _path, '/');
+    mp["PATH_TRANSLATED"] = mp["SCRIPT_FILENAME"];
+    // mp["PATH_INFO"] = removeRepeated(_loc.getRoot() + "/" + _path, '/');
+
     // mp["REMOTE_ADDR"] = _server.getHost();
     // {
     //     std::vector <std::string> tmp = split(path, "/");
@@ -136,31 +156,28 @@ void Cgi::SetEnv()
     //TODO : fill the variables bellow dinammically
     // std::cout << filepath << " <-- filepath | path " << path;
     // std::cout << uri << " <-- uri /\n";
-    mp["PATH_INFO"] = _loc.getDefaultt();
 
-    mp["PATH_TRANSLATED"] = filepath;
-    // mp["REQUEST_URI"] = uri;
-    mp["REDIRECT_STATUS"] = "200";
+    mp["PATH_INFO"] = def;//_path.substr(_loc.getLocation().size());
+
   
-    mp["QUERY_STRING"] = query;
-    mp["SCRIPT_NAME"] = path;
-    mp["DOCUMENT_ROOT"] = _loc.getRoot();
-    mp["DOCUMENT_URI"] = filepath;
 
 
     mp["HTTP_COOKIE"] = _req.getCookie();
     std::vector<std::string> v;
+    std::cout << "ENV FOR CGUI\n";
     for ( std::map<std::string , std::string>::iterator it = mp.begin() ; it != mp.end(); it++)
     {
         std::string tmp = it->first + "=" + it->second;
         v.push_back(tmp);
+        std::cout << tmp << '\n';
     }
+    std::cout << "ENV FOR CGUI END\n";
 	env = vectToArr(v);
 }
 char **  Cgi::initarr()
 {
     std::vector<std::string> ar;
-	ar.push_back(cgikey);
+	ar.push_back(_cgikey);
     std::cerr << filepath << std::endl;
 	ar.push_back(filepath);
     return(vectToArr(ar));

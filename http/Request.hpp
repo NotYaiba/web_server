@@ -31,7 +31,7 @@ class Request
         void fillBody( char   *buff, int read, int _bodyfd);
         bool checkEndRequest( char const *buff, int read);
         bool isChunksize(size_t begin , size_t end, char * str);
-        void fill_vect(char *buff , size_t read);
+        void fill_vect(char *buff , int read);
         void writeVect(int fd);
         bool findchunkSize();
         void fillMethod();

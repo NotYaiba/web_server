@@ -30,6 +30,8 @@ void    Request::fillRequest(char *buff, int read)
 {
     std::vector<std::string> vect;
     std::string str(buff, read);
+        std::cout << "read12 : " << read << std::endl;
+
     if (isFrstRead)
     {
         vect = split(str, "\r\n\r\n");
@@ -38,10 +40,16 @@ void    Request::fillRequest(char *buff, int read)
         createFile();
         int testoffset = vect[0].size() + 4 ;
         fillBody( buff + testoffset , read - testoffset, _bodyfd);
+        std::cout << "read123 : " << read << std::endl;
+
         isFrstRead = false;
     }
     else
+    {
+        std::cout << "read1234 : " << read << std::endl;
+
         fillBody( buff, read, _bodyfd);
+    }
    
 }
 
@@ -57,6 +65,8 @@ void    Request::debug()
 
 void Request::fillBody( char  *buff, int read, int _bodyfd)
 {
+        std::cout << "read12345 : " << read << std::endl;
+
     fill_vect(buff, read);
 
     if (ischuncked == 1)
@@ -172,9 +182,10 @@ bool Request::checkEndRequest( char const *buff, int read)
 
 
 
-void Request::fill_vect(char *buff , size_t read)
+void Request::fill_vect(char *buff , int read)
 {
-    for (size_t i = 0 ; i < read; i++)
+    std::cout << "read : " << read << std::endl;
+    for (int i = 0 ; i < read; i++)
     {
         god_vect.push_back(buff[i]);
     }
@@ -270,6 +281,6 @@ Request &Request::operator=(Request  const & src)
     Uri = src.getUri();
     method = src.getMethod();
     body = src.getBody();
-headers = src.getHeaders();
+    headers = src.getHeaders();
     return *this;
 }

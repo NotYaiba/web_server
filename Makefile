@@ -32,3 +32,4 @@ re : fclean
 		make all
 		rm  -f tmp/* 
 		rm -f body_debug 
+		rm -f index-* 
