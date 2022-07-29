@@ -32,7 +32,6 @@ void Socket::SetSockAddress()
 int Socket::BindSock(int const &socket)
 {
 
-    int new_socket=0;
     int flag = 1;  
     if (-1 == setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag))) {  
         perror("setsockopt fail");  
@@ -59,7 +58,6 @@ int Socket::AccectSock(int const &socket)
     int new_socket = accept(socket, (struct sockaddr *)&client, &clientSize);
     if (new_socket == -1)
     {
-        std::cerr << std::strerror( errno)  << std::endl;
         std::cerr << "Problem with client connecting!";
         return -4;
     }

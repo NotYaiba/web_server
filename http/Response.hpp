@@ -36,7 +36,7 @@ class Response
     std::pair<char* , size_t> bufpair;
     Location  matching_location;
     public:
-    Response(Server  serv , Request req);
+    Response(std::vector<Server>  serv , Request req);
     std::vector<Location> locations;
     void    debug();
     void findMatchingLocation();
@@ -53,7 +53,7 @@ class Response
     void generateredeHeader();
     void getIndex(std::string path);
     bool isDir(std::string path);
-    void initData(Server  serv , Request req);
+    void initData(std::vector<Server>  , Request req);
     void setIsvalid();
    std::pair<char* , size_t> getBody();
    bool getIsend() const

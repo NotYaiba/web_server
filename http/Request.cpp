@@ -34,11 +34,18 @@ void    Request::fillRequest(char *buff, int read)
 
     if (isFrstRead)
     {
+        std::cout << "firstread :"<< (read) << std::endl;
+
         vect = split(str, "\r\n\r\n");
+        std::cout << "under spli :"<< (read) << std::endl;
         fillHeaders( vect[0]);
+        std::cout << "under fillHeaders :"<< (read) << std::endl;
         checkHeaders();
+        std::cout << "under checkHeaders :"<< (read) << std::endl;
         createFile();
+        std::cout << "create :"<< (read) << std::endl;
         int testoffset = vect[0].size() + 4 ;
+        std::cout << "read - test "<< (read - testoffset) << std::endl;
         fillBody( buff + testoffset , read - testoffset, _bodyfd);
         std::cout << "read123 : " << read << std::endl;
 
@@ -93,7 +100,9 @@ void Request::fillMethod()
     std::vector<std::string> s  = split(Muv, " ");
     method = s[0];
     Uri = fixIt(s[1]);
-    if (Uri != "POST" || Uri != "GET" || Uri != "DELETE")
+    std::cout << yellow << method << std::endl;
+    std::cout << yellow << Uri << std::endl;
+    if (method != "POST" || method != "GET" || method != "DELETE")
         invalidMethod = -1;
     
 }
@@ -107,6 +116,7 @@ void Request::fillHeaders(std::string header)
     int i = 0;
     while (std::getline (headerStream, line))
     {
+        std::cout << "header : " << line << std::endl;
         if (i == 0)
             Muv  = line;
         else
@@ -116,7 +126,7 @@ void Request::fillHeaders(std::string header)
             if (vect3.size() > 2)
             {
                 int k  = 2;
-                while (k < vect3.size())
+                while ((size_t)k < vect3.size())
                     value +=  + ":" + vect3[k++];
             }   
             headers.insert(std::make_pair(vect3[0], trim(value)));
@@ -168,7 +178,7 @@ bool Request::checkEndRequest( char const *buff, int read)
         fclose(p_file);
 
 
-        if (content_length <= size)
+        if (content_length <= (size_t)size)
         {
                 isslastRead = true;
                 isFrstRead = true;
@@ -207,7 +217,7 @@ bool Request::findchunkSize()
         {
             if (i + 1 <  god_vect.size() && god_vect[i + 1] == '\n')
             {
-                int n = i  + 2;
+                size_t n = i  + 2;
                 while  (n  <  god_vect.size()  &&  isxdigit(god_vect[n]) )
                     n++;
                 if (n + 1 < god_vect.size() &&   god_vect[n] == '\r' && god_vect[n + 1] == '\n')

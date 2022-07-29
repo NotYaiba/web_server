@@ -42,6 +42,7 @@ class Request
             return status_code;
         }
         std::string const & getUri() const{
+            
             return Uri;
         }
         std::string const & getMethod() const{

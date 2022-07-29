@@ -14,9 +14,10 @@ NAME = webserv
 
 all : $(NAME)
 
-FLAGS =  -std=c++98  #-Wall -Wextra -Werror
+FLAGS =  -std=c++98  -Wall -Wextra -Werror
 
 $(NAME) : $(SRCS)
+		mkdir -p .tmp tmp
 		@clang++ ${FLAGS} ${SRCS}   -o $(NAME)
 
 
@@ -32,4 +33,4 @@ re : fclean
 		make all
 		rm  -f tmp/* 
 		rm -f body_debug 
-		rm -f index-* 
+		rm -f .tmp/* 

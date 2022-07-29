@@ -2,7 +2,7 @@
 
 bool isDigit(std::string str)
 {
-     for (int i = 0 ; i < str.size(); i++)
+     for (size_t i = 0 ; i < str.size(); i++)
     {
         int check = isdigit(str[i]);
         if (!check)
@@ -139,7 +139,7 @@ std::string removeRepeated(std::string str , char s)
 {
     std::vector <char> v;
     int d = 0;
-    for (int i = 0 ; i < str.size(); i++)
+    for (size_t i = 0 ; i < str.size(); i++)
     {
         
         if (s == str[i] )

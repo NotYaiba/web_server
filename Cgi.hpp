@@ -14,6 +14,7 @@ class Cgi {
     std::string _query;
     std::string _header;
     std::string _status;
+    std::pair<std::string , std::string> statusCode;
     std::string _location;
     char **arr;
     bool on;

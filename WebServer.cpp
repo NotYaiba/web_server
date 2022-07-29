@@ -85,12 +85,11 @@ void Webserver::NewConnectionRead(int fd)
 void Webserver::HandleRequest(int fd)
 {
     char *buf = (char *)malloc(BUFFER_SIZE * sizeof(char));
-    int allread  = 0;
     int rb = read(fd,buf,BUFFER_SIZE );
     if (rb == -1)
     {
-        std::cout << std::strerror( errno)  << std::endl;
-        throw "mochkila\n";
+        close(fd);
+        FD_CLR(fd ,&readcopy);
     }
     else if (rb > 0)
     {
@@ -125,12 +124,14 @@ void Webserver::HandleResponse(int fd)
     if (it  == res_map.end())
     {
         std::cout << red << "\n\n start Response \n\n" << reset <<  std::endl;
-        Response res(servers[fd][0], req_map[fd]);
+
+        
+
+        Response res(servers[fd], req_map[fd]);
 
         res_map.insert(std::make_pair(fd, res));
         it = res_map.find(fd);
         buffer_new = it->second.getHeader();
-
     }
     else
     {

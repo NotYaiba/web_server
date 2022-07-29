@@ -2,7 +2,7 @@
 
 Cgi::Cgi(Server serv , Request  req , Location const & loc) : _server(serv), _req(req), _loc(loc)
 {
-    toRender_file= "index-" + random_string();
+    toRender_file= ".tmp/index-" + random_string();
     _status = "";
     on = false;
     is_post = false;
@@ -16,18 +16,21 @@ Cgi::Cgi(Server serv , Request  req , Location const & loc) : _server(serv), _re
 void Cgi::initData()
 {
     cgimap = _loc.getCgiMap();
-    _uri = _req.getUri();
+    _uri =_req.getUri();
     _uri.erase(_uri.size() - 1);
     _path = _uri;
     size_t found = _path.find("?");
     if (found != std::string::npos)
         _path.erase(found);
-    filepath =  removeRepeated(_loc.getRoot() + "/" +  _uri , '/');
+    filepath =  removeRepeated(_loc.getRoot() + "/" +  _uri  , '/');
+    std::cout << "filrpath :" << filepath << std::endl;
     std::vector<std::string> tmpv = split(filepath, "?");
     if(tmpv.size() > 1)
     {
         _query = tmpv[1];
         filepath = tmpv[0];
+        filepath = removeRepeated(filepath + "/" , '/');
+        filepath.erase(filepath.size() - 1);
     }
     std::cout << "matching Location: " <<_loc.getLocation() << std::endl;
     std::string def =  _loc.getDefaultt();
@@ -40,6 +43,7 @@ void Cgi::initData()
         std::cout << "default path ; " << filepath << std::endl;
     }
     _method = _req.getMethod();
+    std::cout << "file path ===>" << filepath << std::endl;
     filetype =  get_file_type(filepath);
 
     if (_method == "POST")
@@ -59,7 +63,7 @@ void Cgi::initData()
         else
             _cgikey = cgimap["python"];
         if (_cgikey == "")
-            throw "BAD GET AWAY !"; // TODO
+            return ; // TODO
         on = true;
     }
 }
@@ -69,7 +73,6 @@ void Cgi::execute_cgi()
 
     pid_t pid;
     int post_fd;
-    std::cout << "file path ===>" << filepath << std::endl;
     std::cout << "query string "<< _query<< std::endl;
     std::cout << yellow<< "DKHEL CGIII"<<  reset << std::endl;
     
@@ -110,8 +113,20 @@ void Cgi::execute_cgi()
 }
 void Cgi::SetEnv()
 {
-   std::string  def = removeRepeated(_loc.getDefaultt()  + "/" , '/');
+    std::string def = removeRepeated(_loc.getDefaultt() + "/" , '/');
     def.erase(def.size() - 1);
+    std::string scriptUri = removeRepeated(_req.getUri() , '/');
+    std::string scriptPath = removeRepeated(_loc.getRoot() + "/" + scriptUri , '/');
+    if (isDirictory(scriptPath))
+    {
+        scriptUri = removeRepeated(scriptUri +"/"+  def  , '/');
+        scriptPath = removeRepeated(scriptPath + "/" + def , '/');
+    }
+    std::cout << "scriptUri :" << scriptUri << std::endl;
+    std::cout << "scriptPath :" << scriptPath << std::endl;
+
+    // std::string  def = removeRepeated(_loc.getDefaultt()  + "/" , '/');
+    // def.erase(def.size() - 1);
     std::map<std::string , std::string> mp;
     std::map<std::string , std::string> req_headers = _req.getHeaders();
     for(std::map<std::string , std::string>::iterator it = req_headers.begin() ; it != req_headers.end() ; it++ )
@@ -126,14 +141,19 @@ void Cgi::SetEnv()
     mp["REQUEST_METHOD"] = _method;
     mp["CONTENT_TYPE"] = _req.getContentType();
     mp["CONTENT_LENGTH"] = std::to_string(_req.getContentLength());
-    mp["SCRIPT_NAME"] = removeRepeated(_uri + "/" + def, '/');
-    mp["REQUEST_URI"] = _uri;
-    mp["DOCUMENT_URI"] = _path;
-    mp["DOCUMENT_ROOT"] = _loc.getLocation()+"wp-admin/";
+    mp["SCRIPT_NAME"] = removeRepeated( _uri+ "/" + def, '/') ;
+    if (isDirictory(_req.getUri()))
+        mp["REQUEST_URI"] = removeRepeated( _uri+ "/" + def, '/');
+    else
+        mp["REQUEST_URI"] = removeRepeated(  _uri+ "/" , '/');
+    mp["DOCUMENT_URI"] = scriptPath;
+    mp["DOCUMENT_ROOT"] = _loc.getRoot();
     mp["SERVER_PROTOCOL"] = "HTTP/1.1";
     mp["REQUEST_SCHEME"] = "http";
     mp["GATEWAY_INTERFACE"] = "CGI/1.1";
     mp["SERVER_SOFTWARE"] = "webserv/2.1";
+    // if (isDirictory(removeRepeated(_loc.getRoot() + "/"+ _req.getUri(), '/')))
+    //     mp["PATH_INFO"] = def;
 
     mp["PATH_TRANSLATED"] = filepath;
     mp["REMOTE_ADDR"] = remote[0];
@@ -143,21 +163,23 @@ void Cgi::SetEnv()
     mp["SERVER_NAME"] = (_server.getServerName())[0];
     mp["REDIRECT_STATUS"] = "200";
     mp["SCRIPT_FILENAME"] =  removeRepeated(_loc.getRoot() + "/" + _path, '/');
-    mp["PATH_TRANSLATED"] = mp["SCRIPT_FILENAME"];
-    // mp["PATH_INFO"] = removeRepeated(_loc.getRoot() + "/" + _path, '/');
+    // mp["PATH_TRANSLATED"] = mp["SCRIPT_FILENAME"];
+    mp["PHP_SELF"] = "/wp-admin/index.php";
+    //     // mp["PATH_INFO"] = removeRepeated(_loc.getRoot() + "/" + _path, '/');
 
-    // mp["REMOTE_ADDR"] = _server.getHost();
-    // {
-    //     std::vector <std::string> tmp = split(path, "/");
-    //     std::string path_info = "/";
-    //     for (std::vector<std::string>::iterator it = tmp.begin(); it != --tmp.end(); it++)
-    //         path_info += *it + "/";
-    // }
-    //TODO : fill the variables bellow dinammically
-    // std::cout << filepath << " <-- filepath | path " << path;
-    // std::cout << uri << " <-- uri /\n";
+    //     // mp["REMOTE_ADDR"] = _server.getHost();
+    //     // {
+    //     //     std::vector <std::string> tmp = split(path, "/");
+    //     //     std::string path_info = "/";
+    //     //     for (std::vector<std::string>::iterator it = tmp.begin(); it != --tmp.end(); it++)
+    //     //         path_info += *it + "/";
+    //     // }
+    //     //TODO : fill the variables bellow dinammically
+    //     // std::cout << filepath << " <-- filepath | path " << path;
+    //     // std::cout << uri << " <-- uri /\n";
 
-    mp["PATH_INFO"] = def;//_path.substr(_loc.getLocation().size());
+    //   //_path.substr(_loc.getLocation().size());
+
 
   
 
@@ -195,7 +217,14 @@ void Cgi::pars_file()
 {
     //  std::cout << "ex: "<<  << std::endl;
     std::ifstream MyReadFile("index.html");
+    if (_status == "301")
+    {
+         _header += "HTTP/1.1 "+ _status + _header + "\r\n";
+      _header  += _location + "\r\n";
+      _header  +=  "\r\n";
+        return ;
 
+    }
     _header += "Server: mywebserver\r\n";
 
     _header += "Access-Control-Allow-Origin: *\r\n";
@@ -223,8 +252,10 @@ void Cgi::pars_file()
     if (_status.size())
     {
         std::vector<std::string> v = split(_status, ":");
-        // v = split(v[1], " ");
          _status = v[1];
+        v = split(v[1], " ");
+        statusCode.first = v[0] ;
+        statusCode.second = v[1] ;
         _header = "HTTP/1.1 "+ _status + _header + "\r\n";
     }
     else
@@ -238,10 +269,15 @@ void Cgi::pars_file()
     int newfile_fd = open(toRender_file.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0666);
     int saved_stdout = dup(STDOUT_FILENO);
     dup2(newfile_fd, STDOUT_FILENO);
-    for (std::string line; std::getline(MyReadFile, line);) 
-    {
-        std::cout << line;
-    }
+    // if (statusCode.first != "200" && statusCode.first != "201" && statusCode.first != "302")
+    //     generateBody();
+    // else
+    // {
+        for (std::string line; std::getline(MyReadFile, line);) 
+        {
+            std::cout << line;
+        }
+    // }
     std::cout << std::endl;
     close(newfile_fd);
     dup2(saved_stdout, STDOUT_FILENO);
@@ -281,25 +317,29 @@ void Cgi::dupp_file(std::string filename)
     close(saved_stdout);
 
 }
-// std::string Cgi::generateBody()
-// {
-//   std::ofstream bodytmp("body.html", std::ios::out | std::ios::binary);
-//     if (_server.getErrorpage() == "")
-//     {
-//         std::string msg = std::to_string(statusCode.first) +  statusCode.second;
-//         std::string tmp;
-//         tmp = "<html>\n<head><title>" + msg + "</title></head>\n<body bgcolor='white'>\n<center><h1>"  +msg + "</h1></center>\n</body>\n</html>";
-//         bodytmp << tmp;
-//         file_name = "body.html";
-//         file_size = tmp.size();
-//         file_type = "text/html";
-//         return "body";
-//     }
-//     else
-//     {
-//         file_name = (_server.getErrorpage() + "/" + std::to_string(statusCode.first) + ".html");
-//         file_size = fsize(file_name.c_str());
-//         file_type = "text/html";
-//     }
-//     return ("");
-// }
+std::string Cgi::generateBody()
+{
+    if (_server.getErrorpage() == "")
+    {
+        std::string msg = _status;
+        std::string tmp;
+        tmp = "<html>\n<head><title>" + msg + "</title></head>\n<body bgcolor='white'>\n<center><h1>"  +msg + "</h1></center>\n</body>\n</html>";
+        std::cout  << tmp;
+        // // file_name = "body.html";
+        // // file_size = tmp.size();
+        // // file_type = "text/html";
+        // return "body.html";
+    }
+    else
+    {
+        std::ifstream bodytmp( (_server.getErrorpage() + "/" + statusCode.first + ".html"));
+         for (std::string line; std::getline(bodytmp , line);) 
+        {
+            std::cout << line;
+        }
+        // file_name = (_server.getErrorpage() + "/" + std::to_string(statusCode.first) + ".html");
+        // file_size = fsize(file_name.c_str());
+        // file_type = "text/html";
+    }
+    return ("body.html");
+}

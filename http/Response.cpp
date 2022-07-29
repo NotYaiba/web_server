@@ -1,9 +1,27 @@
 #include "Response.hpp"
 #include "../Cgi.hpp"
 
-void Response::initData(Server  serv , Request req)
+void Response::initData(std::vector<Server>  serv , Request req)
 {
-    _server = serv;
+    std::map<std::string , std::string > Reqheaders = req.getHeaders();
+    int fl = 0;
+    std::cout << "Host : " << Reqheaders["Host"] << std::endl;
+    if (Reqheaders["Host"] != "")
+    {
+        for (size_t i = 0 ; i < serv.size() ; i++)
+        {
+            std::vector<std::string > tmp = split( Reqheaders["Host"], ":");
+            if (serv[i].getHost() == tmp[0] &&  fl == 0)
+            {
+                 _server = serv[i];
+                fl = 1;
+            }
+        }
+    }
+    else
+        setStatusCode(400);
+    if (fl == 0)
+        _server = serv[0];
     _req  = req;
     _path = _req.getUri();
     _method  = _req.getMethod();
@@ -17,6 +35,7 @@ void Response::initData(Server  serv , Request req)
     file_type = "text/html";
     file_size = 0;
     written = 0;
+    cgiOn = false;
     findMatchingLocation();
     _loc = matching_location.getLocation();
     _redirect = matching_location.getRedirect();
@@ -24,16 +43,16 @@ void Response::initData(Server  serv , Request req)
     cgimap = matching_location.getCgiMap();
     setIsvalid();
 }
-Response::Response(Server  serv , Request req)
+Response::Response(std::vector<Server>  serv , Request req)
 {
 
     // check 400 413 uri errors
     initData(serv, req);
-
+    std::cout << "cgi maap : "<<cgimap.size() << std::endl;
     if (cgimap.size() > 0 )
     {
         std::cout << red <<"CGI start!" << reset <<  std::endl;
-        Cgi c(serv, req , matching_location); 
+        Cgi c(_server, req , matching_location); 
         cgiOn = c.getOn();
         if (cgiOn)
         {
@@ -200,12 +219,12 @@ void   Response::findMatchingLocation()
     int iterations = 0;
     std::map<int , int > locScore;
     locations = _server.getLocations();
-    for (int i = 0; i < locations.size(); i++)
+    for (size_t i = 0; i < locations.size(); i++)
     {
         score = 0;
         iterations = 0;
         std::string loc = locations[i].getLocation();
-        for(int i = 0 ; i < _path.size() || i < loc.size() ; i++)
+        for(size_t i = 0 ; i < _path.size() || i < loc.size() ; i++)
         {
                 if (_path[i] == loc[i])
                 {
@@ -276,13 +295,16 @@ void Response::Delete()
 void Response::Post()
 {
     std::cout << "Merhba end POST!\n";
-    //  if (s.get_max_body_size() < size_t(fsize(req.get_body().c_str())))
-    // {
-    //     std::cout << "Request body too large" << std::endl;
-    //     remove(req.get_body().c_str());
-    //     set_status_code(413);
-    //     return ;
-    // }
+    size_t bodyLimit = (_server.getBody_size_limit() * 1024) ;
+    size_t filesi = size_t(fsize(_req.getBody().c_str())) ;
+     if ((size_t)bodyLimit < filesi)
+    {
+        std::cout << bodyLimit << std::endl;
+        std::cout << bodyLimit << std::endl;
+        std::cout << "Request body too large" << std::endl;
+        setStatusCode(413);
+        return ;
+    }
     std::string new_file(_req.getBody().c_str());
     // std::cout << blue << new_file << reset<<std::endl;
     std::string file_name1 = removeRepeated(matching_location.getUpload() + "/" + new_file, '/');
@@ -308,7 +330,6 @@ void Response::Post()
 
 std::string Response::generateHeader()
 {   
-    int len;
     std::string headertmp;
     std::cout << "Generate header no cgi \n";
 
@@ -320,12 +341,13 @@ std::string Response::generateHeader()
             headertmp += "HTTP/1.1 " + std::to_string(statusCode.first) + statusCode.second + "\r\n" ;
             headertmp += "Content-type: "+ file_type + "\r\n";
             headertmp += "Content-length: " + std::to_string((int)file_size) + "\r\n";
-            headertmp += "Server: mywebserver\r\n";
+            headertmp += "Server: " + _server.getServerName()[0] + "\r\n";
             //------ to fix cors error
             headertmp += "Access-Control-Allow-Origin: *\r\n";
             headertmp += "Access-Control-Allow-Private-Network: true\r\n";
             headertmp += "Date: " + formatted_time() + "\r\n";
             headertmp += "\r\n";
+            std::cout << headertmp << std::endl;
     }
     else
         generateredeHeader();
@@ -337,6 +359,7 @@ std::pair<char *, size_t> Response::getHeader()
 {
      char *buf;   
     header = "";
+    std::cout << "cgi : " << cgiOn << std::endl;
     if (!cgiOn)
         header +=  generateHeader(); 
     else
@@ -388,6 +411,10 @@ void Response::setStatusCode(int code)
         statusCode.second = " Moved Permanently";
     else if (code == 302)
         statusCode.second = " found";
+    else if (code == 400)
+        statusCode.second = " Bad Request";
+    else if (413)
+        statusCode.second = " Request Entity Too Large";
 }
 
 
@@ -417,7 +444,6 @@ std::pair<char * , size_t> Response::getBody()
 {   
     char *buf;
     int ret;
-    int len;
     std::cout << red << "File to render " << file_name << reset<< std::endl;
    
     int fd = open (file_name.c_str(), O_RDONLY);
@@ -434,7 +460,7 @@ std::pair<char * , size_t> Response::getBody()
     // std::cout << buf << std::endl;
     std::cout << "filesize "<< file_size << std::endl;
     std::cout << "written "<<  written << std::endl;
-    if (written >= file_size)
+    if ((size_t)written >= file_size)
     {
         isEndRes =  true;
     }
