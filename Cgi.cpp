@@ -49,11 +49,9 @@ void Cgi::initData()
     if (_method == "POST")
         is_post = true;
 
-    std::cout <<blue <<"hellow cgi is on " << on << reset << std::endl;
     if (isDirictory(filepath) ||( filetype != "application/x-php" && filetype != "application/x-python" ))
     {
-    std::cout <<blue <<"hellow cgi is on " << on << reset << std::endl;
-
+        std::cout <<blue <<"hellow cgi is off " << on << reset << std::endl;
         return ;
     }
     else
@@ -70,17 +68,13 @@ void Cgi::initData()
 
 void Cgi::execute_cgi()
 {
-
     pid_t pid;
     int post_fd;
     std::cout << "query string "<< _query<< std::endl;
     std::cout << yellow<< "DKHEL CGIII"<<  reset << std::endl;
-    
+    // TODO : check if open failed.
     int outfile_fd = open("./index.html", O_CREAT | O_WRONLY | O_TRUNC, 0666);
-    // std::cout 
-    // dupp_file("tmp/" + _req.getBody());
     post_fd = open(("tmp/" + _req.getBody()).c_str(),   O_RDONLY , 0666);
-    // post_fd = open("new_file",   O_RDONLY , 0666);
     if (post_fd == -1)
     {
         std::cerr << "error open file " << "tmp/" + _req.getBody() << std::endl;
@@ -103,7 +97,7 @@ void Cgi::execute_cgi()
             close(post_fd);
         if (execve(arr[0] ,arr, env) < 0)
         {
-            perror ("ERROR execve "); // TODO
+            perror ("ERROR execve "); // TODO : remove perror.
         }
     }
     close(outfile_fd);
@@ -152,9 +146,6 @@ void Cgi::SetEnv()
     mp["REQUEST_SCHEME"] = "http";
     mp["GATEWAY_INTERFACE"] = "CGI/1.1";
     mp["SERVER_SOFTWARE"] = "webserv/2.1";
-    // if (isDirictory(removeRepeated(_loc.getRoot() + "/"+ _req.getUri(), '/')))
-    //     mp["PATH_INFO"] = def;
-
     mp["PATH_TRANSLATED"] = filepath;
     mp["REMOTE_ADDR"] = remote[0];
     mp["REMOTE_PORT"] = remote[1];
@@ -163,37 +154,17 @@ void Cgi::SetEnv()
     mp["SERVER_NAME"] = (_server.getServerName())[0];
     mp["REDIRECT_STATUS"] = "200";
     mp["SCRIPT_FILENAME"] =  removeRepeated(_loc.getRoot() + "/" + _path, '/');
-    // mp["PATH_TRANSLATED"] = mp["SCRIPT_FILENAME"];
-    mp["PHP_SELF"] = "/wp-admin/index.php";
-    //     // mp["PATH_INFO"] = removeRepeated(_loc.getRoot() + "/" + _path, '/');
-
-    //     // mp["REMOTE_ADDR"] = _server.getHost();
-    //     // {
-    //     //     std::vector <std::string> tmp = split(path, "/");
-    //     //     std::string path_info = "/";
-    //     //     for (std::vector<std::string>::iterator it = tmp.begin(); it != --tmp.end(); it++)
-    //     //         path_info += *it + "/";
-    //     // }
-    //     //TODO : fill the variables bellow dinammically
-    //     // std::cout << filepath << " <-- filepath | path " << path;
-    //     // std::cout << uri << " <-- uri /\n";
-
-    //   //_path.substr(_loc.getLocation().size());
-
-
-  
-
-
+    // mp["PHP_SELF"] = "/wp-admin/index.php";
     mp["HTTP_COOKIE"] = _req.getCookie();
     std::vector<std::string> v;
     std::cout << "ENV FOR CGUI\n";
-    for ( std::map<std::string , std::string>::iterator it = mp.begin() ; it != mp.end(); it++)
+    for (std::map<std::string, std::string>::iterator it = mp.begin(); it != mp.end(); it++)
     {
         std::string tmp = it->first + "=" + it->second;
         v.push_back(tmp);
-        std::cout << tmp << '\n';
+        std::cerr << tmp << '\n';
     }
-    std::cout << "ENV FOR CGUI END\n";
+    std::cout << "ENV FOR CGI END\n";
 	env = vectToArr(v);
 }
 char **  Cgi::initarr()
@@ -301,22 +272,6 @@ std::string Cgi::getLocation() const {return _location;}
 
 std::string Cgi::gettoRender_file() const{return toRender_file;}
 
-void Cgi::dupp_file(std::string filename)
-{
-    std::ifstream MyReadFile(filename.c_str());
-    int newfile_fd = open("new_file", O_CREAT | O_WRONLY | O_TRUNC, 0666);
-    int saved_stdout = dup(STDOUT_FILENO);
-    dup2(newfile_fd, STDOUT_FILENO);
-    for (std::string line; std::getline(MyReadFile, line);) 
-    {
-        std::cout << line;
-        std::cerr << line;
-    }
-    close(newfile_fd);
-    dup2(saved_stdout, STDOUT_FILENO);
-    close(saved_stdout);
-
-}
 std::string Cgi::generateBody()
 {
     if (_server.getErrorpage() == "")
