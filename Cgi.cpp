@@ -225,16 +225,24 @@ void Cgi::pars_file()
         }
         _header += line + "\r\n";
     }
+    std::cout << red << "status wach 3amer : " << _status << std::endl;
+    int newfile_fd = open(toRender_file.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0666);
+    int saved_stdout = dup(STDOUT_FILENO);
+    dup2(newfile_fd, STDOUT_FILENO);
+    for (std::string line; std::getline(MyReadFile, line);) 
+    {
+        std::cout << line;
+    }
     size_t file_size = fsize(toRender_file.c_str());
+    std::cout << std::endl;
     if (_content_length == false)
     {
         _header += "Content-length: "  + std::to_string(file_size) + "\r\n";
     }
-    std::cout << red << "status wach 3amer : " << _status << std::endl;
 
     if (_status.size())
     {
-        std::cout << "statuss:"<< _status << std::endl;
+        // std::cout << "statuss:"<< _status << std::endl;
         std::vector<std::string> v = split(_status, ":");
          _status = v[1];
         v = split(v[1], " ");
@@ -250,20 +258,8 @@ void Cgi::pars_file()
         _location = v[1];
     }
 
-    int newfile_fd = open(toRender_file.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0666);
-    int saved_stdout = dup(STDOUT_FILENO);
-    dup2(newfile_fd, STDOUT_FILENO);
     if (statusCode.first != "200" && statusCode.first != "201" && statusCode.first != "302" &&  statusCode.first != "" && !file_size)
         generateBody();
-
-    else
-    {
-        for (std::string line; std::getline(MyReadFile, line);) 
-        {
-            std::cout << line;
-        }
-    }
-    std::cout << std::endl;
     close(newfile_fd);
     dup2(saved_stdout, STDOUT_FILENO);
     close(saved_stdout);
@@ -290,6 +286,7 @@ std::string Cgi::gettoRender_file() const{return toRender_file;}
 
 std::string Cgi::generateBody()
 {
+
     if (_server.getErrorpage() == "")
     {
         std::string msg = _status;
