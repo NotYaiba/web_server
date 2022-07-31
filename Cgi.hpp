@@ -25,6 +25,7 @@ class Cgi {
     std::string filepath;
     std::string toRender_file;
     bool is_post;
+    bool _content_length;
     public :
     Cgi(Server serv , Request  req ,  Location const & loc);
     void initData();
@@ -42,6 +43,7 @@ class Cgi {
     std::string getLocation() const;
     std::string gettoRender_file() const;
     std::string generateBody();
+    void setStatusCode(std::string code);
 
 };
 

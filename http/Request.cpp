@@ -31,7 +31,7 @@ void    Request::fillRequest(char *buff, int read)
     std::vector<std::string> vect;
     std::string str(buff, read);
         std::cout << "read12 : " << read << std::endl;
-
+    std::cerr << buff << std::endl;
     if (isFrstRead)
     {
         std::cout << "firstread :"<< (read) << std::endl;
@@ -114,6 +114,7 @@ void Request::fillHeaders(std::string header)
     std::stringstream headerStream(header);
     std::string value;
     int i = 0;
+    std::cout <<" header befor " << header << std::endl;
     while (std::getline (headerStream, line))
     {
         std::cout << "header : " << line << std::endl;
@@ -125,8 +126,9 @@ void Request::fillHeaders(std::string header)
             value = vect3[1];
             if (vect3.size() > 2)
             {
-                int k  = 2;
-                while ((size_t)k < vect3.size())
+
+                size_t k  = 2;
+                while (k < vect3.size())
                     value +=  + ":" + vect3[k++];
             }   
             headers.insert(std::make_pair(vect3[0], trim(value)));

@@ -48,7 +48,7 @@ void Cgi::initData()
 
     if (_method == "POST")
         is_post = true;
-
+    std::cout <<blue <<"hellow cgi is off " << on << reset << std::endl;
     if (isDirictory(filepath) ||( filetype != "application/x-php" && filetype != "application/x-python" ))
     {
         std::cout <<blue <<"hellow cgi is off " << on << reset << std::endl;
@@ -56,12 +56,16 @@ void Cgi::initData()
     }
     else
     {
+        std::cout <<blue <<"hellow cgi is off " << filetype << reset << std::endl;
+
         if (filetype == "application/x-php")
             _cgikey = cgimap["php"];
         else
             _cgikey = cgimap["python"];
+        std::cout <<blue <<"hellow cgi is off " << _cgikey << reset << std::endl;
+        
         if (_cgikey == "")
-            return ; // TODO
+            return ;
         on = true;
     }
 }
@@ -82,6 +86,7 @@ void Cgi::execute_cgi()
     arr = initarr();
     SetEnv();
     pid = fork();
+    std::cout << " ----------> " << arr[0] << arr[1] << std::endl;
 
     if (pid == 0)
     {
@@ -97,13 +102,19 @@ void Cgi::execute_cgi()
             close(post_fd);
         if (execve(arr[0] ,arr, env) < 0)
         {
-            perror ("ERROR execve "); // TODO : remove perror.
+            std::cout << "Status: 500 Internal Server Error";
+            exit(0);
         }
+
     }
+    std::cout << "horyaaaaa ------ " << _status << std::endl;
     close(outfile_fd);
     if (is_post)
         close(post_fd);
     while (wait(NULL) > 0);
+    for (int i = 0; arr[i] != nullptr; i++) 
+        free(arr[i]);
+    free(arr);
 }
 void Cgi::SetEnv()
 {
@@ -116,11 +127,6 @@ void Cgi::SetEnv()
         scriptUri = removeRepeated(scriptUri +"/"+  def  , '/');
         scriptPath = removeRepeated(scriptPath + "/" + def , '/');
     }
-    std::cout << "scriptUri :" << scriptUri << std::endl;
-    std::cout << "scriptPath :" << scriptPath << std::endl;
-
-    // std::string  def = removeRepeated(_loc.getDefaultt()  + "/" , '/');
-    // def.erase(def.size() - 1);
     std::map<std::string , std::string> mp;
     std::map<std::string , std::string> req_headers = _req.getHeaders();
     for(std::map<std::string , std::string>::iterator it = req_headers.begin() ; it != req_headers.end() ; it++ )
@@ -154,7 +160,6 @@ void Cgi::SetEnv()
     mp["SERVER_NAME"] = (_server.getServerName())[0];
     mp["REDIRECT_STATUS"] = "200";
     mp["SCRIPT_FILENAME"] =  removeRepeated(_loc.getRoot() + "/" + _path, '/');
-    // mp["PHP_SELF"] = "/wp-admin/index.php";
     mp["HTTP_COOKIE"] = _req.getCookie();
     std::vector<std::string> v;
     std::cout << "ENV FOR CGUI\n";
@@ -162,7 +167,6 @@ void Cgi::SetEnv()
     {
         std::string tmp = it->first + "=" + it->second;
         v.push_back(tmp);
-        std::cerr << tmp << '\n';
     }
     std::cout << "ENV FOR CGI END\n";
 	env = vectToArr(v);
@@ -202,26 +206,35 @@ void Cgi::pars_file()
     _header += "Access-Control-Allow-Private-Network: true\r\n";
     for (std::string line; std::getline(MyReadFile, line);) 
     {
-        std::cout << line << std::endl;
+        std::cout<< red << "hada line : " << line << reset << std::endl;
         if (line == "\r")
             break;
         std::string tmp;
         if ((tmp = find("Location", line)) != "")
-        {
             _location = tmp;
-            // continue;
-        }
         if ((tmp = find("Status", line)) != "")
         {
+        std::cout << "statuss:"<< _status << std::endl;
+
             _status = tmp;
             continue;
         }
+        if ((tmp = find("Content-length", line)) != "")
+        {
+            _content_length = true;
+        }
         _header += line + "\r\n";
     }
+    size_t file_size = fsize(toRender_file.c_str());
+    if (_content_length == false)
+    {
+        _header += "Content-length: "  + std::to_string(file_size) + "\r\n";
+    }
+    std::cout << red << "status wach 3amer : " << _status << std::endl;
 
-    // _header += "Access-Control-Expose-Headers: Set-Cookie\r\n";
     if (_status.size())
     {
+        std::cout << "statuss:"<< _status << std::endl;
         std::vector<std::string> v = split(_status, ":");
          _status = v[1];
         v = split(v[1], " ");
@@ -240,15 +253,16 @@ void Cgi::pars_file()
     int newfile_fd = open(toRender_file.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0666);
     int saved_stdout = dup(STDOUT_FILENO);
     dup2(newfile_fd, STDOUT_FILENO);
-    // if (statusCode.first != "200" && statusCode.first != "201" && statusCode.first != "302")
-    //     generateBody();
-    // else
-    // {
+    if (statusCode.first != "200" && statusCode.first != "201" && statusCode.first != "302" &&  statusCode.first != "" && !file_size)
+        generateBody();
+
+    else
+    {
         for (std::string line; std::getline(MyReadFile, line);) 
         {
             std::cout << line;
         }
-    // }
+    }
     std::cout << std::endl;
     close(newfile_fd);
     dup2(saved_stdout, STDOUT_FILENO);
@@ -263,9 +277,11 @@ void Cgi::pars_file()
 
 int Cgi::getStatus() const 
 {
-    if (_status.size())
-        return std::stoi(_status);
+    std::string s = statusCode.first;
+    if (s != "")
+        return std::stoi(statusCode.first);
     return 200;
+  
 }
 std::string Cgi::getHeader() const {return _header;}
 std::string Cgi::getLocation() const {return _location;}
@@ -297,4 +313,30 @@ std::string Cgi::generateBody()
         // file_type = "text/html";
     }
     return ("body.html");
+}
+
+
+void Cgi::setStatusCode(std::string code)
+{
+    statusCode.first = code;
+    if (code == "200")
+        statusCode.second = " OK";
+    else if (code == "404")
+        statusCode.second = " Not Found";
+    else if (code == "403")
+        statusCode.second = " Forbidden";
+    else if (code == "201")
+        statusCode.second = " Created";
+    else if (code == "405")
+        statusCode.second = " Not Allowed";
+    else if (code == "301")
+        statusCode.second = " Moved Permanently";
+    else if (code == "302")
+        statusCode.second = " found";
+    else if (code == "400")
+        statusCode.second = " Bad Request";
+    else if (code == "413")
+        statusCode.second = " Request Entity Too Large";
+    else if (code == "500")
+        statusCode.second = " Internal Server Error";
 }

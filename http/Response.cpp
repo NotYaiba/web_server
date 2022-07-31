@@ -56,14 +56,12 @@ Response::Response(std::vector<Server>  serv , Request req)
         cgiOn = c.getOn();
         if (cgiOn)
         {
-            // if (c.getStatus() != -1)
-            //     setStatusCode(c.getStatus());
             file_name = c.gettoRender_file();
             file_size = fsize( file_name.c_str());  
-
             cgi_header = c.getHeader();
             return ;
         }
+
         std::cout << red <<"CGI DONE! => " << cgiOn << reset << std::endl;
 
     }
@@ -276,12 +274,17 @@ void Response::Delete()
 {
     matching_location.debug();
     std::string path = _loc + matching_location.getRoot() + "/" +_path;
-    path = removeRepeated(path, '/');
+    path = removeRepeated(path + "/", '/');
     path.erase(path.size() - 1);
-    if (file_exists(path))
+    std::cout << "Delete path " << path << std::endl;
+    if (access(path.c_str(), F_OK) != -1 )
     {
         if (std::remove(path.c_str()) < 0)
-            setStatusCode(403);
+        {
+            std::cout << "Delete path " << path << std::endl;
+
+            setStatusCode(403); 
+        }
         else
             setStatusCode(200);
         
@@ -295,37 +298,33 @@ void Response::Delete()
 void Response::Post()
 {
     std::cout << "Merhba end POST!\n";
+    std::string new_file(_req.getBody().c_str());
+    std::string tmp = "./tmp/" + new_file;
     size_t bodyLimit = (_server.getBody_size_limit() * 1024) ;
-    size_t filesi = size_t(fsize(_req.getBody().c_str())) ;
-     if ((size_t)bodyLimit < filesi)
+    size_t filesi = size_t(fsize(tmp.c_str())) ;
+
+    if ((size_t)bodyLimit < filesi)
     {
-        std::cout << bodyLimit << std::endl;
-        std::cout << bodyLimit << std::endl;
-        std::cout << "Request body too large" << std::endl;
         setStatusCode(413);
         return ;
     }
-    std::string new_file(_req.getBody().c_str());
-    // std::cout << blue << new_file << reset<<std::endl;
-    std::string file_name1 = removeRepeated(matching_location.getUpload() + "/" + new_file, '/');
-    std::string tmp = "./tmp/" + new_file;
-    if (cgiOn ==  true)
+    std::string uploadFile  = matching_location.getUpload();
+    if (!isDirictory(uploadFile) || uploadFile == "/")
     {
-        file_name = cgi_file;
-        file_size = fsize(file_name.c_str());
-        file_type = get_file_type(file_name);
-        std::cout << blue << "CGION" <<file_name << reset<<std::endl;
+        uploadFile = removeRepeated(matching_location.getRoot() + "/" + uploadFile + "/", '/');
+        uploadFile.erase(uploadFile.size());
+        mkdir(uploadFile.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     }
-    else
-    {
-        std::ifstream in(tmp.c_str(), std::ios::in | std::ios::binary);
-        std::ofstream out(file_name1, std::ios::out | std::ios::binary);
-        out << in.rdbuf();
-        in.close();
-        out.close();
-        remove(_req.getBody().c_str());
-        setStatusCode(201);
-    }
+
+    std::string file_name1 = removeRepeated(uploadFile + "/" + new_file, '/');
+    std::ifstream in(tmp.c_str(), std::ios::in | std::ios::binary);
+    std::ofstream out(file_name1, std::ios::out | std::ios::binary);
+    out << in.rdbuf();
+    in.close();
+    out.close();
+    remove(_req.getBody().c_str());
+    setStatusCode(201);
+
 }
 
 std::string Response::generateHeader()
@@ -357,15 +356,18 @@ std::string Response::generateHeader()
 
 std::pair<char *, size_t> Response::getHeader()
 {
-     char *buf;   
+    char *buf;   
     header = "";
     std::cout << "cgi : " << cgiOn << std::endl;
     if (!cgiOn)
         header +=  generateHeader(); 
     else
         header += cgi_header;
-	buf = (char *)malloc(sizeof(char) * header.size());
-    buf = strcpy(new char[header.length() + 1], header.c_str());
+	// buf = (char *)malloc(sizeof(char) * header.size());
+
+    char * tmp = (char *)malloc(header.length() + 1);
+    buf = strcpy(tmp, header.c_str());
+    // delete []tmp;
     // std::cout << "Please10 : " << getIsend() << std::endl;
 
     return std::make_pair(buf, strlen(buf));
@@ -413,8 +415,10 @@ void Response::setStatusCode(int code)
         statusCode.second = " found";
     else if (code == 400)
         statusCode.second = " Bad Request";
-    else if (413)
+    else if (code == 413)
         statusCode.second = " Request Entity Too Large";
+    else if (code == 500)
+        statusCode.second = " Internal Server Error";
 }
 
 

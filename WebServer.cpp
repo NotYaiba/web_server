@@ -84,7 +84,7 @@ void Webserver::NewConnectionRead(int fd)
 
 void Webserver::HandleRequest(int fd)
 {
-    char *buf = (char *)malloc(BUFFER_SIZE * sizeof(char));
+    char buf[BUFFER_SIZE];
     int rb = read(fd,buf,BUFFER_SIZE );
     if (rb == -1)
     {
@@ -139,7 +139,7 @@ void Webserver::HandleResponse(int fd)
         buffer_new = it->second.getBody();
     }
 	returnWrite =  write(fd, buffer_new.first, buffer_new.second);
-
+    free(buffer_new.first);
     if (it->second.getIsend())
     {
         std::cout << "END RESPONSE\n";

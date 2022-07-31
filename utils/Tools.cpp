@@ -306,8 +306,7 @@ bool isDirictory(std::string path)
 {
   
     struct stat statbuf;
-	if (path == "/")
-		return true;
+
 	std::string s = path;
 	if (stat(s.c_str(), &statbuf) != 0)
 		return 0;

@@ -150,6 +150,8 @@ void Parser::makeMap()
         mapServers.insert(std::make_pair(servers[i].getPort(), tmpserver));
         if (value.second == false)
         {
+            if (servers[i].getServerName()[0] == mapServers[servers[i].getPort()][0].getServerName()[0]  )
+                throwError(IVA, "duplicated Servers", 0);
             (value.first)->second.push_back(servers[i]);
         }
         tmpserver.clear();
@@ -224,20 +226,20 @@ void Parser::checkServer(Server  s , int line)
             std::cout << cgi.size() << std::endl;
             if(locations[i].getUpload() != "" && cgi.size() != 0 )
             {
-                std::cout <<"sc" << std::endl;
+
 
                 throwError(IVA, "hadchi mablanch" , line);
             }
-            for(std::map<std::string, std::string >::iterator it = cgi.begin(); it != cgi.end() ; it++)
-            {
-                if (it->first != "php"  && it->first != "python")
-                    throwError(IVA, "" , line);
-                if (access(it->second.c_str(), R_OK) == -1 && access(it->second.c_str(), F_OK) == 0)
-                    throwError(IVA, "Forbidden" , line);
-                else if (access(it->second.c_str(), F_OK) == -1)
-                    throwError(IVA, "Path Not Found" , line);
+            // for(std::map<std::string, std::string >::iterator it = cgi.begin(); it != cgi.end() ; it++)
+            // {
+            //     if (it->first != "php"  && it->first != "python")
+            //         throwError(IVA, "" , line);
+            //     if (access(it->second.c_str(), R_OK) == -1 && access(it->second.c_str(), F_OK) == 0)
+            //         throwError(IVA, "Forbidden" , line);
+            //     else if (access(it->second.c_str(), F_OK) == -1)
+            //         throwError(IVA, "Path Not Found" , line);
 
-            }
+            // }
         }
     
 }

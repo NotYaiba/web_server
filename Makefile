@@ -30,7 +30,7 @@ fclean : clean
 		@rm -f $(NAME)
 
 re : fclean
-		make all
-		rm  -f tmp/* 
+		rm  -rf tmp
+		rm -rf .tmp 
 		rm -f body_debug 
-		rm -f .tmp/* 
+		make all
