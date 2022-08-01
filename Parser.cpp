@@ -223,23 +223,10 @@ void Parser::checkServer(Server  s , int line)
         for (size_t i = 0; i < locations.size(); i++)
         {
             std::map<std::string , std::string> cgi = locations[i].getCgiMap();
-            std::cout << cgi.size() << std::endl;
             if(locations[i].getUpload() != "" && cgi.size() != 0 )
             {
-
-
-                throwError(IVA, "hadchi mablanch" , line);
+                throwError(IVA, "Cgi and upload in the same location." , line);
             }
-            // for(std::map<std::string, std::string >::iterator it = cgi.begin(); it != cgi.end() ; it++)
-            // {
-            //     if (it->first != "php"  && it->first != "python")
-            //         throwError(IVA, "" , line);
-            //     if (access(it->second.c_str(), R_OK) == -1 && access(it->second.c_str(), F_OK) == 0)
-            //         throwError(IVA, "Forbidden" , line);
-            //     else if (access(it->second.c_str(), F_OK) == -1)
-            //         throwError(IVA, "Path Not Found" , line);
-
-            // }
         }
     
 }

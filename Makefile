@@ -25,12 +25,12 @@ sani : $(SRCS)
 		@clang++ ${FLAGS} ${SRCS} -fsanitize=address -g -o $(NAME)
 clean :
 		@rm -f ${NAME}
-
+		
 fclean : clean
 		@rm -f $(NAME)
-
-re : fclean
 		rm  -rf tmp
 		rm -rf .tmp 
-		rm -f body_debug 
-		make all
+
+re : fclean
+	rm -f body_debug 
+	make all

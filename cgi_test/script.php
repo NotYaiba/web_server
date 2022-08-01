@@ -1,8 +1,8 @@
-<!DOCTYPE html>
-<!-- Contrbuted by GS -->
-<html><head></head><body>
-<?php
-var_dump(getenv()); // bool(false)
+<html>
+<body>
 
-?>
-</body></html>
+Welcome <?php echo $_POST["name"]; ?><br>
+Your email address is: <?php echo $_POST["email"]; ?>
+
+</body>
+</html>

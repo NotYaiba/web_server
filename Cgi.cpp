@@ -147,7 +147,6 @@ char **  Cgi::initarr()
 {
     std::vector<std::string> ar;
 	ar.push_back(_cgikey);
-    std::cerr << filepath << std::endl;
 	ar.push_back(filepath);
     return(vectToArr(ar));
 }

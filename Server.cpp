@@ -59,7 +59,6 @@
 
         if (!isDigit(body_size_limitt))
             throwError(IVA, "body_size_limit");
-        // std::cout << body_size_limit;
         if (body_size_limit == 10)
             body_size_limit = stoi(body_size_limitt);
         else
@@ -99,7 +98,6 @@ void    Server::debug()
     std::cout  <<blue << "port :" << reset  << port << std::endl; 
     std::cout  <<blue << "host :" << reset  << host<< std::endl; 
     std::cout  <<blue << "error_page :" << reset  << error_page << std::endl; 
-    // std::cou<<t << blue << "cgimap :" << reset << setw(50) << defaultt <<  std::endl; 
     for (size_t i = 0 ; i < locations.size() ; i++)
         locations[i].debug();
 }

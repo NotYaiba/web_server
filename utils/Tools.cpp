@@ -131,7 +131,6 @@ std::string random_string()
 std::string fixIt(std::string str)
 {
     str += "/";
-    std::cout <<str <<std::endl;
     return (removeRepeated(str, '/'));
     
 }
@@ -180,7 +179,6 @@ std::string tuUpper(std::string str)
 bool file_exists(std::string filename)
 {
 	int fd = open(filename.c_str(), O_RDONLY);
-	std::cout << "fd: >>>>" << fd << std::endl;
 	if (fd < 0)
 		return (false);
 	close(fd);

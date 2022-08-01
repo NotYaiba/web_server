@@ -5,15 +5,15 @@ void Response::initData(std::vector<Server>  serv , Request req)
 {
     std::map<std::string , std::string > Reqheaders = req.getHeaders();
     int fl = 0;
-    std::cout << "Host : " << Reqheaders["Host"] << std::endl;
     if (Reqheaders["Host"] != "")
     {
         for (size_t i = 0 ; i < serv.size() ; i++)
         {
             std::vector<std::string > tmp = split( Reqheaders["Host"], ":");
+
             if (serv[i].getHost() == tmp[0] &&  fl == 0)
             {
-                 _server = serv[i];
+                _server = serv[i];
                 fl = 1;
             }
         }
@@ -27,7 +27,6 @@ void Response::initData(std::vector<Server>  serv , Request req)
     _method  = _req.getMethod();
     statusCode.first =  req.getStatusCode();
     isEndRes = false;
-    /////
 
     validMethod = 0;
     flag = 0;
@@ -43,15 +42,14 @@ void Response::initData(std::vector<Server>  serv , Request req)
     cgimap = matching_location.getCgiMap();
     setIsvalid();
 }
+
 Response::Response(std::vector<Server>  serv , Request req)
 {
-
     // check 400 413 uri errors
     initData(serv, req);
-    std::cout << "cgi maap : "<<cgimap.size() << std::endl;
     if (cgimap.size() > 0 )
     {
-        std::cout << red <<"CGI start!" << reset <<  std::endl;
+
         Cgi c(_server, req , matching_location); 
         cgiOn = c.getOn();
         if (cgiOn)
@@ -61,9 +59,6 @@ Response::Response(std::vector<Server>  serv , Request req)
             cgi_header = c.getHeader();
             return ;
         }
-
-        std::cout << red <<"CGI DONE! => " << cgiOn << reset << std::endl;
-
     }
     if (validMethod)
     {
@@ -76,14 +71,6 @@ Response::Response(std::vector<Server>  serv , Request req)
     }
     else
         setStatusCode(405);
-    // if get method | 404 403 405 | 200 | 301 redirect
-
-    // if delete Method | 405 404 403 | 200
-
-    // if post method | 405 | 201
-
-    // addistional info in CGI case 500 is returnrd when CGI fails
-    // else 500
 }
 
 bool Response::isDir(std::string path)
@@ -102,11 +89,9 @@ bool Response::isDir(std::string path)
 
 void Response::getIndex(std::string path)
 {
-    // std::cout << "get index \n";
    DIR *dr;
    struct dirent *en;
    path =  removeRepeated(path  + "/" + _path, '/');
-   std::cout << "path  :" << path << std::endl;
    std::ofstream bodytmp("body.html", std::ios::out | std::ios::binary);
    dr = opendir(path.c_str());
 
@@ -128,11 +113,9 @@ void Response::getIndex(std::string path)
     }
    bodytmp <<  "</table>\n</body>\n</head>\n</html>\n";
    bodytmp.close();
-//    std::cout <<" end index \n";
     file_name ="body.html";
     file_size = fsize(file_name.c_str());   
 
-   std::cout << "fsize" << file_size << std::endl;
     setStatusCode(200);
 
    closedir(dr);
@@ -140,18 +123,15 @@ void Response::getIndex(std::string path)
 
 void Response::Get()
 {
-    std::cout << _server.getServerName()[0];
     std::string path = removeRepeated(matching_location.getRoot() +"/", '/');
 
         if (isDir(path))
         {
-            std::cout  << "is Dir " <<_def.size()  << std::endl;
             if (_def.size() > 1)
             {
                 path = removeRepeated(path +"/" + _loc +"/"+ _def, '/');
                 path.erase(path.size() - 1 ) ;
                 file_name = path;
-                std::cout << "def on " <<  file_name << std::endl;
                 if (access(file_name.c_str(), R_OK) == -1 && access(file_name.c_str(), F_OK) == 0)
                 {
                     setStatusCode(403);
@@ -169,7 +149,6 @@ void Response::Get()
             }
             else
             {
-                std::cout << "IS Directory \n";
                 if (matching_location.getAutoindex() == false)
                     setStatusCode(403);
                 else
@@ -192,10 +171,6 @@ void Response::Get()
                 file_name.erase(index);
             file_size = fsize(file_name.c_str());
             file_type = get_file_type(file_name);
-            std::cout << "file name " << file_name << std::endl;
-            std::cout << "file size " << file_size << std::endl;
-            std::cout << "file type " << file_type << std::endl;
-            // exit(0);
             if (access(file_name.c_str(), R_OK) == -1 && access(file_name.c_str(), F_OK) == 0)
             {
                 setStatusCode(403);
@@ -272,17 +247,13 @@ void Response::setIsvalid()
 
 void Response::Delete()
 {
-    matching_location.debug();
     std::string path = _loc + matching_location.getRoot() + "/" +_path;
     path = removeRepeated(path + "/", '/');
     path.erase(path.size() - 1);
-    std::cout << "Delete path " << path << std::endl;
     if (access(path.c_str(), F_OK) != -1 )
     {
         if (std::remove(path.c_str()) < 0)
         {
-            std::cout << "Delete path " << path << std::endl;
-
             setStatusCode(403); 
         }
         else
@@ -297,7 +268,7 @@ void Response::Delete()
 
 void Response::Post()
 {
-    std::cout << "Merhba end POST!\n";
+
     std::string new_file(_req.getBody().c_str());
     std::string tmp = "./tmp/" + new_file;
     size_t bodyLimit = (_server.getBody_size_limit() * 1024) ;
@@ -330,7 +301,6 @@ void Response::Post()
 std::string Response::generateHeader()
 {   
     std::string headertmp;
-    std::cout << "Generate header no cgi \n";
 
     if (statusCode.first != 200 && statusCode.first != 201 && statusCode.first != 301 && statusCode.first != 302 )
       generateBody();
@@ -346,7 +316,6 @@ std::string Response::generateHeader()
             headertmp += "Access-Control-Allow-Private-Network: true\r\n";
             headertmp += "Date: " + formatted_time() + "\r\n";
             headertmp += "\r\n";
-            std::cout << headertmp << std::endl;
     }
     else
         generateredeHeader();
@@ -358,17 +327,13 @@ std::pair<char *, size_t> Response::getHeader()
 {
     char *buf;   
     header = "";
-    std::cout << "cgi : " << cgiOn << std::endl;
     if (!cgiOn)
         header +=  generateHeader(); 
     else
         header += cgi_header;
-	// buf = (char *)malloc(sizeof(char) * header.size());
 
     char * tmp = (char *)malloc(header.length() + 1);
     buf = strcpy(tmp, header.c_str());
-    // delete []tmp;
-    // std::cout << "Please10 : " << getIsend() << std::endl;
 
     return std::make_pair(buf, strlen(buf));
 }
@@ -431,12 +396,10 @@ void Response::generateredeHeader()
         setStatusCode(std::stoi(v[0]));
         _redirect = v[1];
     }
-    std::cout <<"STATUS COSE +++ " << statusCode.first << std::endl;
     header += "HTTP/1.1 " + std::to_string(statusCode.first) + statusCode.second + "\r\n" ;
     header += cgi_header;
     header += "Location :" + _redirect + "\r\n";
-    // header += "Access-Control-Allow-Origin: *\r\n";
-    // header += "Access-Control-Allow-Private-Network: true\r\n";
+
 
     header +=  "\r\n";
         
@@ -448,24 +411,19 @@ std::pair<char * , size_t> Response::getBody()
 {   
     char *buf;
     int ret;
-    std::cout << red << "File to render " << file_name << reset<< std::endl;
    
-    int fd = open (file_name.c_str(), O_RDONLY);
+    int fd = open(file_name.c_str(), O_RDONLY);
+    std::ofstream fdw("tmp"  );
 	buf = (char *)malloc(BUFFER_SIZE);
 	lseek(fd, written, SEEK_SET);
-	if (fd == -1)
-    {
-		perror("open");
-    }
+
 	ret = read(fd, buf, BUFFER_SIZE);
     written += ret;
-    std::cout << yellow << "SALAAM"<< reset << std::endl;
-    std::cout <<  "ret :"<< ret << std::endl;
-    // std::cout << buf << std::endl;
-    std::cout << "filesize "<< file_size << std::endl;
-    std::cout << "written "<<  written << std::endl;
+
+    fdw << buf;
     if ((size_t)written >= file_size)
     {
+        fdw.close();
         isEndRes =  true;
     }
 	close(fd);

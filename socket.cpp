@@ -13,7 +13,6 @@ Socket::~Socket( )
 }
 int Socket::CreateServerSocket()
 {
-    std::cout << "Creating server socket..." << std::endl;
     int listening = socket(AF_INET, SOCK_STREAM, 0);
 
     if (listening == -1)
@@ -58,7 +57,6 @@ int Socket::AccectSock(int const &socket)
     int new_socket = accept(socket, (struct sockaddr *)&client, &clientSize);
     if (new_socket == -1)
     {
-        std::cerr << "Problem with client connecting!";
         return -4;
     }
     return (new_socket);

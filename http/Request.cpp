@@ -30,40 +30,23 @@ void    Request::fillRequest(char *buff, int read)
 {
     std::vector<std::string> vect;
     std::string str(buff, read);
-        std::cout << "read12 : " << read << std::endl;
-    std::cerr << buff << std::endl;
     if (isFrstRead)
     {
-        std::cout << "firstread :"<< (read) << std::endl;
-
         vect = split(str, "\r\n\r\n");
-        std::cout << "under spli :"<< (read) << std::endl;
         fillHeaders( vect[0]);
-        std::cout << "under fillHeaders :"<< (read) << std::endl;
         checkHeaders();
-        std::cout << "under checkHeaders :"<< (read) << std::endl;
         createFile();
-        std::cout << "create :"<< (read) << std::endl;
         int testoffset = vect[0].size() + 4 ;
-        std::cout << "read - test "<< (read - testoffset) << std::endl;
         fillBody( buff + testoffset , read - testoffset, _bodyfd);
-        std::cout << "read123 : " << read << std::endl;
-
         isFrstRead = false;
     }
     else
-    {
-        std::cout << "read1234 : " << read << std::endl;
-
         fillBody( buff, read, _bodyfd);
-    }
    
 }
 
 void    Request::debug()
 {
-    std::cout  <<blue << "Muv :" <<  reset << Muv << std::endl; 
-    // std::cou<<t << blue << "cgimap :" << reset << setw(50) << defaultt <<  std::endl; 
     for (std::map<std::string, std::string>::iterator  i =  headers.begin() ; i != headers.end() ; i++)
     {
         std::cout  <<yellow<< "[" <<(i->first) << "}" << reset <<" : {"  << (i->second) << "}"   << std::endl;
@@ -72,22 +55,14 @@ void    Request::debug()
 
 void Request::fillBody( char  *buff, int read, int _bodyfd)
 {
-        std::cout << "read12345 : " << read << std::endl;
-
     fill_vect(buff, read);
-
     if (ischuncked == 1)
     {
         if (findchunkSize())
-        {
             writeVect(_bodyfd);
-        }
     }   
     else 
-    {
-        
         write (_bodyfd,  buff, read );  
-    }
 
     checkEndRequest(buff , read);
 }
@@ -95,13 +70,9 @@ void Request::fillBody( char  *buff, int read, int _bodyfd)
 
 void Request::fillMethod()
 {
-    // std::cout << Muv << std::endl;
-
     std::vector<std::string> s  = split(Muv, " ");
     method = s[0];
     Uri = fixIt(s[1]);
-    std::cout << yellow << method << std::endl;
-    std::cout << yellow << Uri << std::endl;
     if (method != "POST" || method != "GET" || method != "DELETE")
         invalidMethod = -1;
     
@@ -114,10 +85,8 @@ void Request::fillHeaders(std::string header)
     std::stringstream headerStream(header);
     std::string value;
     int i = 0;
-    std::cout <<" header befor " << header << std::endl;
     while (std::getline (headerStream, line))
     {
-        std::cout << "header : " << line << std::endl;
         if (i == 0)
             Muv  = line;
         else
@@ -140,17 +109,13 @@ void Request::fillHeaders(std::string header)
 
 bool Request::checkEndRequest( char const *buff, int read)
 {
-    
-    
     if (ischuncked == 1 )
     {
-        // std::cout << yellow << "request id chunked !\n" << reset ;
          int i = 0;
         while (i < read)
         {
             if   (i  +  4< read && buff[i] == '\r' && buff[i + 1] == '\n'  &&  buff[i + 2] == '0' && buff[i + 3] == '\r'  && buff[i + 4] == '\n'  )
             {
-                std::cout << "ENDD OF REQUEST\n";
                 isslastRead = true;
                 isFrstRead = true;
                 return true;
@@ -164,9 +129,6 @@ bool Request::checkEndRequest( char const *buff, int read)
     {
         if (content_length == 0)
         {
-            /* code */
-            std::cout << "ENDD OF REQUEST\n";
-            
             isslastRead = true;
             isFrstRead = true;
             return true;
@@ -178,8 +140,6 @@ bool Request::checkEndRequest( char const *buff, int read)
         fseek(p_file,0,SEEK_END);
         int size = ftell(p_file);
         fclose(p_file);
-
-
         if (content_length <= (size_t)size)
         {
                 isslastRead = true;
@@ -188,26 +148,19 @@ bool Request::checkEndRequest( char const *buff, int read)
         }
     }  
      return false;
-  
-
 }
 
 
 
 void Request::fill_vect(char *buff , int read)
 {
-    std::cout << "read : " << read << std::endl;
     for (int i = 0 ; i < read; i++)
-    {
         god_vect.push_back(buff[i]);
-    }
 }
 void Request::writeVect(int fd)
 {
     for (size_t i = 0 ; i < god_vect.size(); i++)
-    {
         write(fd, &god_vect[i], 1);
-    }
     god_vect.clear();
 }
 bool Request::findchunkSize()
@@ -252,8 +205,6 @@ void   Request::checkHeaders()
     if (it != headers.end())
     {
     content_length = stoi(it->second);
-    std::cout << blue << "=============>"<< content_length << reset<< std::endl;
-    std::cout << blue << "=============>"<< ischuncked << reset<< std::endl;
     
     }
 
