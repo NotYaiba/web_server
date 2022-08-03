@@ -22,6 +22,7 @@ void Response::initData(std::vector<Server>  serv , Request req)
         setStatusCode(400);
     if (fl == 0)
         _server = serv[0];
+
     _req  = req;
     _path = _req.getUri();
     _method  = _req.getMethod();
@@ -250,19 +251,23 @@ void Response::Delete()
     std::string path = _loc + matching_location.getRoot() + "/" +_path;
     path = removeRepeated(path + "/", '/');
     path.erase(path.size() - 1);
-    if (access(path.c_str(), F_OK) != -1 )
+    if (access(path.c_str(), R_OK) == -1 && access(path.c_str(), F_OK) == 0)
     {
-        if (std::remove(path.c_str()) < 0)
-        {
-            setStatusCode(403); 
-        }
-        else
-            setStatusCode(200);
-        
+        setStatusCode(403);
+        return ;
+    }
+    else if (access(path.c_str(), F_OK) == -1)
+    {
+        file_size = 0;
+        setStatusCode(404);
+        return ;
+    }
+     if (std::remove(path.c_str()) < 0)
+    {
+        setStatusCode(403); 
     }
     else
-        setStatusCode(404);
-
+        setStatusCode(200);
 }
 
 
@@ -271,7 +276,7 @@ void Response::Post()
 
     std::string new_file(_req.getBody().c_str());
     std::string tmp = "./tmp/" + new_file;
-    size_t bodyLimit = (_server.getBody_size_limit() * 1024) ;
+    size_t bodyLimit = (_server.getBody_size_limit() * UNIT) ;
     size_t filesi = size_t(fsize(tmp.c_str())) ;
 
     if ((size_t)bodyLimit < filesi)
@@ -280,13 +285,15 @@ void Response::Post()
         return ;
     }
     std::string uploadFile  = matching_location.getUpload();
+    std::cout << uploadFile << std::endl;
+    std::cout << isDirictory(uploadFile) << std::endl;
     if (!isDirictory(uploadFile) || uploadFile == "/")
     {
         uploadFile = removeRepeated(matching_location.getRoot() + "/" + uploadFile + "/", '/');
         uploadFile.erase(uploadFile.size());
         mkdir(uploadFile.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     }
-
+    std::cout << uploadFile << std::endl;
     std::string file_name1 = removeRepeated(uploadFile + "/" + new_file, '/');
     std::ifstream in(tmp.c_str(), std::ios::in | std::ios::binary);
     std::ofstream out(file_name1, std::ios::out | std::ios::binary);
@@ -340,9 +347,11 @@ std::pair<char *, size_t> Response::getHeader()
     
 std::string Response::generateBody()
 {
-  std::ofstream bodytmp("body.html", std::ios::out | std::ios::binary);
-    if (_server.getErrorpage() == "")
+    std::ofstream bodytmp("body.html", std::ios::out | std::ios::binary);
+    if (access(std::string(_server.getErrorpage() + "/" + std::to_string(statusCode.first) + ".html" ).c_str(), F_OK) == -1)
     {
+        // exit(0);
+
         std::string msg = std::to_string(statusCode.first) +  statusCode.second;
         std::string tmp;
         tmp = "<html>\n<head><title>" + msg + "</title></head>\n<body bgcolor='white'>\n<center><h1>"  +msg + "</h1></center>\n</body>\n</html>";
@@ -389,7 +398,7 @@ void Response::setStatusCode(int code)
 
 void Response::generateredeHeader()
 {   
-        std::string tmp_redirect = matching_location.getRedirect();
+    std::string tmp_redirect = matching_location.getRedirect();
     if (tmp_redirect.size())
     {
         std::vector<std::string> v = split(tmp_redirect, " ");

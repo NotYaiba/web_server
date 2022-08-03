@@ -36,7 +36,6 @@ void Webserver::RunWebServer()
     signal(SIGPIPE, SIG_IGN);
     for (;;)
     {
-        
         readset = readcopy;
         writeset = writecopy;
         int rs = select(maxfd + 1 , &readset, &writeset, NULL, NULL);
@@ -68,7 +67,7 @@ void Webserver::NewConnectionRead(int fd)
     fcntl(new_fd, F_SETFL,  O_NONBLOCK);
     FD_SET(new_fd, &readcopy);
     fd_map.insert(std::make_pair(new_fd, 1));
-    servers.insert(std::make_pair(new_fd, servers[fd]));
+    servers[new_fd] = servers[fd];
     Request req;
     req_map.insert(std::make_pair(new_fd ,req));
     fd_map[new_fd] = 1;

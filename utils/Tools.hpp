@@ -38,6 +38,7 @@
 
 #define  STARTSERV -1
 #define  ENDSERV   1
+#define  UNIT   1024
 
 # define BUFFER_SIZE 4096
 

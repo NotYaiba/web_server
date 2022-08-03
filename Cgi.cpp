@@ -239,7 +239,7 @@ int Cgi::getStatus() const
 
 std::string Cgi::generateBody()
 {
-    if (_server.getErrorpage() == "")
+    if (access(std::string(_server.getErrorpage() + "/" + statusCode.first + ".html" ).c_str(), F_OK) == -1)
     {
         std::string msg = _status;
         std::string tmp;
